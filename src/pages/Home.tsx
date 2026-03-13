@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Search, Instagram, Youtube, Twitter, Linkedin } from 'lucide-react'
+import festivalsData from '../../public/data/festivals.json'
 import './Home.css'
 
 export default function Home() {
@@ -27,6 +28,9 @@ export default function Home() {
   const handleSearch = () => {
     if (query.trim()) navigate(`/maps?q=${encodeURIComponent(query)}`)
   }
+
+  // Get first 5 festivals for footer
+  const footerFestivals = festivalsData.slice(0, 5)
 
   return (
     <div className="home">
@@ -85,9 +89,11 @@ export default function Home() {
               무장애축제지도를 만듭니다.
             </p>
             <div className="social-icons">
-              <a href="#"><Twitter size={20} /></a>
-              <a href="#"><Instagram size={20} /></a>
+              <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
+                <Instagram size={20} />
+              </a>
               <a href="#"><Youtube size={20} /></a>
+              <a href="#"><Twitter size={20} /></a>
               <a href="#"><Linkedin size={20} /></a>
             </div>
           </div>
@@ -95,22 +101,20 @@ export default function Home() {
           <div className="footer-links">
             <div>
               <h4>무장애지도</h4>
-              <a href="#">겨울공주 군밤축제</a>
-              <a href="#">강진청자축제</a>
-              <a href="#">광주 고싸움축제</a>
-              <a href="#">광주 충장축제</a>
-              <a href="#">군산 짬뽕축제</a>
+              {footerFestivals.map(f => (
+                <Link key={f.id} to={`/maps/${f.id}`}>{f.name}</Link>
+              ))}
             </div>
             <div>
               <h4>축제캘린더</h4>
-              <a href="#">현재 진행중인 축제</a>
-              <a href="#">월별 축제</a>
-              <a href="#">지역별 축제</a>
+              <Link to="/calendar">현재 진행중인 축제</Link>
+              <Link to="/calendar">월별 축제</Link>
+              <Link to="/calendar">지역별 축제</Link>
             </div>
             <div>
               <h4>신고센터</h4>
-              <a href="#">지도 수정사항 신고</a>
-              <a href="#">축제 관계자</a>
+              <Link to="/report">지도 수정사항 신고</Link>
+              <a href="mailto:contact@naeil.org">축제 관계자</a>
             </div>
           </div>
         </div>
