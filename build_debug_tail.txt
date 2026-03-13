@@ -1,0 +1,50 @@
+﻿  experimental: {
+    importGlobRestoreExtensio
+n: false,
+    renderBuiltUrl: undefined
+,
+    hmrPartialAccept: false,
+    bundledDev: false
+  },
+  future: undefined,
+  ssr: {
+    target: 'node',
+    optimizeDeps: { esbuildOp
+tions: { preserveSymlinks: fa
+lse } },
+    resolve: { conditions: un
+defined, externalConditions: 
+undefined }
+  },
+  dev: {
+    warmup: [],
+    sourcemap: { js: true },
+    sourcemapIgnoreList: [Fun
+ction: isInNodeModules],
+    preTransformRequests: fal
+se,
+    createEnvironment: [Funct
+ion: defaultCreateDevEnvironm
+ent],
+    recoverable: false,
+    moduleRunnerTransform: fa
+lse
+  },
+  devtools: { config: { host:
+ 'localhost' }, enabled: fals
+e },
+  webSocketToken: '_r05vkDX0O
+cf',
+  getSortedPlugins: [Function
+: getSortedPlugins],
+  getSortedPluginHooks: [Func
+tion: getSortedPluginHooks],
+  createResolver: [Function: 
+createResolver],
+  fsDenyGlob: [Function: arra
+yMatcher],
+  safeModulePaths: Set(0) {},
+  Symbol(vite:resolved-config
+): true
+}
+transforming...??1749 modules transformed.

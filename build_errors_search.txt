@@ -1,0 +1,25 @@
+﻿
+build_debug.log:16:    + Full
+yQualifiedErrorId  
+build_debug.log:17:   : Nativ
+eCommandError
+build_debug.log:988:ddEventLi
+stener("error", () =
+build_debug.log:996:dlePreloa
+dError(err) {\n' +
+build_debug.log:998:new Event
+("vite:preloadError"
+build_debug.log:1017:eloadErr
+or(item.reason);\n' +
+build_debug.log:1021:Error);\
+n' +
+build_debug.log:1208:: false,
+ unhandledErrors: fal
+build_debug.log:1243:    erro
+r: [Function: error],
+build_debug.log:1246:    hasE
+rrorLogged: [Function
+build_debug.log:1247:: hasErr
+orLogged]
+
+
