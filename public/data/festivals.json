@@ -1,0 +1,71 @@
+[
+  {
+    "id": "gunbam-2025",
+    "name": "겨울공주 군밤축제",
+    "subtitle": "공주알밤과 떠나는 달콤한 여행!",
+    "startDate": "2025-01-16",
+    "endDate": "2025-01-20",
+    "location": "충청남도 공주시",
+    "address": "충청남도 공주시 금벽로 368, 금강신관공원",
+    "fee": "무료/부분유료",
+    "phone": "041-840-8401",
+    "instagram": "gongju_gunbam",
+    "status": "ended",
+    "thumbnail": "/images/gunbam-thumb.jpg",
+    "images": ["/images/gunbam-1.jpg"],
+    "description": "대표프로그램: 알밤을 구워먹는 '대형화로체험', 공주에서 생산된 지역 농축산물을 그림위에서 구워 먹을 수 있는 '공주 군밤 그릴존', 알밤관련음식, 물품 만들기 체험이 있으며, 추억의 민속놀이 체험, 추억 포토존 등 다양한 볼거리와 즐길거리 제공",
+    "programs": [
+      "메인프로그램: 대형화로체험, 공주 군밤그릴존 체험, 알밤과 놀아밤!",
+      "부대프로그램: 공주 알밤 직거래장터, 알밤가공식품 판매장, 전국 군밤 축제 사진 공모전, 군밤축제 어린이 글짓기 대회"
+    ],
+    "mapImage": "/maps/gunbam-map.png",
+    "hotspots": [],
+    "transport": {
+      "description": "KTX/SRT 탑승 - 공주역 도착 - 장애인 콜택시 환승 - 충청남도 공주시 금벽로 368, 금강신관공원 도착",
+      "services": [
+        {
+          "name": "공주시 교통약자 특별 교통 차량 이용안내(구 장애인 콜택시)",
+          "target": "1, 2급 장애인, 65세 이상 노인 중 대중교통 이용이 어려운 자, 교통약자를 동반하는 가족 및 보호자",
+          "phone": "041-952-5858",
+          "fee": "일반택시 요금의 50%",
+          "operator": "한국지체장애인협회 공주시지회(위탁)",
+          "inquiry": "공주시 교통과 교통행정팀 041-840-8490"
+        }
+      ]
+    },
+    "pictograms": [
+      { "id": "disabled-parking", "name": "장애인 주차구역", "color": "blue" },
+      { "id": "disabled-toilet", "name": "이동형 장애인 화장실", "color": "blue" },
+      { "id": "toilet", "name": "화장실(남녀구분)", "color": "gray" },
+      { "id": "diaper", "name": "기저귀 교환대", "color": "gray" },
+      { "id": "auto-door", "name": "여닫이문", "color": "gray" },
+      { "id": "slope-warn", "name": "이동형 장애인 화장실:기울기 45도 미충족", "color": "red" },
+      { "id": "assistant", "name": "활동보조사 권장", "color": "orange" },
+      { "id": "step-warn", "name": "단차 2cm 초과", "color": "red" },
+      { "id": "wheelchair", "name": "휠체어 대여소", "color": "blue" },
+      { "id": "accessible", "name": "눈놀이터, 군밤그릴존 제외한 모든 콘텐츠", "color": "green" },
+      { "id": "grass", "name": "잔디", "color": "gray" }
+    ]
+  },
+  {
+    "id": "celadon-2025",
+    "name": "강진청자축제",
+    "subtitle": "흙, 사랑 그리고 불",
+    "startDate": "2025-02-22",
+    "endDate": "2025-03-03",
+    "location": "전라남도 강진군",
+    "address": "강진군 대구면 고려청자요지 일원",
+    "fee": "무료",
+    "phone": "",
+    "instagram": "",
+    "status": "ended",
+    "thumbnail": "/images/celadon-thumb.jpg",
+    "images": [],
+    "description": "제51회 강진청자축제",
+    "programs": [],
+    "mapImage": "/maps/celadon-map.png",
+    "hotspots": [],
+    "transport": null,
+    "pictograms": []
+  }
+]

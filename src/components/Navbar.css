@@ -1,0 +1,122 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  height: var(--nav-height);
+}
+
+.navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-btn {
+  color: var(--gray-800);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.menu-btn:hover { background: var(--gray-100); }
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.admin-trigger-hint {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #5BA4CF;
+  color: white;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  pointer-events: none;
+}
+.logo-img {
+  height: 36px;
+  width: auto;
+  /* 로고 배경이 검정이므로 흰 배경에서도 보이도록 */
+  filter: none;
+}
+
+.font-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue-bg);
+  border: 1.5px solid var(--blue-light);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue-dark);
+}
+.font-control button {
+  color: var(--blue-dark);
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px;
+  transition: background 0.15s;
+}
+.font-control button:hover { background: var(--blue-light); }
+.font-control .divider { color: var(--blue-light); }
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--gray-700);
+  font-weight: 400;
+  transition: color 0.15s, background 0.15s;
+}
+.nav-link:hover { color: var(--blue); background: var(--blue-bg); }
+.nav-link.active { color: var(--blue); font-weight: 500; }
+
+.mobile-menu {
+  background: white;
+  border-top: 1px solid var(--gray-200);
+  padding: 12px 0;
+}
+.mobile-link {
+  display: block;
+  padding: 12px 24px;
+  font-size: 16px;
+  color: var(--gray-800);
+  transition: background 0.15s;
+}
+.mobile-link:hover { background: var(--gray-50); color: var(--blue); }
+
+@media (max-width: 768px) {
+  .navbar-links { display: none; }
+}
