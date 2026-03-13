@@ -3,7 +3,7 @@
 /* 히어로 */
 .hero {
   position: relative;
-  height: 480px;
+  height: 30rem;
   background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
   background-color: #2c3e50;
   display: flex;
@@ -21,16 +21,16 @@
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 0 24px;
+  padding: 0 1.5rem;
   width: 100%;
-  max-width: 700px;
+  max-width: 43.75rem;
 }
 
 .hero-title {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 28px;
+  margin-bottom: 1.75rem;
   line-height: 1.4;
   text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
@@ -39,10 +39,10 @@
   display: flex;
   align-items: center;
   background: rgba(255,255,255,0.92);
-  border-radius: 99px;
-  padding: 10px 16px 10px 24px;
-  gap: 8px;
-  max-width: 500px;
+  border-radius: 6.1875rem;
+  padding: 0.625rem 1rem 0.625rem 1.5rem;
+  gap: 0.5rem;
+  max-width: 31.25rem;
   margin: 0 auto;
   backdrop-filter: blur(4px);
 }
@@ -51,7 +51,7 @@
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-family: var(--font);
   color: var(--gray-800);
   outline: none;
@@ -63,32 +63,32 @@
   color: var(--blue);
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: 0.25rem;
 }
 
 /* 소개 섹션 */
 .intro-section {
-  padding: 64px 24px;
+  padding: 4rem 1.5rem;
   background: var(--gray-50);
 }
 
 .intro-inner {
-  max-width: 1000px;
+  max-width: 62.5rem;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .intro-card {
   background: white;
   border-radius: var(--radius-md);
-  padding: 32px 28px;
+  padding: 2rem 1.75rem;
   text-align: center;
   border: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
   align-items: center;
 }
 
@@ -97,16 +97,16 @@
   border-color: var(--blue-light);
 }
 
-.intro-icon { font-size: 36px; }
+.intro-icon { font-size: 2.25rem; }
 
 .intro-card h3 {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.4;
 }
 
 .intro-card p {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--gray-600);
   line-height: 1.7;
 }
@@ -115,14 +115,14 @@
 .footer {
   background: var(--gray-900);
   color: white;
-  padding: 48px 24px;
+  padding: 3rem 1.5rem;
 }
 
 .footer-inner {
-  max-width: 1000px;
+  max-width: 62.5rem;
   margin: 0 auto;
   display: flex;
-  gap: 64px;
+  gap: 4rem;
 }
 
 .footer-brand {
@@ -130,21 +130,21 @@
 }
 
 .footer-logo {
-  height: 48px;
-  margin-bottom: 16px;
+  height: 3rem;
+  margin-bottom: 1rem;
   object-fit: contain;
 }
 
 .footer-tagline {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--gray-400);
   line-height: 1.8;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .social-icons {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .social-icons a {
@@ -157,32 +157,32 @@
 
 .footer-links {
   display: flex;
-  gap: 48px;
+  gap: 3rem;
   flex-wrap: wrap;
 }
 
 .footer-links > div {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .footer-links h4 {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: white;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
 }
 
 .footer-links a {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--gray-400);
   transition: color 0.2s;
 }
 .footer-links a:hover { color: white; }
 
 @media (max-width: 768px) {
-  .hero-title { font-size: 22px; }
+  .hero-title { font-size: 1.375rem; }
   .intro-inner { grid-template-columns: 1fr; }
-  .footer-inner { flex-direction: column; gap: 32px; }
+  .footer-inner { flex-direction: column; gap: 2rem; }
 }

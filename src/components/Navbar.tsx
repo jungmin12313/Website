@@ -1,11 +1,11 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, Minus, Plus } from 'lucide-react'
+import { Menu, X, Minus, Plus, RotateCcw } from 'lucide-react'
 import './Navbar.css'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [fontSize, setFontSize] = useState(100)
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('naeil_font_size')) || 100)
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -13,8 +13,12 @@ export default function Navbar() {
   const logoClickCount = useRef(0)
   const [adminHint, setAdminHint] = useState(0)
 
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontSize}%`
+    localStorage.setItem('naeil_font_size', String(fontSize))
+  }, [fontSize])
+
   const handleLogoClick = (e: React.MouseEvent) => {
-    // Prevent default navigation for quick clicks
     logoClickCount.current += 1
     setAdminHint(logoClickCount.current)
     
@@ -32,7 +36,6 @@ export default function Navbar() {
       }
     }
 
-    // Reset counter after 2 seconds of inactivity
     setTimeout(() => {
       if (logoClickCount.current > 0) {
         logoClickCount.current = 0
@@ -42,10 +45,11 @@ export default function Navbar() {
   }
 
   const changeFontSize = (delta: number) => {
-    const next = Math.min(140, Math.max(80, fontSize + delta))
+    const next = Math.min(150, Math.max(70, fontSize + delta))
     setFontSize(next)
-    document.documentElement.style.fontSize = `${next}%`
   }
+
+  const resetFontSize = () => setFontSize(100)
 
   const navLinks = [
     { to: '/about', label: '소개' },
@@ -70,10 +74,13 @@ export default function Navbar() {
         </div>
 
         <div className="font-control">
-          <span>화면크기</span>
-          <button onClick={() => changeFontSize(-10)}><Minus size={14} /></button>
-          <span className="divider">|</span>
-          <button onClick={() => changeFontSize(10)}><Plus size={14} /></button>
+          <span className="control-label">화면 크기</span>
+          <div className="zoom-pill">
+            <button onClick={() => changeFontSize(-10)} title="축소"><Minus size={16} /></button>
+            <span className="zoom-value">{fontSize}%</span>
+            <button onClick={() => changeFontSize(10)} title="확대"><Plus size={16} /></button>
+            <button onClick={resetFontSize} className="reset-btn" title="초기화"><RotateCcw size={16} /></button>
+          </div>
         </div>
 
         <div className="navbar-links">
