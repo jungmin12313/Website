@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, Instagram, Youtube, Twitter, Linkedin } from 'lucide-react'
+import { Search, Instagram } from 'lucide-react'
 import festivalsData from '../../public/data/festivals.json'
 import './Home.css'
 
@@ -90,11 +90,8 @@ export default function Home() {
             </p>
             <div className="social-icons">
               <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
-                <Instagram size={20} />
+                <Instagram size={24} />
               </a>
-              <a href="#"><Youtube size={20} /></a>
-              <a href="#"><Twitter size={20} /></a>
-              <a href="#"><Linkedin size={20} /></a>
             </div>
           </div>
 
