@@ -60,15 +60,44 @@ export default function Admin() {
     }
   }
 
+  // Helper visibility for storage usage
+  const getStorageUsage = () => {
+    const total = JSON.stringify(localStorage).length
+    return (total / 1024 / 1024).toFixed(2) + ' MB'
+  }
+
+  const compressImage = (base64: string, maxWidth = 1200, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.src = base64
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let width = img.width
+        let height = img.height
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height
+          width = maxWidth
+        }
+
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+    })
+  }
+
   const handleHeroBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64 = reader.result as string
-      setHeroBg(base64)
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string, 1920, 0.8)
+      setHeroBg(compressed)
       try {
-        localStorage.setItem(HERO_BG_STORAGE_KEY, base64)
+        localStorage.setItem(HERO_BG_STORAGE_KEY, compressed)
         alert('배경사진이 변경되었습니다.')
       } catch (err) {
         alert('이미지 용량이 너무 커서 저장할 수 없습니다.')
@@ -163,10 +192,13 @@ export default function Admin() {
       id: `hs-${Date.now()}`,
       x: Math.round(x * 100) / 100,
       y: Math.round(y * 100) / 100,
+      w: 4,
+      h: 4,
       label: '',
       description: [],
       pictogramIds: [],
       photos: [],
+      pictogramImages: [],
     }
     setEditHs(newHs)
     setAdding(false)
@@ -222,12 +254,12 @@ export default function Admin() {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64 = reader.result as string
-      setMapSrc(base64)
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string, 1600, 0.7)
+      setMapSrc(compressed)
       
       setFestivals(prev => {
-        const updated = prev.map(f => f.id === selectedFestivalId ? { ...f, mapImage: base64 } : f)
+        const updated = prev.map(f => f.id === selectedFestivalId ? { ...f, mapImage: compressed } : f)
         saveToStorage(updated)
         return updated
       })
@@ -274,6 +306,9 @@ export default function Admin() {
         <div className="admin-title-row">
           <h1>어드민 시스템</h1>
           <div className="admin-tabs">
+            <div className="storage-info">
+              사용 중: <span>{getStorageUsage()}</span>
+            </div>
             <button className={`tab-btn ${activeTab === 'festivals' ? 'active' : ''}`} onClick={() => setActiveTab('festivals')}>
               <Calendar size={18} /> 축제 관리
             </button>
@@ -363,7 +398,17 @@ export default function Admin() {
                 <div className={`admin-map ${adding ? 'cursor-crosshair' : ''}`} ref={mapRef} onClick={handleMapClick}>
                   {mapSrc ? <img src={mapSrc} className="admin-map-img" /> : <div className="admin-map-placeholder">지도 이미지를 업로드하세요</div>}
                   {hotspots.map(hs => (
-                    <button key={hs.id} className="admin-hotspot" style={{ left: `${hs.x}%`, top: `${hs.y}%` }} onClick={e => { e.stopPropagation(); setEditHs(hs) }}>
+                    <button 
+                      key={hs.id} 
+                      className="admin-hotspot" 
+                      style={{ 
+                        left: `${hs.x}%`, 
+                        top: `${hs.y}%`,
+                        width: `${hs.w || 4}%`,
+                        height: `${hs.h || 4}%`
+                      }} 
+                      onClick={e => { e.stopPropagation(); setEditHs(hs) }}
+                    >
                       <span className="admin-hs-label">{hs.label}</span>
                     </button>
                   ))}
@@ -400,25 +445,54 @@ export default function Admin() {
 
       {/* Festival Editor Modal */}
       {editingFestival && (
-        <FestivalEditor festival={editingFestival} onSave={saveFestival} onClose={() => setEditingFestival(null)} setFestival={setEditingFestival} />
+        <FestivalEditor 
+          festival={editingFestival} 
+          onSave={saveFestival} 
+          onClose={() => setEditingFestival(null)} 
+          setFestival={setEditingFestival} 
+          compressImage={compressImage}
+        />
       )}
 
       {/* Hotspot Editor Modal */}
       {editHs && (
-        <HotspotEditor hotspot={editHs} pictograms={festivals.find(f => f.id === selectedFestivalId)?.pictograms || []} onSave={saveHotspot} onClose={() => setEditHs(null)} />
+        <HotspotEditor 
+          hotspot={editHs} 
+          mapSrc={mapSrc}
+          otherHotspots={hotspots.filter(h => h.id !== editHs.id)}
+          pictograms={festivals.find(f => f.id === selectedFestivalId)?.pictograms || []} 
+          onSave={saveHotspot} 
+          onClose={() => setEditHs(null)} 
+          compressImage={compressImage}
+        />
       )}
     </div>
   )
 }
 
-function FestivalEditor({ festival, onSave, onClose, setFestival }: { festival: Festival, onSave: () => void, onClose: () => void, setFestival: React.Dispatch<React.SetStateAction<Festival | null>> }) {
+function FestivalEditor({ 
+  festival, 
+  onSave, 
+  onClose, 
+  setFestival,
+  compressImage
+}: { 
+  festival: Festival, 
+  onSave: () => void, 
+  onClose: () => void, 
+  setFestival: React.Dispatch<React.SetStateAction<Festival | null>>,
+  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+}) {
   const update = (field: keyof Festival, val: any) => setFestival(prev => prev ? ({ ...prev, [field]: val }) : prev)
   
   const handleThumbUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onloadend = () => update('thumbnail', reader.result as string)
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string, 800, 0.7)
+      update('thumbnail', compressed)
+    }
     reader.readAsDataURL(file)
   }
 
@@ -464,9 +538,29 @@ function FestivalEditor({ festival, onSave, onClose, setFestival }: { festival: 
   )
 }
 
-function HotspotEditor({ hotspot, pictograms, onSave, onClose }: { hotspot: Hotspot, pictograms: Festival['pictograms'], onSave: (hs: Hotspot) => void, onClose: () => void }) {
-  const [hs, setHs] = useState<Hotspot>({ ...hotspot })
+function HotspotEditor({ 
+  hotspot, 
+  mapSrc,
+  otherHotspots,
+  pictograms, 
+  onSave, 
+  onClose,
+  compressImage 
+}: { 
+  hotspot: Hotspot, 
+  mapSrc: string,
+  otherHotspots: Hotspot[],
+  pictograms: Festival['pictograms'], 
+  onSave: (hs: Hotspot) => void, 
+  onClose: () => void,
+  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+}) {
+  const [hs, setHs] = useState<Hotspot>({ 
+    ...hotspot, 
+    pictogramImages: hotspot.pictogramImages || [] 
+  })
   const [descText, setDescText] = useState(hotspot.description.join('\n'))
+  const [activePreviewTab, setActivePreviewTab] = useState<'map' | 'modal'>('map')
 
   const togglePic = (id: string) => {
     setHs(prev => ({ ...prev, pictogramIds: prev.pictogramIds.includes(id) ? prev.pictogramIds.filter(p => p !== id) : [...prev.pictogramIds, id] }))
@@ -476,32 +570,192 @@ function HotspotEditor({ hotspot, pictograms, onSave, onClose }: { hotspot: Hots
     const files = Array.from(e.target.files || [])
     files.forEach(file => {
       const reader = new FileReader()
-      reader.onloadend = () => setHs(prev => ({ ...prev, photos: [...prev.photos, reader.result as string] }))
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 1000, 0.7)
+        setHs(prev => ({ ...prev, photos: [...prev.photos, compressed] }))
+      }
       reader.readAsDataURL(file)
     })
   }
 
+  const handlePictogramUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 400, 0.9)
+        setHs(prev => ({ ...prev, pictogramImages: [...prev.pictogramImages, compressed] }))
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const removePhoto = (index: number) => {
+    setHs(prev => ({ ...prev, photos: prev.photos.filter((_, i) => i !== index) }))
+  }
+
+  const removePictogram = (index: number) => {
+    setHs(prev => ({ ...prev, pictogramImages: prev.pictogramImages.filter((_, i) => i !== index) }))
+  }
+
+  const currentDescLines = descText.split('\n').filter(Boolean)
+
   return (
     <div className="editor-overlay">
-      <div className="editor-panel">
+      <div className="editor-panel extra-wide">
         <div className="editor-header"><h3>핫스팟 편집</h3><button onClick={onClose}><X size={20} /></button></div>
-        <div className="editor-body">
-          <label className="required">장소 이름</label>
-          <input 
-            value={hs.label} 
-            onChange={e => setHs({ ...hs, label: e.target.value })} 
-            className={!hs.label.trim() ? 'error' : ''}
-            placeholder="예: 휠체어 리프트 입구"
-          />
-          <label>설명 (줄바꿈 구분)</label><textarea rows={4} value={descText} onChange={e => setDescText(e.target.value)} />
-          <label>사진 추가</label>
-          <div className="hs-photos-preview">{hs.photos.map((p, i) => <img key={i} src={p} />)}<label className="add-photo-box"><Plus /><input type="file" multiple onChange={handleHsPhotoUpload} style={{ display: 'none' }} /></label></div>
-          <label>픽토그램</label>
-          <div className="editor-pics">{pictograms.map(p => (
-            <button key={p.id} className={`pic-toggle ${hs.pictogramIds.includes(p.id) ? 'selected' : ''}`} onClick={() => togglePic(p.id)}>{p.name}</button>
-          ))}</div>
+        <div className="editor-body split-view">
+          <div className="editor-form">
+            <label className="required">장소 이름</label>
+            <input 
+              value={hs.label} 
+              onChange={e => setHs({ ...hs, label: e.target.value })} 
+              className={!hs.label.trim() ? 'error' : ''}
+              placeholder="예: 휠체어 리프트 입구"
+            />
+            
+            <div className="row">
+              <div>
+                <label>X 위치 (%)</label>
+                <input type="number" value={hs.x} onChange={e => setHs({ ...hs, x: Number(e.target.value) })} step="0.1" />
+              </div>
+              <div>
+                <label>Y 위치 (%)</label>
+                <input type="number" value={hs.y} onChange={e => setHs({ ...hs, y: Number(e.target.value) })} step="0.1" />
+              </div>
+            </div>
+
+            <div className="row">
+              <div>
+                <label>너비 (W %)</label>
+                <input type="number" value={hs.w || 4} onChange={e => setHs({ ...hs, w: Number(e.target.value) })} step="0.5" />
+              </div>
+              <div>
+                <label>높이 (H %)</label>
+                <input type="number" value={hs.h || 4} onChange={e => setHs({ ...hs, h: Number(e.target.value) })} step="0.5" />
+              </div>
+            </div>
+
+            <label>설명 (줄바꿈 구분)</label>
+            <textarea 
+              rows={3} 
+              value={descText} 
+              onChange={e => setDescText(e.target.value)}
+              placeholder="• 입구 진입 경사로: 약 5도(1/12)&#10;• 출입구 폭: 약 0.9M"
+            />
+            
+            <div className="image-sections">
+              <div className="img-section">
+                <label>실제 장소 이미지</label>
+                <div className="hs-photos-preview">
+                  {hs.photos.map((p, i) => (
+                    <div key={i} className="photo-wrapper">
+                      <img src={p} alt={`hotspot-${i}`} />
+                      <button className="photo-remove-btn" onClick={() => removePhoto(i)}><X size={12} /></button>
+                    </div>
+                  ))}
+                  <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handleHsPhotoUpload} style={{ display: 'none' }} /></label>
+                </div>
+              </div>
+
+              <div className="img-section">
+                <label>픽토그램 이미지 (아이콘)</label>
+                <div className="hs-photos-preview">
+                  {hs.pictogramImages.map((p, i) => (
+                    <div key={i} className="photo-wrapper pic-wrap">
+                      <img src={p} alt={`pic-${i}`} />
+                      <button className="photo-remove-btn" onClick={() => removePictogram(i)}><X size={12} /></button>
+                    </div>
+                  ))}
+                  <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handlePictogramUpload} style={{ display: 'none' }} /></label>
+                </div>
+              </div>
+            </div>
+
+            <label>기존 픽토그램 선택 (선택 사항)</label>
+            <div className="editor-pics">{pictograms.map(p => (
+              <button key={p.id} className={`pic-toggle ${hs.pictogramIds.includes(p.id) ? 'selected' : ''}`} onClick={() => togglePic(p.id)}>{p.name}</button>
+            ))}</div>
+          </div>
+
+          <div className="editor-preview-container">
+            <div className="preview-tabs">
+              <button className={activePreviewTab === 'map' ? 'active' : ''} onClick={() => setActivePreviewTab('map')}>위치 미리보기</button>
+              <button className={activePreviewTab === 'modal' ? 'active' : ''} onClick={() => setActivePreviewTab('modal')}>팝업 상세 미리보기</button>
+            </div>
+
+            {activePreviewTab === 'map' ? (
+              <div className="mini-map-container">
+                {mapSrc ? (
+                  <div className="mini-map">
+                    <img src={mapSrc} className="mini-map-img" alt="Map Preview" />
+                    {otherHotspots.map(other => (
+                      <div 
+                        key={other.id} 
+                        className="mini-hotspot other" 
+                        style={{ 
+                          left: `${other.x}%`, 
+                          top: `${other.y}%`,
+                          width: `${other.w || 4}%`,
+                          height: `${other.h || 4}%`
+                        }}
+                      />
+                    ))}
+                    <div 
+                      className="mini-hotspot current pulse" 
+                      style={{ 
+                        left: `${hs.x}%`, 
+                        top: `${hs.y}%`,
+                        width: `${hs.w || 4}%`,
+                        height: `${hs.h || 4}%`
+                      }}
+                    >
+                      <span className="mini-hs-label">{hs.label || '현재 위치'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mini-map-placeholder">지도가 없습니다</div>
+                )}
+              </div>
+            ) : (
+              <div className="modal-preview-area">
+                <div className="mock-modal">
+                  <div className="mock-modal-content">
+                    <div className="mock-modal-left">
+                      <h2 className="mock-title">{hs.label || '장소 이름'}</h2>
+                      <div className="mock-pictograms">
+                        {hs.pictogramImages.map((img, i) => (
+                          <img key={i} src={img} className="mock-pic-img" alt="pic" />
+                        ))}
+                      </div>
+                      <ul className="mock-desc-list">
+                        {currentDescLines.length > 0 ? currentDescLines.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        )) : (
+                          <li className="placeholder">설명을 입력하면 여기에 표시됩니다.</li>
+                        )}
+                      </ul>
+                      <p className="mock-footer-note">*혹시 사용에 불편한 점이 생겼다면&#10;본 홈페이지 신고센터에 신고해주세요.</p>
+                    </div>
+                    <div className="mock-modal-right">
+                      {hs.photos.length > 0 ? (
+                        <div className="mock-slider">
+                          <img src={hs.photos[0]} className="mock-main-img" alt="preview" />
+                          <div className="mock-dots">
+                            {hs.photos.map((_, i) => <span key={i} className={`mock-dot ${i === 0 ? 'active' : ''}`} />)}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mock-img-placeholder">실제 장소 사진을 추가하세요</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="editor-footer"><button className="editor-save" onClick={() => onSave({ ...hs, description: descText.split('\n').filter(Boolean) })}><Save size={16} /> 저장</button></div>
+        <div className="editor-footer"><button className="editor-save" onClick={() => onSave({ ...hs, description: currentDescLines })}><Save size={16} /> 저장</button></div>
       </div>
     </div>
   )

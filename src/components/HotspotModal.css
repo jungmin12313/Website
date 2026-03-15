@@ -72,6 +72,15 @@
   color: white;
 }
 
+.modal-pic-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
 .modal-desc {
   list-style: none;
   display: flex;

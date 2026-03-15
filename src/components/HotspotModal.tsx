@@ -34,8 +34,8 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
           <div className="modal-left">
             <h2 className="modal-title">{hotspot.label}</h2>
 
-            {/* 픽토그램 뱃지 */}
-            {pics.length > 0 && (
+            {/* 픽토그램 뱃지 및 이미지 */}
+            {(pics.length > 0 || (hotspot.pictogramImages && hotspot.pictogramImages.length > 0)) && (
               <div className="modal-pics">
                 {pics.map(p => (
                   <div
@@ -46,6 +46,9 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
                   >
                     <span className="pic-icon">♿</span>
                   </div>
+                ))}
+                {hotspot.pictogramImages?.map((img, i) => (
+                  <img key={i} src={img} className="modal-pic-img" alt="pictogram icon" />
                 ))}
               </div>
             )}

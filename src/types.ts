@@ -2,10 +2,13 @@ export interface Hotspot {
   id: string
   x: number        // % (0~100)
   y: number        // % (0~100)
+  w?: number       // Width % (default 4 if missing)
+  h?: number       // Height % (default 4 if missing)
   label: string
   description: string[]
   pictogramIds: string[]
   photos: string[]
+  pictogramImages: string[]
   note?: string
 }
 

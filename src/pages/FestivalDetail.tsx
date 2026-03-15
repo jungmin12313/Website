@@ -145,19 +145,6 @@ export default function FestivalDetail() {
               {festival.description && (
                 <p className="legend-desc">{festival.description.slice(0, 120)}...</p>
               )}
-
-              <div className="legend-title">픽토그램 소개</div>
-              <div className="legend-list">
-                {festival.pictograms.map(p => (
-                  <div key={p.id} className="legend-item">
-                    <div
-                      className="legend-icon"
-                      style={{ background: p.color === 'blue' ? '#5BA4CF' : p.color === 'orange' ? '#E67E22' : p.color === 'red' ? '#E74C3C' : p.color === 'green' ? '#27AE60' : '#95A5A6' }}
-                    >♿</div>
-                    <span>{p.name}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* 우측 지도 */}
@@ -190,7 +177,12 @@ export default function FestivalDetail() {
                       <button
                         key={hs.id}
                         className="hotspot-btn"
-                        style={{ left: `${hs.x}%`, top: `${hs.y}%` }}
+                        style={{ 
+                          left: `${hs.x}%`, 
+                          top: `${hs.y}%`,
+                          width: `${hs.w || 4}%`,
+                          height: `${hs.h || 4}%`
+                        }}
                         onClick={() => setSelectedHotspot(hs)}
                         title={hs.label}
                       />

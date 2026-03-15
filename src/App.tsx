@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 import Home from './pages/Home'
 import FestivalList from './pages/FestivalList'
 import FestivalDetail from './pages/FestivalDetail'
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/report" element={<Report />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   )
 }

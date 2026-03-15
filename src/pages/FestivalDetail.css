@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: 18.75rem;
   color: var(--gray-400);
 }
 
@@ -19,11 +19,11 @@
 
 .tab-btn {
   flex: 1;
-  padding: 18px 16px;
-  font-size: 15px;
+  padding: 1.125rem 1rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--gray-500);
-  border-bottom: 2px solid transparent;
+  border-bottom: 0.125rem solid transparent;
   transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 
@@ -35,21 +35,21 @@
 }
 
 .tab-content {
-  padding: 32px 24px;
-  max-width: 1200px;
+  padding: 2rem 1.5rem;
+  max-width: 75rem;
   margin: 0 auto;
 }
 
 /* 기본정보 */
 .info-layout {
   display: flex;
-  gap: 48px;
+  gap: 3rem;
   align-items: flex-start;
 }
 
 .info-slider {
   flex-shrink: 0;
-  width: 380px;
+  width: 23.75rem;
 }
 
 .slider-wrap {
@@ -150,13 +150,13 @@
 
 .map-layout {
   display: flex;
-  height: calc(100vh - var(--nav-height) - 58px);
+  height: calc(100vh - var(--nav-height) - 3.625rem);
 }
 
 .map-legend {
-  width: 300px;
+  width: 18.75rem;
   flex-shrink: 0;
-  padding: 20px;
+  padding: 1.25rem;
   border-right: 1px solid var(--gray-200);
   overflow-y: auto;
   background: var(--gray-50);
@@ -222,22 +222,23 @@
   position: relative;
   overflow: hidden;
   background: var(--gray-100);
+  min-width: 0; /* Important for flex child to not overflow/collapse strangely */
 }
 
 .map-controls {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  bottom: 1rem;
+  right: 1rem;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   background: white;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
+  padding: 0.375rem 0.75rem;
   box-shadow: var(--shadow-sm);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -289,22 +290,19 @@
 .map-placeholder p { color: var(--gray-500); font-size: 15px; }
 .map-placeholder-sub { font-size: 13px !important; color: var(--gray-400) !important; }
 
-/* 핫스팟 버튼 */
+/* 핫스팟 버튼 (투명한 클릭 영역) */
 .hotspot-btn {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(91, 164, 207, 0.2);
-  border: 2px solid var(--blue);
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
+  z-index: 5;
 }
 
 .hotspot-btn:hover {
-  background: rgba(91, 164, 207, 0.5);
-  transform: translate(-50%, -50%) scale(1.15);
+  background: rgba(91, 164, 207, 0.15); /* 매우 미세한 피드백 */
 }
 
 /* 편의정보 탭 */

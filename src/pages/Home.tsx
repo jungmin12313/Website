@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search, Instagram } from 'lucide-react'
-import festivalsData from '../../public/data/festivals.json'
+import { useNavigate } from 'react-router-dom'
+import { Search } from 'lucide-react'
 import './Home.css'
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
       const savedHero = localStorage.getItem('naeil_hero_bg')
       if (savedHero) {
         setHeroBg(savedHero)
-        console.log('Hero background loaded from storage')
       } else {
         setHeroBg('')
       }
@@ -28,9 +26,6 @@ export default function Home() {
   const handleSearch = () => {
     if (query.trim()) navigate(`/maps?q=${encodeURIComponent(query)}`)
   }
-
-  // Get first 5 festivals for footer
-  const footerFestivals = festivalsData.slice(0, 5)
 
   return (
     <div className="home">
@@ -77,45 +72,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* 푸터 */}
-      <footer className="footer">
-        <div className="footer-inner">
-          <div className="footer-brand">
-            <img src="/logo.png" alt="내일" className="footer-logo" />
-            <p className="footer-tagline">
-              장애에 구애받지 않고,<br/>
-              모두가 즐길 수 있는,<br/>
-              무장애축제지도를 만듭니다.
-            </p>
-            <div className="social-icons">
-              <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
-                <Instagram size={24} />
-              </a>
-            </div>
-          </div>
-
-          <div className="footer-links">
-            <div>
-              <h4>무장애지도</h4>
-              {footerFestivals.map(f => (
-                <Link key={f.id} to={`/maps/${f.id}`}>{f.name}</Link>
-              ))}
-            </div>
-            <div>
-              <h4>축제캘린더</h4>
-              <Link to="/calendar">현재 진행중인 축제</Link>
-              <Link to="/calendar">월별 축제</Link>
-              <Link to="/calendar">지역별 축제</Link>
-            </div>
-            <div>
-              <h4>신고센터</h4>
-              <Link to="/report">지도 수정사항 신고</Link>
-              <a href="mailto:contact@naeil.org">축제 관계자</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

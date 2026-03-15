@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Minus, Plus, RotateCcw } from 'lucide-react'
 import './Navbar.css'
 
@@ -7,42 +7,11 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('naeil_font_size')) || 100)
   const location = useLocation()
-  const navigate = useNavigate()
-  
-  // Admin trigger logic
-  const logoClickCount = useRef(0)
-  const [adminHint, setAdminHint] = useState(0)
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}%`
     localStorage.setItem('naeil_font_size', String(fontSize))
   }, [fontSize])
-
-  const handleLogoClick = (e: React.MouseEvent) => {
-    logoClickCount.current += 1
-    setAdminHint(logoClickCount.current)
-    
-    if (logoClickCount.current >= 5) {
-      e.preventDefault()
-      logoClickCount.current = 0
-      setAdminHint(0)
-      
-      const code = window.prompt('관리자 인증 코드를 입력하세요.')
-      if (code === 'naeil2025') {
-        sessionStorage.setItem('naeil_admin_auth', 'true')
-        navigate('/admin')
-      } else if (code !== null) {
-        alert('인증 코드가 올바르지 않습니다.')
-      }
-    }
-
-    setTimeout(() => {
-      if (logoClickCount.current > 0) {
-        logoClickCount.current = 0
-        setAdminHint(0)
-      }
-    }, 2000)
-  }
 
   const changeFontSize = (delta: number) => {
     const next = Math.min(150, Math.max(70, fontSize + delta))
@@ -65,11 +34,8 @@ export default function Navbar() {
           <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <Link to="/" className="logo-link" onClick={handleLogoClick}>
+          <Link to="/" className="logo-link">
             <img src="/logo.png" alt="내일" className="logo-img" />
-            {adminHint > 0 && adminHint < 5 && (
-              <span className="admin-trigger-hint">{adminHint}</span>
-            )}
           </Link>
         </div>
 
