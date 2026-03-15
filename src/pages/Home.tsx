@@ -1,26 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
+import { getSetting } from '../firebaseUtils'
 import './Home.css'
 
 export default function Home() {
   const [query, setQuery] = useState('')
-  const [heroBg, setHeroBg] = useState(() => localStorage.getItem('naeil_hero_bg') || '')
+  const [heroBg, setHeroBg] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
-    const loadHero = () => {
-      const savedHero = localStorage.getItem('naeil_hero_bg')
-      if (savedHero) {
-        setHeroBg(savedHero)
-      } else {
-        setHeroBg('')
-      }
-    }
-
-    loadHero()
-    window.addEventListener('storage', loadHero)
-    return () => window.removeEventListener('storage', loadHero)
+    getSetting('naeil_hero_bg').then(savedHero => {
+      if (savedHero) setHeroBg(savedHero)
+    }).catch(err => console.error(err))
   }, [])
 
   const handleSearch = () => {

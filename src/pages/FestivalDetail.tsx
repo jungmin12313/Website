@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Calendar, MapPin, Phone, Instagram, Globe, DollarSign, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react'
 import type { Festival, Hotspot } from '../types'
 import HotspotModal from '../components/HotspotModal'
+import { getFestivals } from '../firebaseUtils'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -18,22 +19,18 @@ export default function FestivalDetail() {
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('naeil_festivals_data')
-    if (saved) {
-      const data = JSON.parse(saved)
-      const found = data.find((f: Festival) => f.id === id)
-      if (!found) navigate('/maps')
-      else setFestival(found)
-    } else {
-      fetch('/data/festivals.json')
-        .then(r => r.json())
-        .then((data: Festival[]) => {
-          localStorage.setItem('naeil_festivals_data', JSON.stringify(data))
-          const found = data.find(f => f.id === id)
-          if (!found) navigate('/maps')
-          else setFestival(found)
-        })
+    const loadData = async () => {
+      try {
+        const data = await getFestivals()
+        const found = data.find(f => f.id === id)
+        if (!found) navigate('/maps')
+        else setFestival(found)
+      } catch (err) {
+        console.error('Failed to load detail from Firebase:', err)
+        navigate('/maps')
+      }
     }
+    loadData()
   }, [id, navigate])
 
   if (!festival) return <div className="loading">불러오는 중...</div>

@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar } from 'lucide-react'
 import type { Hotspot, Festival } from '../types'
+import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting } from '../firebaseUtils'
 import './Admin.css'
 
-const FESTIVALS_STORAGE_KEY = 'naeil_festivals_data'
 const HERO_BG_STORAGE_KEY = 'naeil_hero_bg'
 
 export default function Admin() {
@@ -31,31 +31,29 @@ export default function Admin() {
     }
 
     // Load festivals
-    const savedFestivals = localStorage.getItem(FESTIVALS_STORAGE_KEY)
-    if (savedFestivals) {
-      setFestivals(JSON.parse(savedFestivals))
-    } else {
-      fetch('/data/festivals.json')
-        .then(r => r.json())
-        .then((data: Festival[]) => {
-          setFestivals(data)
-          localStorage.setItem(FESTIVALS_STORAGE_KEY, JSON.stringify(data))
-        })
-    }
+    getFestivals().then(data => {
+      setFestivals(data)
+    }).catch(err => {
+      console.error('Failed to load from Firebase', err)
+    })
 
-    // Load hero bg
-    const savedHero = localStorage.getItem(HERO_BG_STORAGE_KEY)
-    if (savedHero) setHeroBg(savedHero)
+    getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
+      if (savedHero) setHeroBg(savedHero)
+    })
   }, [])
 
-  const saveToStorage = (data: Festival[]) => {
+  const updateAndSave = async (f: Festival, successMsg?: string) => {
     try {
-      setFestivals(data)
-      localStorage.setItem(FESTIVALS_STORAGE_KEY, JSON.stringify(data))
+      await dbSave(f)
+      setFestivals(prev => {
+        const exists = prev.find(pf => pf.id === f.id)
+        return exists ? prev.map(pf => pf.id === f.id ? f : pf) : [...prev, f]
+      })
+      if (successMsg) alert(successMsg)
       return true
     } catch (e) {
-      console.error('Failed to save to localStorage:', e)
-      alert('저장에 실패했습니다. 이미지 용량이 너무 크거나 브라우저 저장 공간이 부족할 수 있습니다.')
+      console.error('Save error:', e)
+      alert('데이터베이스 저장 실패 (용량 과다 또는 네트워크 문제)')
       return false
     }
   }
@@ -94,13 +92,14 @@ export default function Admin() {
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1920, 0.8)
+      // 1MB(Base64) 제한을 피하기 위해 크기와 품질을 낮춤
+      const compressed = await compressImage(reader.result as string, 1280, 0.6)
       setHeroBg(compressed)
       try {
-        localStorage.setItem(HERO_BG_STORAGE_KEY, compressed)
-        alert('배경사진이 변경되었습니다.')
+        await saveSetting(HERO_BG_STORAGE_KEY, compressed)
+        alert('배경사진이 클라우드에 변경되었습니다.')
       } catch (err) {
-        alert('이미지 용량이 너무 커서 저장할 수 없습니다.')
+        alert('이미지 용량이 너무 커서 클라우드에 저장할 수 없습니다. 더 작은 사진을 선택해주세요.')
       }
     }
     reader.readAsDataURL(file)
@@ -132,7 +131,7 @@ export default function Admin() {
     setEditingFestival(newF)
   }
 
-  const saveFestival = () => {
+  const saveFestival = async () => {
     if (!editingFestival) return
     
     // Validation
@@ -141,37 +140,26 @@ export default function Admin() {
       return
     }
 
-    setFestivals(prev => {
-      const exists = prev.find(f => f.id === editingFestival.id)
-      let updated: Festival[]
-      if (exists) {
-        updated = prev.map(f => f.id === editingFestival.id ? editingFestival : f)
-      } else {
-        updated = [...prev, editingFestival]
-      }
-      
-      if (saveToStorage(updated)) {
-        setEditingFestival(null)
-        alert('축제 정보가 저장되었습니다.')
-      }
-      return updated
-    })
+    const success = await updateAndSave(editingFestival, '축제 정보가 클라우드에 저장되었습니다.')
+    if (success) {
+      setEditingFestival(null)
+    }
   }
 
-  const deleteFestival = (id: string) => {
+  const deleteFestival = async (id: string) => {
     if (!confirm('정말 축제를 삭제하시겠습니까?')) return
-    setFestivals(prev => {
-      const updated = prev.filter(f => f.id !== id)
-      if (saveToStorage(updated)) {
-        if (selectedFestivalId === id) {
-          setSelectedFestivalId('')
-          setHotspots([])
-          setMapSrc('')
-        }
-        alert('축제가 삭제되었습니다.')
+    try {
+      await dbDelete(id)
+      setFestivals(prev => prev.filter(f => f.id !== id))
+      if (selectedFestivalId === id) {
+        setSelectedFestivalId('')
+        setHotspots([])
+        setMapSrc('')
       }
-      return updated
-    })
+      alert('축제가 삭제되었습니다.')
+    } catch (e) {
+      alert('삭제에 실패했습니다.')
+    }
   }
 
   // --- Hotspot Management ---
@@ -204,7 +192,7 @@ export default function Admin() {
     setAdding(false)
   }
 
-  const saveHotspot = (hsWithDesc: Hotspot) => {
+  const saveHotspot = async (hsWithDesc: Hotspot) => {
     if (!selectedFestivalId) return
     
     // Validation
@@ -213,41 +201,35 @@ export default function Admin() {
       return
     }
 
-    setFestivals(prev => {
-      const festival = prev.find(f => f.id === selectedFestivalId)
-      if (!festival) return prev
+    const festival = festivals.find(f => f.id === selectedFestivalId)
+    if (!festival) return
 
-      const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
-      const newHotspots = hotspotExists
-        ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
-        : [...(festival.hotspots || []), hsWithDesc]
+    const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
+    const newHotspots = hotspotExists
+      ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
+      : [...(festival.hotspots || []), hsWithDesc]
 
-      const updated = prev.map(f => f.id === selectedFestivalId ? { ...f, hotspots: newHotspots } : f)
-      
-      if (saveToStorage(updated)) {
-        setHotspots(newHotspots)
-        setEditHs(null)
-        alert('핫스팟이 저장되었습니다.')
-      }
-      return updated
-    })
+    const updatedFestival = { ...festival, hotspots: newHotspots }
+    const success = await updateAndSave(updatedFestival, '핫스팟이 클라우드에 연동되었습니다.')
+    if (success) {
+      setHotspots(newHotspots)
+      setEditHs(null)
+    }
   }
 
-  const deleteHotspot = (id: string) => {
+  const deleteHotspot = async (id: string) => {
     if (!confirm('핫스팟을 삭제하시겠습니까?')) return
     
-    setFestivals(prev => {
-      const festival = prev.find(f => f.id === selectedFestivalId)
-      if (!festival) return prev
+    const festival = festivals.find(f => f.id === selectedFestivalId)
+    if (!festival) return
 
-      const newHotspots = (festival.hotspots || []).filter(h => h.id !== id)
-      const updated = prev.map(f => f.id === selectedFestivalId ? { ...f, hotspots: newHotspots } : f)
-      
-      if (saveToStorage(updated)) {
-        setHotspots(newHotspots)
-      }
-      return updated
-    })
+    const newHotspots = (festival.hotspots || []).filter(h => h.id !== id)
+    const updatedFestival = { ...festival, hotspots: newHotspots }
+    
+    const success = await updateAndSave(updatedFestival)
+    if (success) {
+      setHotspots(newHotspots)
+    }
   }
 
   const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,11 +240,10 @@ export default function Admin() {
       const compressed = await compressImage(reader.result as string, 1600, 0.7)
       setMapSrc(compressed)
       
-      setFestivals(prev => {
-        const updated = prev.map(f => f.id === selectedFestivalId ? { ...f, mapImage: compressed } : f)
-        saveToStorage(updated)
-        return updated
-      })
+      const festival = festivals.find(f => f.id === selectedFestivalId)
+      if (festival) {
+        updateAndSave({ ...festival, mapImage: compressed })
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -434,7 +415,7 @@ export default function Admin() {
                 <input type="file" accept="image/*" onChange={handleHeroBgUpload} style={{ display: 'none' }} />
               </label>
               {heroBg && (
-                <button className="reset-hero-btn" onClick={() => { setHeroBg(''); localStorage.removeItem(HERO_BG_STORAGE_KEY) }}>
+                <button className="reset-hero-btn" onClick={() => { setHeroBg(''); saveSetting(HERO_BG_STORAGE_KEY, '') }}>
                   기본으로 초기화
                 </button>
               )}
