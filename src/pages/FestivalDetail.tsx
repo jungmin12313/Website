@@ -55,30 +55,37 @@ export default function FestivalDetail() {
         <div className="tab-content info-tab">
           <div className="info-layout">
             {/* 사진 슬라이더 */}
-            <div className="info-slider">
-              <div className="slider-wrap">
-                <img
-                  src={festival.images[imgIdx] || '/placeholder.svg'}
-                  alt={festival.name}
-                  onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
-                />
-                {festival.images.length > 1 && (
-                  <>
-                    <button className="slider-btn prev" onClick={() => setImgIdx(i => (i - 1 + festival.images.length) % festival.images.length)}>
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="slider-btn next" onClick={() => setImgIdx(i => (i + 1) % festival.images.length)}>
-                      <ChevronRight size={18} />
-                    </button>
-                  </>
-                )}
-              </div>
-              <div className="slider-dots">
-                {(festival.images.length > 0 ? festival.images : ['']).map((_, i) => (
-                  <span key={i} className={`dot ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)} />
-                ))}
-              </div>
-            </div>
+            {(() => {
+              const displayImages = festival.images.length > 0
+                ? festival.images
+                : (festival.thumbnail ? [festival.thumbnail] : [])
+              return (
+                <div className="info-slider">
+                  <div className="slider-wrap">
+                    <img
+                      src={displayImages[imgIdx] || '/placeholder.svg'}
+                      alt={festival.name}
+                      onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
+                    />
+                    {displayImages.length > 1 && (
+                      <>
+                        <button className="slider-btn prev" onClick={() => setImgIdx(i => (i - 1 + displayImages.length) % displayImages.length)}>
+                          <ChevronLeft size={18} />
+                        </button>
+                        <button className="slider-btn next" onClick={() => setImgIdx(i => (i + 1) % displayImages.length)}>
+                          <ChevronRight size={18} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <div className="slider-dots">
+                    {(displayImages.length > 0 ? displayImages : ['']).map((_, i) => (
+                      <span key={i} className={`dot ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)} />
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* 상세 정보 */}
             <div className="info-content">
