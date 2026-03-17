@@ -118,10 +118,19 @@ export default function FestivalDetail() {
                   </div>
                 )}
                 {festival.description && (
-                  <div className="info-row align-top">
+                  <div className="info-row align-top description-row">
                     <Globe size={18} />
                     <div>
-                      <p className="info-label">[행사내용]</p>
+                      <p className="info-label">[행사소개]</p>
+                      <p className="description-text">{festival.description}</p>
+                    </div>
+                  </div>
+                )}
+                {festival.programs && festival.programs.length > 0 && (
+                  <div className="info-row align-top programs-row">
+                    <Globe size={18} />
+                    <div>
+                      <p className="info-label">[주요 프로그램]</p>
                       {festival.programs.map((p, i) => (
                         <p key={i} className="program-item">{i + 1}. {p}</p>
                       ))}
@@ -137,19 +146,7 @@ export default function FestivalDetail() {
       {/* 지도 탭 */}
       {tab === 'map' && (
         <div className="tab-content map-tab">
-          <div className="map-layout">
-            {/* 좌측 범례 */}
-            <div className="map-legend">
-              <div className="legend-header">
-                <span>🌰</span>
-                <strong>{festival.name}</strong>
-              </div>
-              <p className="legend-period">기간: {festival.startDate}~{festival.endDate}</p>
-              <p className="legend-addr">장소: {festival.address}</p>
-              {festival.description && (
-                <p className="legend-desc">{festival.description.slice(0, 120)}...</p>
-              )}
-            </div>
+          <div className="map-layout full-map">
 
             {/* 우측 지도 */}
             <div className="map-area">
@@ -163,10 +160,20 @@ export default function FestivalDetail() {
                 <div className="map-scaler" style={{ transform: `scale(${mapScale})` }}>
                   <div className="map-image-wrap">
                     {festival.mapImage ? (
-                      <img
+                       <img
                         src={festival.mapImage}
                         alt="축제 무장애지도"
                         className="map-img"
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          const viewport = mapRef.current;
+                          if (viewport) {
+                            const scaleX = (viewport.clientWidth - 40) / img.naturalWidth;
+                            const scaleY = (viewport.clientHeight - 40) / img.naturalHeight;
+                            const fitScale = Math.min(scaleX, scaleY, 1);
+                            setMapScale(fitScale);
+                          }
+                        }}
                         onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                       />
                     ) : (

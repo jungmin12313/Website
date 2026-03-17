@@ -138,8 +138,16 @@
   color: var(--gray-800);
 }
 
+.description-text {
+  font-size: 14.5px;
+  color: var(--gray-600);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin-top: 4px;
+}
+
 .program-item {
-  font-size: 14px;
+  font-size: 14.5px;
   color: var(--gray-600);
   margin-bottom: 4px;
   line-height: 1.6;
@@ -148,19 +156,12 @@
 /* 지도 탭 */
 .map-tab { padding: 0; max-width: none; }
 
-.map-layout {
+.map-layout.full-map {
   display: flex;
   height: calc(100vh - var(--nav-height) - 3.625rem);
 }
 
-.map-legend {
-  width: 18.75rem;
-  flex-shrink: 0;
-  padding: 1.25rem;
-  border-right: 1px solid var(--gray-200);
-  overflow-y: auto;
-  background: var(--gray-50);
-}
+.map-legend { display: none; }
 
 .legend-header {
   display: flex;
@@ -254,13 +255,18 @@
   height: 100%;
   overflow: auto;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .map-scaler {
-  transform-origin: top left;
+  transform-origin: center center;
   transition: transform 0.2s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .map-image-wrap {

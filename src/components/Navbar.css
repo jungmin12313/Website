@@ -57,22 +57,26 @@
 }
 
 .logo-img {
-  height: 2.5rem;
+  height: 2.2rem;
   width: auto;
   display: block;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .font-control {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-left: 1.25rem;
+  margin-left: 0.75rem;
+  flex-shrink: 0;
 }
 
 .control-label {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--gray-600);
+  white-space: nowrap;
 }
 
 .zoom-pill {
