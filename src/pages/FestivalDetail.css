@@ -255,18 +255,14 @@
   height: 100%;
   overflow: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  padding: 40px;
 }
 
 .map-scaler {
-  transform-origin: center center;
-  transition: transform 0.2s;
+  margin: auto;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: transform 0.2s;
+  display: block;
 }
 
 .map-image-wrap {

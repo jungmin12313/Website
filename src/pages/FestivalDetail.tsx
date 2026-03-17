@@ -16,6 +16,7 @@ export default function FestivalDetail() {
   const [imgIdx, setImgIdx] = useState(0)
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
   const [mapScale, setMapScale] = useState(0.5)
+  const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -157,8 +158,20 @@ export default function FestivalDetail() {
               </div>
 
               <div className="map-viewport" ref={mapRef}>
-                <div className="map-scaler" style={{ transform: `scale(${mapScale})` }}>
-                  <div className="map-image-wrap">
+                <div 
+                  className="map-scaler" 
+                  style={{ 
+                    width: imgSize.w ? `${imgSize.w * mapScale}px` : 'auto',
+                    height: imgSize.h ? `${imgSize.h * mapScale}px` : 'auto'
+                  }}
+                >
+                  <div 
+                    className="map-image-wrap" 
+                    style={{ 
+                      transform: `scale(${mapScale})`,
+                      transformOrigin: '0 0'
+                    }}
+                  >
                     {festival.mapImage ? (
                        <img
                         src={festival.mapImage}
@@ -167,6 +180,7 @@ export default function FestivalDetail() {
                         onLoad={(e) => {
                           const img = e.currentTarget;
                           const viewport = mapRef.current;
+                          setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
                           if (viewport) {
                             const scaleX = (viewport.clientWidth - 40) / img.naturalWidth;
                             const scaleY = (viewport.clientHeight - 40) / img.naturalHeight;
@@ -182,7 +196,7 @@ export default function FestivalDetail() {
                         <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
                       </div>
                     )}
-
+                    
                     {/* 핫스팟 */}
                     {festival.hotspots.map(hs => (
                       <button

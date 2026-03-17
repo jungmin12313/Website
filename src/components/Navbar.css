@@ -57,11 +57,10 @@
 }
 
 .logo-img {
-  height: 2.2rem;
+  height: 2.4rem;
   width: auto;
   display: block;
   image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
 }
 
 .font-control {
