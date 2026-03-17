@@ -15,7 +15,7 @@ export default function FestivalDetail() {
   const [tab, setTab] = useState<Tab>('info')
   const [imgIdx, setImgIdx] = useState(0)
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
-  const [mapScale, setMapScale] = useState(1)
+  const [mapScale, setMapScale] = useState(0.5)
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
