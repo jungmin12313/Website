@@ -380,14 +380,17 @@ export default function Admin() {
               className={`admin-map-area ${isDragging ? 'dragging' : ''}`} 
               ref={mapAreaRef}
               onMouseDown={(e) => {
-                if (!mapAreaRef.current || adding) return
-                setIsDragging(true)
+                if (!mapAreaRef.current) return
+                const scrollLeft = mapAreaRef.current.scrollLeft
+                const scrollTop = mapAreaRef.current.scrollTop
                 setDragStart({
                   x: e.pageX,
                   y: e.pageY,
-                  scrollLeft: mapAreaRef.current.scrollLeft,
-                  scrollTop: mapAreaRef.current.scrollTop
+                  scrollLeft,
+                  scrollTop
                 })
+                if (adding) return // Don't start dragging if we're adding a hotspot
+                setIsDragging(true)
               }}
               onMouseMove={(e) => {
                 if (!isDragging || !mapAreaRef.current) return
@@ -404,7 +407,9 @@ export default function Admin() {
                 <div className="admin-map-empty"><p>왼쪽에서 축제를 먼저 선택하세요</p></div>
               ) : (
                 <div className={`admin-map ${adding ? 'cursor-crosshair' : ''}`} ref={mapRef} onClick={(e) => {
-                  // Prevent click if we just finished dragging
+                  // Only handle adding if we didn't drag
+                  if (isDragging) return;
+                  // Even if isDragging is false, double check movement to be safe
                   if (Math.abs(e.pageX - dragStart.x) > 5 || Math.abs(e.pageY - dragStart.y) > 5) return;
                   handleMapClick(e);
                 }}>

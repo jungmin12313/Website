@@ -181,7 +181,20 @@
   user-select: none;
 }
 .admin-map-area.dragging { cursor: grabbing; }
-.admin-map-img { display: block; max-width: 100%; border-radius: 0.625rem; }
+
+.admin-map { 
+  position: relative; 
+  flex-shrink: 0;
+  margin: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-radius: 0.75rem;
+}
+
+.admin-map-img { 
+  display: block; 
+  max-width: none; /* Allow full size for scrolling */
+  border-radius: 0.625rem; 
+}
 .admin-map-placeholder { padding: 5rem; text-align: center; color: #adb5bd; font-size: 0.9375rem; border: 2px dashed #dee2e6; border-radius: 1.25rem; }
 
 .admin-hotspot {
