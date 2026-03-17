@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, MapPin, Phone, Instagram, Globe, DollarSign, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react'
+import { Calendar, MapPin, Phone, Instagram, Globe, DollarSign, ChevronLeft, ChevronRight, Minus, Plus, Maximize } from 'lucide-react'
 import type { Festival, Hotspot } from '../types'
 import HotspotModal from '../components/HotspotModal'
 import { getFestivals } from '../firebaseUtils'
@@ -17,6 +17,8 @@ export default function FestivalDetail() {
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
   const [mapScale, setMapScale] = useState(0.5)
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -152,12 +154,39 @@ export default function FestivalDetail() {
             {/* 우측 지도 */}
             <div className="map-area">
               <div className="map-controls">
-                <button onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))}><Minus size={16} /></button>
+                <button onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
                 <span>{Math.round(mapScale * 100)}%</span>
-                <button onClick={() => setMapScale(s => Math.min(3, s + 0.25))}><Plus size={16} /></button>
+                <button onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
+                <div className="control-divider" />
+                <button onClick={() => festival.mapImage && window.open(festival.mapImage, '_blank')} title="원본 이미지 보기">
+                  <Maximize size={16} />
+                </button>
               </div>
 
-              <div className="map-viewport" ref={mapRef}>
+              <div 
+                className={`map-viewport ${isDragging ? 'dragging' : ''}`} 
+                ref={mapRef}
+                onMouseDown={(e) => {
+                  if (!mapRef.current) return
+                  setIsDragging(true)
+                  setDragStart({
+                    x: e.pageX,
+                    y: e.pageY,
+                    scrollLeft: mapRef.current.scrollLeft,
+                    scrollTop: mapRef.current.scrollTop
+                  })
+                }}
+                onMouseMove={(e) => {
+                  if (!isDragging || !mapRef.current) return
+                  e.preventDefault()
+                  const dx = e.pageX - dragStart.x
+                  const dy = e.pageY - dragStart.y
+                  mapRef.current.scrollLeft = dragStart.scrollLeft - dx
+                  mapRef.current.scrollTop = dragStart.scrollTop - dy
+                }}
+                onMouseUp={() => setIsDragging(false)}
+                onMouseLeave={() => setIsDragging(false)}
+              >
                 <div 
                   className="map-scaler" 
                   style={{ 

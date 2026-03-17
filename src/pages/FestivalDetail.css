@@ -248,6 +248,18 @@
   display: flex;
   align-items: center;
   padding: 2px;
+  transition: color 0.1s;
+}
+
+.map-controls button:hover {
+  color: var(--blue);
+}
+
+.control-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--gray-200);
+  margin: 0 4px;
 }
 
 .map-viewport {
@@ -256,6 +268,12 @@
   overflow: auto;
   display: flex;
   padding: 40px;
+  cursor: grab;
+  user-select: none;
+}
+
+.map-viewport.dragging {
+  cursor: grabbing;
 }
 
 .map-scaler {
@@ -274,6 +292,9 @@
   display: block;
   max-width: none;
   height: auto;
+  /* 고해상도 품질 보장 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .map-placeholder {

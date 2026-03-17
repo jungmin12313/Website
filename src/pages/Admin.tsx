@@ -22,7 +22,10 @@ export default function Admin() {
   const [editHs, setEditHs] = useState<Hotspot | null>(null)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [password, setPassword] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
   const mapRef = useRef<HTMLDivElement>(null)
+  const mapAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Check auth
@@ -238,7 +241,7 @@ export default function Admin() {
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1600, 0.7)
+      const compressed = await compressImage(reader.result as string, 2560, 0.85)
       setMapSrc(compressed)
       
       const festival = festivals.find(f => f.id === selectedFestivalId)
@@ -373,11 +376,38 @@ export default function Admin() {
               )}
             </div>
 
-            <div className="admin-map-area">
+            <div 
+              className={`admin-map-area ${isDragging ? 'dragging' : ''}`} 
+              ref={mapAreaRef}
+              onMouseDown={(e) => {
+                if (!mapAreaRef.current || adding) return
+                setIsDragging(true)
+                setDragStart({
+                  x: e.pageX,
+                  y: e.pageY,
+                  scrollLeft: mapAreaRef.current.scrollLeft,
+                  scrollTop: mapAreaRef.current.scrollTop
+                })
+              }}
+              onMouseMove={(e) => {
+                if (!isDragging || !mapAreaRef.current) return
+                e.preventDefault()
+                const dx = e.pageX - dragStart.x
+                const dy = e.pageY - dragStart.y
+                mapAreaRef.current.scrollLeft = dragStart.scrollLeft - dx
+                mapAreaRef.current.scrollTop = dragStart.scrollTop - dy
+              }}
+              onMouseUp={() => setIsDragging(false)}
+              onMouseLeave={() => setIsDragging(false)}
+            >
               {!selectedFestivalId ? (
                 <div className="admin-map-empty"><p>왼쪽에서 축제를 먼저 선택하세요</p></div>
               ) : (
-                <div className={`admin-map ${adding ? 'cursor-crosshair' : ''}`} ref={mapRef} onClick={handleMapClick}>
+                <div className={`admin-map ${adding ? 'cursor-crosshair' : ''}`} ref={mapRef} onClick={(e) => {
+                  // Prevent click if we just finished dragging
+                  if (Math.abs(e.pageX - dragStart.x) > 5 || Math.abs(e.pageY - dragStart.y) > 5) return;
+                  handleMapClick(e);
+                }}>
                   {mapSrc ? <img src={mapSrc} className="admin-map-img" /> : <div className="admin-map-placeholder">지도 이미지를 업로드하세요</div>}
                   {hotspots.map(hs => (
                     <button 
