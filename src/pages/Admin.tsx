@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar } from 'lucide-react'
+import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram } from 'lucide-react'
 import type { Hotspot, Festival } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting } from '../firebaseUtils'
 import './Admin.css'
@@ -126,7 +126,8 @@ export default function Admin() {
       mapImage: '',
       hotspots: [],
       transport: null,
-      pictograms: []
+      pictograms: [],
+      category: ''
     }
     setEditingFestival(newF)
   }
@@ -477,12 +478,42 @@ function FestivalEditor({
     reader.readAsDataURL(file)
   }
 
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 1200, 0.7)
+        setFestival(prev => prev ? ({ ...prev, images: [...prev.images, compressed] }) : prev)
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const removeGalleryImage = (index: number) => {
+    setFestival(prev => prev ? ({ ...prev, images: prev.images.filter((_, i) => i !== index) }) : prev)
+  }
+
+  const addProgram = () => {
+    update('programs', [...festival.programs, ''])
+  }
+
+  const updateProgram = (index: number, val: string) => {
+    const newProgs = [...festival.programs]
+    newProgs[index] = val
+    update('programs', newProgs)
+  }
+
+  const removeProgram = (index: number) => {
+    update('programs', festival.programs.filter((_, i) => i !== index))
+  }
+
   return (
     <div className="editor-overlay">
-      <div className="editor-panel wide">
+      <div className="editor-panel extra-wide">
         <div className="editor-header"><h3>축제 정보 수정</h3><button onClick={onClose}><X size={20} /></button></div>
         <div className="editor-body grid-2">
-          <div>
+          <div className="editor-scroll">
             <label className="required">축제 이름</label>
             <input 
               value={festival.name} 
@@ -492,25 +523,84 @@ function FestivalEditor({
             />
             
             <label>부제목</label>
-            <input value={festival.subtitle} onChange={e => update('subtitle', e.target.value)} />
+            <input value={festival.subtitle} onChange={e => update('subtitle', e.target.value)} placeholder="예: 공주알밤과 떠나는 달콤한 여행!" />
+            
             <div className="row">
-              <div><label>시작일</label><input value={festival.startDate} onChange={e => update('startDate', e.target.value)} placeholder="0000.00.00" /></div>
-              <div><label>종료일</label><input value={festival.endDate} onChange={e => update('endDate', e.target.value)} placeholder="0000.00.00" /></div>
+              <div><label>시작일</label><input value={festival.startDate} onChange={e => update('startDate', e.target.value)} placeholder="2025-01-16" /></div>
+              <div><label>종료일</label><input value={festival.endDate} onChange={e => update('endDate', e.target.value)} placeholder="2025-01-20" /></div>
             </div>
-            <label>장소</label><input value={festival.location} onChange={e => update('location', e.target.value)} />
-            <label>주소</label><input value={festival.address} onChange={e => update('address', e.target.value)} />
+
+            <div className="row">
+              <div>
+                <label>지역 (필터용)</label>
+                <select value={festival.location} onChange={e => update('location', e.target.value)}>
+                  <option value="">선택하세요</option>
+                  <option value="충청남도">충청남도</option>
+                  <option value="전라남도">전라남도</option>
+                  <option value="광주">광주</option>
+                  <option value="전라북도">전라북도</option>
+                </select>
+              </div>
+              <div>
+                <label>카테고리</label>
+                <input value={festival.category || ''} onChange={e => update('category', e.target.value)} placeholder="예: 전통축제" />
+              </div>
+            </div>
+
+            <label>주소</label><input value={festival.address} onChange={e => update('address', e.target.value)} placeholder="정확한 주소를 입력하세요" />
+            <label>입장료</label><input value={festival.fee} onChange={e => update('fee', e.target.value)} placeholder="예: 무료 / 부분 유료" />
+            <label>문의처</label><input value={festival.phone} onChange={e => update('phone', e.target.value)} placeholder="예: 041-840-8401" />
+            <div style={{display:'flex', alignItems:'center', gap: '0.5rem', marginBottom: '0.375rem'}}><label style={{margin:0}}>인스타그램 ID</label><Instagram size={14} color="#888" /></div>
+            <input value={festival.instagram} onChange={e => update('instagram', e.target.value)} placeholder="예: gongju_gunbam" />
+            
+            <label>행사소개</label>
+            <textarea 
+              value={festival.description} 
+              onChange={e => update('description', e.target.value)} 
+              rows={5}
+              placeholder="상세한 행사 설명을 입력하세요"
+            />
           </div>
-          <div>
-            <label>썸네일 이미지</label>
-            <div className="thumb-preview">{festival.thumbnail && <img src={festival.thumbnail} />}</div>
-            <label className="upload-inline-btn"><Upload size={14} /> 이미지 변경<input type="file" accept="image/*" onChange={handleThumbUpload} style={{ display: 'none' }} /></label>
-            <label>문의처</label><input value={festival.phone} onChange={e => update('phone', e.target.value)} />
+
+          <div className="editor-scroll">
             <label>상태</label>
             <select value={festival.status} onChange={e => update('status', e.target.value)}>
               <option value="active">진행중</option>
               <option value="soon">준비중</option>
               <option value="ended">종료됨</option>
             </select>
+
+            <label style={{marginTop: '1rem'}}>썸네일 이미지 (목록용)</label>
+            <div className="thumb-preview f-thumb">{festival.thumbnail && <img src={festival.thumbnail} />}</div>
+            <label className="upload-inline-btn"><Upload size={14} /> 이미지 변경<input type="file" accept="image/*" onChange={handleThumbUpload} style={{ display: 'none' }} /></label>
+
+            <label style={{marginTop: '1rem'}}>상세 갤러리 이미지 (기본정보 탭)</label>
+            <div className="hs-photos-preview">
+              {festival.images?.map((p, i) => (
+                <div key={i} className="photo-wrapper">
+                  <img src={p} alt={`gallery-${i}`} />
+                  <button className="photo-remove-btn" onClick={() => removeGalleryImage(i)}><X size={12} /></button>
+                </div>
+              ))}
+              <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handleGalleryUpload} style={{ display: 'none' }} /></label>
+            </div>
+
+            <div className="programs-section" style={{marginTop: '1rem'}}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '0.5rem'}}>
+                <label style={{margin:0}}>주요 프로그램</label>
+                <button className="add-item-btn" onClick={addProgram}><Plus size={14} /> 추가</button>
+              </div>
+              <div className="program-inputs">
+                {festival.programs.map((p, i) => (
+                  <div key={i} className="prog-row">
+                    <span>{i+1}.</span>
+                    <input value={p} onChange={e => updateProgram(i, e.target.value)} placeholder="프로그램 명칭" />
+                    <button onClick={() => removeProgram(i)}><Trash2 size={14} /></button>
+                  </div>
+                ))}
+                {festival.programs.length === 0 && <p className="empty-text">프로그램이 없습니다.</p>}
+              </div>
+            </div>
           </div>
         </div>
         <div className="editor-footer"><button className="editor-save" onClick={onSave}><Save size={16} /> 저장하기</button></div>

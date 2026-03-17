@@ -52,4 +52,5 @@ export interface Festival {
   hotspots: Hotspot[]
   transport: Transport | null
   pictograms: Pictogram[]
+  category?: string
 }

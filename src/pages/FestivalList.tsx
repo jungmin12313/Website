@@ -10,6 +10,7 @@ export default function FestivalList() {
   const [filtered, setFiltered] = useState<Festival[]>([])
   const [statusFilter, setStatusFilter] = useState('all')
   const [regionFilter, setRegionFilter] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -41,8 +42,9 @@ export default function FestivalList() {
     if (q) result = result.filter(f => f.name.includes(q) || f.location.includes(q))
     if (statusFilter !== 'all') result = result.filter(f => f.status === statusFilter)
     if (regionFilter !== 'all') result = result.filter(f => f.location.includes(regionFilter))
+    if (categoryFilter !== 'all') result = result.filter(f => f.category === categoryFilter)
     setFiltered(result)
-  }, [festivals, statusFilter, regionFilter, searchParams])
+  }, [festivals, statusFilter, regionFilter, categoryFilter, searchParams])
 
   const statusLabel = (s: string) => {
     if (s === 'active') return '개최중'
@@ -76,8 +78,11 @@ export default function FestivalList() {
           </div>
           <div className="filter-select">
             <Search size={16} />
-            <select>
+            <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
               <option value="all">카테고리</option>
+              {Array.from(new Set(festivals.map(f => f.category).filter(Boolean))).map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
             </select>
           </div>
           <button className="btn-primary search-btn">검색</button>
