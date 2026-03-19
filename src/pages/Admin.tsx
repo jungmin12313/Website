@@ -178,15 +178,17 @@ export default function Admin() {
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!adding) return
     const rect = mapRef.current!.getBoundingClientRect()
+    // Increase precision to 3 decimal places (0.001% accuracy)
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
     const newHs: Hotspot = {
       id: `hs-${Date.now()}`,
-      x: Math.round(x * 100) / 100,
-      y: Math.round(y * 100) / 100,
+      x: Math.round(x * 1000) / 1000,
+      y: Math.round(y * 1000) / 1000,
       w: 4,
       h: 4,
       label: '',
+
       description: [],
       pictogramIds: [],
       photos: [],
@@ -418,7 +420,7 @@ export default function Admin() {
                   {hotspots.map(hs => (
                     <button 
                       key={hs.id} 
-                      className="admin-hotspot" 
+                      className={`admin-hotspot ${adding ? 'adding-mode' : ''}`} 
                       style={{ 
                         left: `${hs.x}%`, 
                         top: `${hs.y}%`,
@@ -427,6 +429,7 @@ export default function Admin() {
                       }} 
                       onClick={e => { e.stopPropagation(); setEditHs(hs) }}
                     >
+
                       <span className="admin-hs-label">{hs.label}</span>
                     </button>
                   ))}
