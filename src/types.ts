@@ -45,6 +45,8 @@ export interface Festival {
   instagram: string
   status: 'active' | 'ended' | 'soon'
   thumbnail: string
+  thumbnailPositionY?: number
+
   images: string[]
   description: string
   programs: string[]

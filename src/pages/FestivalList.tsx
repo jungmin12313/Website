@@ -100,8 +100,10 @@ export default function FestivalList() {
                 <img
                   src={f.thumbnail || '/placeholder.svg'}
                   alt={f.name}
+                  style={{ objectPosition: `center ${f.thumbnailPositionY || 50}%` }}
                   onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
                 />
+
                 <span className={`badge badge-${f.status === 'active' ? 'active' : f.status === 'soon' ? 'soon' : 'ended'}`}>
                   {statusLabel(f.status)}
                 </span>

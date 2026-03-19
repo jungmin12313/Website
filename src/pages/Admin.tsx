@@ -389,7 +389,8 @@ export default function Admin() {
                   scrollLeft,
                   scrollTop
                 })
-                if (adding) return // Don't start dragging if we're adding a hotspot
+                // Allow dragging even when adding a hotspot to help position the map
+
                 setIsDragging(true)
               }}
               onMouseMove={(e) => {
@@ -606,8 +607,57 @@ function FestivalEditor({
             </select>
 
             <label style={{marginTop: '1rem'}}>썸네일 이미지 (목록용)</label>
-            <div className="thumb-preview f-thumb">{festival.thumbnail && <img src={festival.thumbnail} />}</div>
+            <div 
+              className="thumb-preview f-thumb interactive"
+              title="마우스 휠이나 드래그로 위아래 위치를 맞추세요"
+              onMouseDown={(e) => {
+                const startY = e.pageY;
+                const startPos = festival.thumbnailPositionY ?? 50;
+                const onMouseMove = (moveEvent: MouseEvent) => {
+                  const delta = moveEvent.pageY - startY;
+                  // Sensitive drag: divide by container height (approx 180px)
+                  const next = Math.max(0, Math.min(100, startPos - (delta / 2)));
+                  update('thumbnailPositionY', next);
+                };
+                const onMouseUp = () => {
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+              }}
+              onWheel={(e) => {
+                const current = festival.thumbnailPositionY ?? 50;
+                const next = Math.max(0, Math.min(100, current + (e.deltaY > 0 ? 5 : -5)));
+                update('thumbnailPositionY', next);
+              }}
+            >
+              {festival.thumbnail ? (
+                <img 
+                  src={festival.thumbnail} 
+                  style={{ 
+                    objectPosition: `center ${festival.thumbnailPositionY ?? 50}%`,
+                    pointerEvents: 'none'
+                  }} 
+                />
+              ) : (
+                <div className="empty-thumb-text">이미지를 선택하세요</div>
+              )}
+            </div>
+            
+            <div className="thumb-pos-control">
+              <label>세로 위치 조절 (목록 노출)</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={festival.thumbnailPositionY ?? 50} 
+                onChange={e => update('thumbnailPositionY', Number(e.target.value))}
+              />
+            </div>
+
             <label className="upload-inline-btn"><Upload size={14} /> 이미지 변경<input type="file" accept="image/*" onChange={handleThumbUpload} style={{ display: 'none' }} /></label>
+
 
             <label style={{marginTop: '1rem'}}>상세 갤러리 이미지 (기본정보 탭)</label>
             <div className="hs-photos-preview">
