@@ -1,6 +1,6 @@
-import { collection, doc, getDocs, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore'
 import { db } from './firebase'
-import type { Festival } from './types'
+import type { Festival, Report } from './types'
 
 // 축제 데이터 가져오기
 export async function getFestivals(): Promise<Festival[]> {
@@ -28,6 +28,24 @@ export async function getSetting(key: string): Promise<string | null> {
 
 export async function saveSetting(key: string, value: string): Promise<void> {
   await setDoc(doc(db, 'settings', key), { value })
+}
+
+// --- 신고 센터 관련 ---
+export async function getReports(): Promise<Report[]> {
+  const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return []
+  const reqs: Report[] = []
+  snapshot.forEach(d => reqs.push(d.data() as Report))
+  return reqs
+}
+
+export async function saveReport(report: Report): Promise<void> {
+  await setDoc(doc(db, 'reports', report.id), report)
+}
+
+export async function deleteReport(reportId: string): Promise<void> {
+  await deleteDoc(doc(db, 'reports', reportId))
 }
 
 // 초기 데이터 세팅용 (만약 서버가 비어있다면)

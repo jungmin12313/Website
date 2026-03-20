@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram } from 'lucide-react'
-import type { Hotspot, Festival } from '../types'
-import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting } from '../firebaseUtils'
+import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock } from 'lucide-react'
+import type { Hotspot, Festival, Report } from '../types'
+import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
 import './Admin.css'
 
 const HERO_BG_STORAGE_KEY = 'naeil_hero_bg'
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<'festivals' | 'hotspots' | 'hero'>('festivals')
+  const [activeTab, setActiveTab] = useState<'festivals' | 'hotspots' | 'hero' | 'reports'>('festivals')
   const [festivals, setFestivals] = useState<Festival[]>([])
+  const [reports, setReports] = useState<Report[]>([])
   const [heroBg, setHeroBg] = useState<string>('')
   
   // Festival state
@@ -39,6 +40,9 @@ export default function Admin() {
     }).catch(err => {
       console.error('Failed to load from Firebase', err)
     })
+
+    // Load reports
+    getReports().then(setReports)
 
     getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
@@ -305,6 +309,9 @@ export default function Admin() {
             <button className={`tab-btn ${activeTab === 'hero' ? 'active' : ''}`} onClick={() => setActiveTab('hero')}>
               <Home size={18} /> 홈 배경사진
             </button>
+            <button className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
+              <ShieldAlert size={18} /> 제보 관리 {reports.length > 0 && <span className="tab-badge">{reports.length}</span>}
+            </button>
           </div>
         </div>
       </div>
@@ -459,6 +466,61 @@ export default function Admin() {
                   기본으로 초기화
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'reports' && (
+          <div className="reports-management">
+            <div className="admin-list-header">
+              <h3>민원 제보 내역 ({reports.length})</h3>
+            </div>
+            <div className="reports-grid">
+              {reports.map(r => (
+                <div key={r.id} className="report-card">
+                  <div className="report-card-header">
+                    <div className="report-meta">
+                      <span className={`status-tag ${r.status}`}>{r.status === 'pending' ? '접수됨' : '처리완료'}</span>
+                      <span className="report-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <button className="del-report-btn" onClick={async () => {
+                      if (confirm('제보를 삭제하시겠습니까?')) {
+                        await deleteReport(r.id)
+                        setReports(prev => prev.filter(pr => pr.id !== r.id))
+                      }
+                    }}><Trash2 size={16} /></button>
+                  </div>
+                  <div className="report-card-body">
+                    <div className="report-subject">
+                      <strong>{r.festivalName}</strong>
+                      <p>{r.content}</p>
+                    </div>
+                    {r.images && r.images.length > 0 && (
+                      <div className="report-images">
+                        {r.images.map((img, i) => <img key={i} src={img} alt="report" onClick={() => window.open(img)} />)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="report-card-footer">
+                    <div className="reporter-info">
+                      <span title="이름"><User size={12} /> {r.name}</span>
+                      <span title="연락처"><Phone size={12} /> {r.contact}</span>
+                    </div>
+                    <button 
+                      className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`}
+                      onClick={async () => {
+                        const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
+                        const updated = { ...r, status: newStatus as any }
+                        await saveReport(updated)
+                        setReports(prev => prev.map(pr => pr.id === r.id ? updated : pr))
+                      }}
+                    >
+                      {r.status === 'pending' ? <><CheckCircle size={14} /> 해결 처리</> : <><Clock size={14} /> 미해결로 되돌리기</>}
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {reports.length === 0 && <div className="admin-map-placeholder">접수된 제보가 없습니다.</div>}
             </div>
           </div>
         )}
@@ -757,7 +819,98 @@ function HotspotEditor({
     setHs(prev => ({ ...prev, pictogramImages: prev.pictogramImages.filter((_, i) => i !== index) }))
   }
 
+  const [dragMode, setDragMode] = useState<'none' | 'drawing' | 'moving'>('none')
+  const [moveStart, setMoveStart] = useState({ x: 0, y: 0, hsX: 0, hsY: 0 })
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+  const miniMapRef = useRef<HTMLDivElement>(null)
+
   const currentDescLines = descText.split('\n').filter(Boolean)
+
+  const handleMiniMapMouseDown = (e: React.MouseEvent) => {
+    if (!miniMapRef.current) return
+    const rect = miniMapRef.current.getBoundingClientRect()
+    const curX = ((e.clientX - rect.left) / rect.width) * 100
+    const curY = ((e.clientY - rect.top) / rect.height) * 100
+
+    const width = hs.w || 4
+    const height = hs.h || 4
+    
+    // Check if we already have a box and the click is inside it (hs.x, hs.y is CENTER)
+    const isInside = curX >= (hs.x - width / 2) && curX <= (hs.x + width / 2) &&
+                     curY >= (hs.y - height / 2) && curY <= (hs.y + height / 2)
+
+    if (isInside) {
+      setDragMode('moving')
+      setMoveStart({ x: curX, y: curY, hsX: hs.x, hsY: hs.y })
+    } else {
+      setDragMode('drawing')
+      setResizeStart({ x: curX, y: curY })
+      // New drawing starts at this point as a 0-size box centered here
+      setHs(prev => ({
+        ...prev,
+        x: Math.round(curX * 1000) / 1000,
+        y: Math.round(curY * 1000) / 1000,
+        w: 0,
+        h: 0
+      }))
+    }
+  }
+
+  const handleMiniMapMouseMove = (e: React.MouseEvent) => {
+    if (!miniMapRef.current) return
+    const rect = miniMapRef.current.getBoundingClientRect()
+    const curX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const curY = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100))
+
+    // Update hovering state if not dragging
+    if (dragMode === 'none') {
+      const width = hs.w || 4
+      const height = hs.h || 4
+      const inside = curX >= (hs.x - width / 2) && curX <= (hs.x + width / 2) &&
+                     curY >= (hs.y - height / 2) && curY <= (hs.y + height / 2)
+      setIsHovering(inside)
+      return
+    }
+
+    if (dragMode === 'drawing') {
+      const centerX = (resizeStart.x + curX) / 2
+      const centerY = (resizeStart.y + curY) / 2
+      const width = Math.abs(curX - resizeStart.x)
+      const height = Math.abs(curY - resizeStart.y)
+
+      setHs(prev => ({
+        ...prev,
+        x: Math.round(centerX * 1000) / 1000,
+        y: Math.round(centerY * 1000) / 1000,
+        w: Math.round(width * 1000) / 1000,
+        h: Math.round(height * 1000) / 1000
+      }))
+    } else if (dragMode === 'moving') {
+      const dx = curX - moveStart.x
+      const dy = curY - moveStart.y
+      
+      let newX = moveStart.hsX + dx
+      let newY = moveStart.hsY + dy
+      
+      const width = hs.w || 4
+      const height = hs.h || 4
+      
+      // Boundary check for center point
+      newX = Math.max(width / 2, Math.min(100 - width / 2, newX))
+      newY = Math.max(height / 2, Math.min(100 - height / 2, newY))
+
+      setHs(prev => ({
+        ...prev,
+        x: Math.round(newX * 1000) / 1000,
+        y: Math.round(newY * 1000) / 1000
+      }))
+    }
+  }
+
+  const handleMiniMapMouseUp = () => {
+    setDragMode('none')
+  }
 
   return (
     <div className="editor-overlay">
@@ -846,8 +999,15 @@ function HotspotEditor({
             {activePreviewTab === 'map' ? (
               <div className="mini-map-container">
                 {mapSrc ? (
-                  <div className="mini-map">
-                    <img src={mapSrc} className="mini-map-img" alt="Map Preview" />
+                  <div 
+                    className={`mini-map interactive ${isHovering ? 'can-move' : ''} ${dragMode === 'moving' ? 'is-moving' : ''}`} 
+                    ref={miniMapRef}
+                    onMouseDown={handleMiniMapMouseDown}
+                    onMouseMove={handleMiniMapMouseMove}
+                    onMouseUp={handleMiniMapMouseUp}
+                    onMouseLeave={handleMiniMapMouseUp}
+                  >
+                    <img src={mapSrc} className="mini-map-img" alt="Map Preview" style={{ userSelect: 'none', pointerEvents: 'none' }} />
                     {otherHotspots.map(other => (
                       <div 
                         key={other.id} 
@@ -861,16 +1021,20 @@ function HotspotEditor({
                       />
                     ))}
                     <div 
-                      className="mini-hotspot current pulse" 
+                      className={`mini-hotspot current ${dragMode !== 'none' ? '' : 'pulse'}`} 
                       style={{ 
                         left: `${hs.x}%`, 
                         top: `${hs.y}%`,
                         width: `${hs.w || 4}%`,
-                        height: `${hs.h || 4}%`
+                        height: `${hs.h || 4}%`,
+                        minWidth: dragMode !== 'none' ? 0 : '10px',
+                        minHeight: dragMode !== 'none' ? 0 : '10px',
+                        pointerEvents: 'none'
                       }}
                     >
-                      <span className="mini-hs-label">{hs.label || '현재 위치'}</span>
+                      {dragMode === 'none' && <span className="mini-hs-label">{hs.label || '현재 위치'}</span>}
                     </div>
+                    {dragMode === 'none' && <div className="mini-map-hint">드래그하여 영역 설정 / 클릭 이동 가능</div>}
                   </div>
                 ) : (
                   <div className="mini-map-placeholder">지도가 없습니다</div>

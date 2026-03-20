@@ -56,3 +56,15 @@ export interface Festival {
   pictograms: Pictogram[]
   category?: string
 }
+
+export interface Report {
+  id: string
+  name: string
+  contact: string
+  festivalId: string
+  festivalName: string
+  content: string
+  images: string[]
+  createdAt: number
+  status: 'pending' | 'resolved'
+}
