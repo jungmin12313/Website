@@ -14,7 +14,15 @@
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .navbar-inner {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
 }
 
 .navbar-left {
@@ -57,10 +65,19 @@
 }
 
 .logo-img {
-  height: 2.4rem;
+  height: 2.2rem;
   width: auto;
+  min-width: max-content;
   display: block;
   image-rendering: -webkit-optimize-contrast;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .logo-img {
+    height: 1.8rem;
+  }
 }
 
 .font-control {
@@ -76,6 +93,12 @@
   font-weight: 600;
   color: var(--gray-600);
   white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .control-label {
+    display: none; /* Hide label on very small screens to save space */
+  }
 }
 
 .zoom-pill {

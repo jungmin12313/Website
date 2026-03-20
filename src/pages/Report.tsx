@@ -89,7 +89,7 @@ export default function ReportPage() {
       </div>
 
       <form onSubmit={handleSubmit} style={{ background: 'white', border: '1px solid #E9ECEF', borderRadius: '1.5rem', padding: '2.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(15rem, 1fr))', gap: '1.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#495057', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><User size={14} /> 이름 <span style={{ color: '#fa5252' }}>*</span></label>
             <input 
