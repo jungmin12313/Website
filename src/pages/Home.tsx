@@ -32,7 +32,7 @@ export default function Home() {
           <div className="search-bar">
             <input
               type="text"
-              placeholder="검색어를 입력해주세요."
+              placeholder="관심있는 장소나 축제를 검색해보세요!"
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
