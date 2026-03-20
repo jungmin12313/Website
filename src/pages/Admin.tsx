@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock } from 'lucide-react'
+import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone } from 'lucide-react'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
 import './Admin.css'
