@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 "use client";
 
@@ -65,6 +66,14 @@ const METHODS = [
 
 export default function About() {
   useEffect(() => {
+    // SEO 최적화 (Vite 환경에 맞춤)
+    document.title = "내일 · 무장애 축제 지도 — 소개";
+    
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "장애인의 문화예술 직접 참여율은 3.6%. 내일은 휠체어 이용자와 함께 현장을 누비며 만든 무장애 축제 지도입니다.");
+    }
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -81,6 +90,23 @@ export default function About() {
 
   return (
     <>
+      {/* JSON-LD 구조화 데이터 추가 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "내일 · 무장애 축제 지도",
+            "description": "장애인의 문화예술 접근성을 높이기 위해 휠체어 이용자와 함께 현장을 조사하는 비영리 학생 자치단체",
+            "url": "https://naeil-website.vercel.app",
+            "foundingDate": "2024",
+            "areaServed": "KR",
+            "keywords": "무장애 축제, 장애인 문화 접근성, 휠체어 축제 지도"
+          })
+        }}
+      />
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         
@@ -100,7 +126,7 @@ export default function About() {
       <div style={s.root}>
 
         {/* HERO */}
-        <section style={s.hero}>
+        <section style={s.hero} aria-label="프로젝트 소개">
           <div style={s.heroGhost} aria-hidden="true">97</div>
           <div style={s.pill} className="reveal">문화 접근권 프로젝트</div>
           <h1 style={s.heroHeadline} className="reveal">
@@ -116,7 +142,7 @@ export default function About() {
             '내일'은 그 문을 함께 열러 갑니다.
           </p>
           <div className="reveal" style={{ ...s.heroCta, transitionDelay: '0.2s' }}>
-            <a href="/maps" style={s.btnMain}>지도 보러 가기</a>
+            <Link to="/maps" style={s.btnMain}>지도 보러 가기</Link>
             <a href="#story" style={s.btnGhost}>우리가 시작한 이유 →</a>
           </div>
         </section>
@@ -142,7 +168,7 @@ export default function About() {
         </div>
 
         {/* STORY */}
-        <section id="story" style={s.story}>
+        <section id="story" style={s.story} aria-label="우리가 시작한 이유">
           <div style={s.secKicker} className="reveal">우리가 시작한 이유</div>
           <div style={s.twoCol}>
             <div style={s.storyHeading} className="reveal">
@@ -170,7 +196,7 @@ export default function About() {
         </div>
 
         {/* VOICE */}
-        <section style={s.voice}>
+        <section style={s.voice} aria-label="당사자의 목소리">
           <div style={{ maxWidth: 560, marginBottom: 48 }}>
             <div style={s.pill} className="reveal">당사자의 목소리</div>
             <div className="reveal" style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14, transitionDelay: '0.1s' }}>
@@ -200,7 +226,7 @@ export default function About() {
         </section>
 
         {/* METHOD */}
-        <section style={s.method}>
+        <section style={s.method} aria-label="조사 방법론">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 44 }}>
             <h2 style={s.storyHeading} className="reveal">신뢰는 현장에서<br />나옵니다</h2>
             <div className="reveal" style={{ fontSize: 13, color: C.muted, fontWeight: 300, maxWidth: 220, lineHeight: 1.75, textAlign: "right" as const, transitionDelay: '0.1s' }}>
@@ -219,7 +245,7 @@ export default function About() {
         </section>
 
         {/* CTA */}
-        <section style={s.cta}>
+        <section style={s.cta} aria-label="함께하기">
           <p style={s.ctaBig} className="reveal">당신이 보고 싶은 것을,<br />두려움 없이 보러 갈 권리.</p>
           <p className="reveal" style={{ ...(s.ctaSub as React.CSSProperties), transitionDelay: '0.1s' }}>
             그것은 특별한 배려가 아닙니다.<br />
