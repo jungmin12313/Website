@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 "use client";
 
 // 내일 · 무장애 축제 지도 — About 페이지
-// 사용법: app/about/page.jsx 또는 pages/about.jsx 에 붙여넣으세요.
 
 const C = {
   blue: "#52a5ff",
@@ -65,10 +64,37 @@ const METHODS = [
 ];
 
 export default function About() {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        
+        .reveal {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .reveal.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
       `}</style>
 
       <div style={s.root}>
@@ -76,20 +102,20 @@ export default function About() {
         {/* HERO */}
         <section style={s.hero}>
           <div style={s.heroGhost} aria-hidden="true">97</div>
-          <div style={s.pill}>문화 접근권 프로젝트</div>
-          <h1 style={s.heroHeadline}>
+          <div style={s.pill} className="reveal">문화 접근권 프로젝트</div>
+          <h1 style={s.heroHeadline} className="reveal">
             <span style={{ position: "relative", display: "inline-block" }}>
               97.4%
               <span style={s.strikeLine} aria-hidden="true" />
             </span>
             <br />의 침묵을<br />우리가 깹니다
           </h1>
-          <p style={s.heroSub}>
+          <p style={s.heroSub} className="reveal" style={{ ...s.heroSub, transitionDelay: '0.1s' }}>
             장애인의 문화예술 직접 참여율은 단 3.6%.<br />
             나머지 97.4%는 아직 문 앞에 서 있습니다.<br />
             '내일'은 그 문을 함께 열러 갑니다.
           </p>
-          <div style={s.heroCta}>
+          <div style={s.heroCta} className="reveal" style={{ ...s.heroCta, transitionDelay: '0.2s' }}>
             <a href="/maps" style={s.btnMain}>지도 보러 가기</a>
             <a href="#story" style={s.btnGhost}>우리가 시작한 이유 →</a>
           </div>
@@ -98,7 +124,7 @@ export default function About() {
         {/* STAT BAR */}
         <div style={s.statBar}>
           {STATS.map((st, i) => (
-            <div key={i} style={s.statPill}>
+            <div key={i} style={s.statPill} className="reveal" style={{ ...s.statPill, transitionDelay: `${i * 0.1}s` }}>
               <div style={{
                 ...s.statNum,
                 ...(st.blue ? { color: C.blue } : {}),
@@ -117,13 +143,13 @@ export default function About() {
 
         {/* STORY */}
         <section id="story" style={s.story}>
-          <div style={s.secKicker}>우리가 시작한 이유</div>
+          <div style={s.secKicker} className="reveal">우리가 시작한 이유</div>
           <div style={s.twoCol}>
-            <div style={s.storyHeading}>
+            <div style={s.storyHeading} className="reveal">
               정보가 없는 게<br />아니었습니다.<br />
               그 정보가<br /><span style={{ color: C.blue }}>'진짜'인지</span><br />몰랐던 겁니다.
             </div>
-            <div style={s.storyBody}>
+            <div style={s.storyBody} className="reveal" style={{ ...s.storyBody, transitionDelay: '0.1s' }}>
               <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 우리는 직접 들었습니다.</p>
               <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 장애인 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
               <p style={{ marginTop: 16 }}>그래서 '내일'은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 바퀴가 닿는 모든 곳을 직접 확인하면서.</p>
@@ -133,11 +159,11 @@ export default function About() {
 
         {/* MISSION + VISION */}
         <div style={s.mvRow}>
-          <div style={s.mvCard}>
+          <div style={s.mvCard} className="reveal">
             <div style={s.mvLabel}>Mission</div>
             <div style={s.mvText}>장애인의 문화 접근<br />장벽을 허문다.</div>
           </div>
-          <div style={s.mvCard}>
+          <div style={s.mvCard} className="reveal" style={{ ...s.mvCard, transitionDelay: '0.1s' }}>
             <div style={s.mvLabel}>Vision</div>
             <div style={s.mvText}>모두가 즐길 수 있는<br />무장애 관광 인프라 구축</div>
           </div>
@@ -146,18 +172,18 @@ export default function About() {
         {/* VOICE */}
         <section style={s.voice}>
           <div style={{ maxWidth: 560, marginBottom: 48 }}>
-            <div style={s.pill}>당사자의 목소리</div>
-            <div style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14 }}>
+            <div style={s.pill} className="reveal">당사자의 목소리</div>
+            <div style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14 }} className="reveal" style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14, transitionDelay: '0.1s' }}>
               우리가 현장으로 나간<br />진짜 이유
             </div>
-            <p style={{ fontSize: 14, lineHeight: 1.9, color: C.muted, fontWeight: 300 }}>
+            <p style={{ fontSize: 14, lineHeight: 1.9, color: C.muted, fontWeight: 300 }} className="reveal" style={{ fontSize: 14, lineHeight: 1.9, color: C.muted, fontWeight: 300, transitionDelay: '0.2s' }}>
               여름엔 뙤약볕 아래서, 겨울엔 칼바람 속에서 전국 각지의 축제장을 방문합니다.
               휠체어 이용자의 시선에서 바라보는 축제는 우리가 알던 모습과 사뭇 달랐습니다.
             </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {VOICES.map((v, i) => (
-              <div key={i} style={s.voiceCard}>
+              <div key={i} style={s.voiceCard} className="reveal" style={{ ...s.voiceCard, transitionDelay: `${i * 0.1 + 0.1}s` }}>
                 <div style={s.voiceBar} />
                 <div>
                   <div style={s.voiceQ}>&ldquo;{v.quote}&rdquo;</div>
@@ -176,14 +202,14 @@ export default function About() {
         {/* METHOD */}
         <section style={s.method}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 44 }}>
-            <h2 style={s.storyHeading}>신뢰는 현장에서<br />나옵니다</h2>
-            <div style={{ fontSize: 13, color: C.muted, fontWeight: 300, maxWidth: 220, lineHeight: 1.75, textAlign: "right" }}>
+            <h2 style={s.storyHeading} className="reveal">신뢰는 현장에서<br />나옵니다</h2>
+            <div style={{ fontSize: 13, color: C.muted, fontWeight: 300, maxWidth: 220, lineHeight: 1.75, textAlign: "right" }} className="reveal" style={{ fontSize: 13, color: C.muted, fontWeight: 300, maxWidth: 220, lineHeight: 1.75, textAlign: "right", transitionDelay: '0.1s' }}>
               우리가 지키는 조사 원칙.<br />책상이 아닌 바퀴가 닿는 현장에서.
             </div>
           </div>
           <div style={s.methodGrid}>
-            {METHODS.map((m) => (
-              <div key={m.num} style={s.methodCard}>
+            {METHODS.map((m, i) => (
+              <div key={m.num} style={s.methodCard} className="reveal" style={{ ...s.methodCard, transitionDelay: `${i * 0.1 + 0.1}s` }}>
                 <div style={s.methodNum}>{m.num}</div>
                 <div style={s.methodTitle}>{m.title}</div>
                 <div style={s.methodDesc}>{m.desc}</div>
@@ -194,13 +220,13 @@ export default function About() {
 
         {/* CTA */}
         <section style={s.cta}>
-          <p style={s.ctaBig}>당신이 보고 싶은 것을,<br />두려움 없이 보러 갈 권리.</p>
-          <p style={s.ctaSub}>
+          <p style={s.ctaBig} className="reveal">당신이 보고 싶은 것을,<br />두려움 없이 보러 갈 권리.</p>
+          <p style={s.ctaSub} className="reveal" style={{ ...s.ctaSub, transitionDelay: '0.1s' }}>
             그것은 특별한 배려가 아닙니다.<br />
             처음부터 당신의 것이었던 권리입니다.<br />
             '내일'은 그 권리를 지도 위에 새겨갑니다.
           </p>
-          <a href="/report" style={s.btnWhite}>지금 함께하기</a>
+          <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" style={s.btnWhite} className="reveal" style={{ ...s.btnWhite, transitionDelay: '0.2s' }}>지금 함께하기</a>
         </section>
 
         {/* FOOTER */}
