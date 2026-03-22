@@ -1,22 +1,32 @@
-import { useState, useEffect } from 'react'
-import { Calendar, User, Phone, FileText, Camera, Send } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Calendar, User, Phone, FileText, Camera, Send, MapPin, X, AlertTriangle } from 'lucide-react'
 import { getFestivals, saveReport } from '../firebaseUtils'
 import type { Festival, Report } from '../types'
 
 export default function ReportPage() {
   const [festivals, setFestivals] = useState<Festival[]>([])
+  const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
     festivalId: '',
+    locationDetail: '',
     content: ''
   })
+  const [coords, setCoords] = useState<{ x: number, y: number } | null>(null)
   const [images, setImages] = useState<string[]>([])
+  const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     getFestivals().then(setFestivals)
   }, [])
+
+  useEffect(() => {
+    const f = festivals.find(f => f.id === formData.festivalId)
+    setSelectedFestival(f || null)
+    if (!f) setCoords(null)
+  }, [formData.festivalId, festivals])
 
   const compressImage = (base64: string, maxWidth = 1000, quality = 0.7): Promise<string> => {
     return new Promise((resolve) => {
@@ -51,6 +61,17 @@ export default function ReportPage() {
     })
   }
 
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!mapRef.current) return
+    const rect = mapRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setCoords({ 
+      x: Math.round(x * 1000) / 1000, 
+      y: Math.round(y * 1000) / 1000 
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name || !formData.contact || !formData.festivalId || !formData.content) {
@@ -59,21 +80,24 @@ export default function ReportPage() {
     }
 
     setLoading(true)
-    const selectedFestival = festivals.find(f => f.id === formData.festivalId)
     const newReport: Report = {
       id: `report-${Date.now()}`,
       ...formData,
+      x: coords?.x,
+      y: coords?.y,
       festivalName: selectedFestival?.name || '',
       images,
       createdAt: Date.now(),
-      status: 'pending'
+      status: 'pending',
+      isApproved: false
     }
 
     try {
       await saveReport(newReport)
       alert('신고가 접수되었습니다. 소중한 의견 감사합니다.')
-      setFormData({ name: '', contact: '', festivalId: '', content: '' })
+      setFormData({ name: '', contact: '', festivalId: '', locationDetail: '', content: '' })
       setImages([])
+      setCoords(null)
     } catch (err) {
       alert('신고 접수 중 오류가 발생했습니다.')
     } finally {
@@ -121,6 +145,42 @@ export default function ReportPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#495057', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><MapPin size={14} /> 대략적인 위치 <span style={{ color: '#888', fontWeight: 400 }}>(선택)</span></label>
+          <input 
+            value={formData.locationDetail}
+            onChange={e => setFormData({ ...formData, locationDetail: e.target.value })}
+            type="text" placeholder="예: 메인 무대 왼쪽 입구 근처, 푸드트럭 구역 끝쪽" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none' }} 
+          />
+          
+          {selectedFestival && selectedFestival.mapImage && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>지도에서 위치를 직접 클릭하면 관리자가 더 정확히 파악할 수 있습니다.</p>
+              <div 
+                ref={mapRef}
+                onClick={handleMapClick}
+                style={{ position: 'relative', width: '100%', borderRadius: '0.75rem', overflow: 'hidden', cursor: 'crosshair', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #dee2e6' }}
+              >
+                <img src={selectedFestival.mapImage} alt="map" style={{ width: '100%', display: 'block' }} />
+                {coords && (
+                  <div style={{ position: 'absolute', left: `${coords.x}%`, top: `${coords.y}%`, transform: 'translate(-50%, -100%)', color: '#fa5252' }}>
+                    <AlertTriangle size={24} fill="#fa5252" color="white" />
+                  </div>
+                )}
+              </div>
+              {coords && (
+                <button 
+                  type="button"
+                  onClick={() => setCoords(null)}
+                  style={{ marginTop: '0.5rem', background: 'none', border: 'none', color: '#888', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                >
+                  <X size={12} /> 위치 선택 취소
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#495057', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><FileText size={14} /> 불편사항 상세 내용 <span style={{ color: '#fa5252' }}>*</span></label>
           <textarea 
             value={formData.content}
@@ -137,6 +197,7 @@ export default function ReportPage() {
               <div key={i} style={{ position: 'relative', width: '5.5rem', height: '5.5rem' }}>
                 <img src={img} alt="upload" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0.5rem' }} />
                 <button 
+                  type="button"
                   onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
                   style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#fa5252', color: 'white', width: '1.25rem', height: '1.25rem', borderRadius: '50%', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white', padding: 0 }}
                 >&times;</button>

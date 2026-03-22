@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, MapPin, Phone, Instagram, Globe, DollarSign, ChevronLeft, ChevronRight, Minus, Plus, Maximize } from 'lucide-react'
-import type { Festival, Hotspot } from '../types'
+import { 
+  Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
+  ChevronLeft, ChevronRight, Minus, Plus, Maximize,
+  AlertTriangle, AlertCircle, X
+} from 'lucide-react'
+import { getFestivals, getReports } from '../firebaseUtils'
+import type { Festival, Hotspot, Report } from '../types'
 import HotspotModal from '../components/HotspotModal'
-import { getFestivals } from '../firebaseUtils'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -15,6 +19,8 @@ export default function FestivalDetail() {
   const [tab, setTab] = useState<Tab>('info')
   const [imgIdx, setImgIdx] = useState(0)
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
+  const [reports, setReports] = useState<Report[]>([])
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [mapScale, setMapScale] = useState(0.5)
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -24,10 +30,16 @@ export default function FestivalDetail() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await getFestivals()
-        const found = data.find(f => f.id === id)
+        const [festData, reportData] = await Promise.all([
+          getFestivals(),
+          getReports()
+        ])
+        const found = festData.find(f => f.id === id)
         if (!found) navigate('/maps')
-        else setFestival(found)
+        else {
+          setFestival(found)
+          setReports(reportData.filter(r => r.festivalId === id && r.isApproved))
+        }
       } catch (err) {
         console.error('Failed to load detail from Firebase:', err)
         navigate('/maps')
@@ -237,9 +249,31 @@ export default function FestivalDetail() {
                           width: `${hs.w || 4}%`,
                           height: `${hs.h || 4}%`
                         }}
-                        onClick={() => setSelectedHotspot(hs)}
                         title={hs.label}
                       />
+                    ))}
+                    
+                    {/* 승인된 제보 아이콘 (빨간 느낌표) */}
+                    {reports.map(r => (
+                      <button
+                        key={r.id}
+                        className="report-pin-btn pulse"
+                        style={{ 
+                          left: `${r.x}%`, 
+                          top: `${r.y}%`,
+                          position: 'absolute',
+                          transform: 'translate(-50%, -100%)',
+                          background: 'none',
+                          border: 'none',
+                          color: '#fa5252',
+                          cursor: 'pointer',
+                          zIndex: 10
+                        }}
+                        onClick={() => setSelectedReport(r)}
+                        title="현장 변동사항 제보"
+                      >
+                        <AlertTriangle size={24} fill="#fa5252" color="white" />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -282,6 +316,39 @@ export default function FestivalDetail() {
           pictograms={festival.pictograms}
           onClose={() => setSelectedHotspot(null)}
         />
+      )}
+
+      {/* 제보 상세 모달 (방문자용) */}
+      {selectedReport && (
+        <div className="report-modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedReport(null)}>
+          <div className="report-modal-box">
+            <button className="modal-close" onClick={() => setSelectedReport(null)}><X size={20} /></button>
+            <div className="report-modal-header">
+              <AlertCircle size={24} color="#fa5252" />
+              <h3>현장 변동/불편사항 알림</h3>
+            </div>
+            <div className="report-modal-body">
+              <div className="report-info-section">
+                <p className="report-location"><MapPin size={14} /> {selectedReport.locationDetail || '상세 위치 정보 없음'}</p>
+                <div className="report-text-content">
+                  {selectedReport.content}
+                </div>
+              </div>
+              
+              {selectedReport.images && selectedReport.images.length > 0 && (
+                <div className="report-gallery">
+                  {selectedReport.images.map((img, i) => (
+                    <img key={i} src={img} alt="현장 사진" onClick={() => window.open(img)} />
+                  ))}
+                </div>
+              )}
+              
+              <p className="report-notice">
+                * 위 내용은 방문자의 제보를 바탕으로 관리자가 승인한 현장 정보입니다. 이용에 참고하시기 바랍니다.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone } from 'lucide-react'
+import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone, AlertTriangle } from 'lucide-react'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
 import './Admin.css'
@@ -21,6 +21,7 @@ export default function Admin() {
   const [mapSrc, setMapSrc] = useState<string>('')
   const [adding, setAdding] = useState(false)
   const [editHs, setEditHs] = useState<Hotspot | null>(null)
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [password, setPassword] = useState('')
   const [isDragging, setIsDragging] = useState(false)
@@ -440,6 +441,28 @@ export default function Admin() {
                       <span className="admin-hs-label">{hs.label}</span>
                     </button>
                   ))}
+                  {reports.filter(r => r.festivalId === selectedFestivalId && r.x !== undefined && r.y !== undefined).map(r => (
+                    <button 
+                      key={r.id} 
+                      className={`admin-report-pin ${r.status}`} 
+                      style={{ 
+                        left: `${r.x}%`, 
+                        top: `${r.y}%`,
+                        position: 'absolute',
+                        transform: 'translate(-50%, -100%)',
+                        background: 'none',
+                        border: 'none',
+                        color: r.status === 'resolved' ? '#27AE60' : '#fa5252',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        opacity: r.isApproved ? 1 : 0.4
+                      }} 
+                      onClick={e => { e.stopPropagation(); setSelectedReport(r) }}
+                      title={`${r.isApproved ? '[공개중] ' : '[비공개] '}${r.locationDetail || '민원 제보'}`}
+                    >
+                      <AlertTriangle size={24} fill={r.isApproved ? "currentColor" : "none"} color="currentColor" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -543,10 +566,37 @@ export default function Admin() {
           hotspot={editHs} 
           mapSrc={mapSrc}
           otherHotspots={hotspots.filter(h => h.id !== editHs.id)}
-          pictograms={festivals.find(f => f.id === selectedFestivalId)?.pictograms || []} 
           onSave={saveHotspot} 
           onClose={() => setEditHs(null)} 
           compressImage={compressImage}
+        />
+      )}
+
+      {/* Report Detail Modal */}
+      {selectedReport && (
+        <ReportDetailModal 
+          report={selectedReport} 
+          onClose={() => setSelectedReport(null)}
+          onStatusChange={async (status) => {
+            const updated = { ...selectedReport, status }
+            await saveReport(updated)
+            setReports(prev => prev.map(pr => pr.id === selectedReport.id ? updated : pr))
+            setSelectedReport(updated)
+          }}
+          onDelete={async (id) => {
+            if (confirm('제보를 삭제하시겠습니까?')) {
+              await deleteReport(id)
+              setReports(prev => prev.filter(pr => pr.id !== id))
+              setSelectedReport(null)
+            }
+          }}
+          onApproveChange={async (isApproved) => {
+            if (!selectedReport) return;
+            const updated = { ...selectedReport, isApproved }
+            await saveReport(updated)
+            setReports(prev => prev.map(pr => pr.id === selectedReport.id ? updated : pr))
+            setSelectedReport(updated)
+          }}
         />
       )}
     </div>
@@ -763,7 +813,6 @@ function HotspotEditor({
   hotspot, 
   mapSrc,
   otherHotspots,
-  pictograms, 
   onSave, 
   onClose,
   compressImage 
@@ -771,7 +820,6 @@ function HotspotEditor({
   hotspot: Hotspot, 
   mapSrc: string,
   otherHotspots: Hotspot[],
-  pictograms: Festival['pictograms'], 
   onSave: (hs: Hotspot) => void, 
   onClose: () => void,
   compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
@@ -782,10 +830,6 @@ function HotspotEditor({
   })
   const [descText, setDescText] = useState(hotspot.description.join('\n'))
   const [activePreviewTab, setActivePreviewTab] = useState<'map' | 'modal'>('map')
-
-  const togglePic = (id: string) => {
-    setHs(prev => ({ ...prev, pictogramIds: prev.pictogramIds.includes(id) ? prev.pictogramIds.filter(p => p !== id) : [...prev.pictogramIds, id] }))
-  }
 
   const handleHsPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -984,10 +1028,6 @@ function HotspotEditor({
               </div>
             </div>
 
-            <label>기존 픽토그램 선택 (선택 사항)</label>
-            <div className="editor-pics">{pictograms.map(p => (
-              <button key={p.id} className={`pic-toggle ${hs.pictogramIds.includes(p.id) ? 'selected' : ''}`} onClick={() => togglePic(p.id)}>{p.name}</button>
-            ))}</div>
           </div>
 
           <div className="editor-preview-container">
@@ -1079,6 +1119,89 @@ function HotspotEditor({
           </div>
         </div>
         <div className="editor-footer"><button className="editor-save" onClick={() => onSave({ ...hs, description: currentDescLines })}><Save size={16} /> 저장</button></div>
+      </div>
+    </div>
+  )
+}
+
+function ReportDetailModal({ 
+  report, 
+  onClose, 
+  onStatusChange,
+  onDelete,
+  onApproveChange
+}: { 
+  report: Report, 
+  onClose: () => void,
+  onStatusChange: (status: 'pending' | 'resolved') => void,
+  onDelete: (id: string) => void,
+  onApproveChange: (isApproved: boolean) => void
+}) {
+  return (
+    <div className="editor-overlay">
+      <div className="editor-panel">
+        <div className="editor-header">
+          <h3>민원 제보 상세</h3>
+          <button onClick={onClose}><X size={20} /></button>
+        </div>
+        <div className="editor-body">
+          <div className="report-detail-row">
+            <span className={`status-tag ${report.status}`}>{report.status === 'pending' ? '접수됨' : '처리완료'}</span>
+            <span className="report-date">{new Date(report.createdAt).toLocaleString()}</span>
+          </div>
+          
+          <div className="report-section">
+            <label>제보자 정보</label>
+            <div className="reporter-info-box">
+              <p><User size={14} /> {report.name}</p>
+              <p><Phone size={14} /> {report.contact}</p>
+            </div>
+          </div>
+
+          <div className="report-section">
+            <label>위치 정보</label>
+            <p className="location-text"><MapPin size={14} /> {report.locationDetail || '상세 위치 설명 없음'}</p>
+            {report.x !== undefined && <p className="coord-text">좌표: ({report.x.toFixed(2)}%, {report.y?.toFixed(2)}%)</p>}
+          </div>
+
+          <div className="report-section">
+            <label>제보 내용</label>
+            <div className="report-content-box">
+              {report.content}
+            </div>
+          </div>
+
+          {report.images && report.images.length > 0 && (
+            <div className="report-section">
+              <label>현장 사진 ({report.images.length})</label>
+              <div className="report-images-preview">
+                {report.images.map((img, i) => (
+                  <img key={i} src={img} alt="report" onClick={() => window.open(img)} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="editor-footer" style={{ justifyContent: 'space-between' }}>
+          <button className="del-f-btn" onClick={() => onDelete(report.id)} style={{ padding: '0.5rem 1rem' }}>
+            <Trash2 size={16} /> 삭제
+          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              className={`status-toggle-btn ${report.isApproved ? 'approved' : ''}`}
+              onClick={() => onApproveChange(!report.isApproved)}
+              style={{ background: report.isApproved ? '#fa5252' : '#f1f3f5', color: report.isApproved ? 'white' : '#666' }}
+            >
+              {report.isApproved ? '공개 취소' : '방문자 지도에 공개'}
+            </button>
+            <button 
+              className={`status-toggle-btn ${report.status === 'resolved' ? 'resolved' : ''}`}
+              onClick={() => onStatusChange(report.status === 'pending' ? 'resolved' : 'pending')}
+            >
+              {report.status === 'pending' ? <><CheckCircle size={14} /> 해결 처리</> : <><Clock size={14} /> 미해결 처리</>}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -63,8 +63,12 @@ export interface Report {
   contact: string
   festivalId: string
   festivalName: string
+  locationDetail?: string // 대략적인 위치 설명
+  x?: number             // % 좌표 (지도 표시용)
+  y?: number             // % 좌표 (지도 표시용)
   content: string
   images: string[]
   createdAt: number
   status: 'pending' | 'resolved'
+  isApproved?: boolean    // 관리자가 공개 지도에 표시하도록 승인했는지 여부
 }
