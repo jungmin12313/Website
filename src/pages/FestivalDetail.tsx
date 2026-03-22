@@ -48,6 +48,16 @@ export default function FestivalDetail() {
     loadData()
   }, [id, navigate])
 
+  useEffect(() => {
+    if (festival) {
+      document.title = `${festival.name} 무장애 정보 · 내일`;
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute("content", `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 확인하세요. 당사자와 함께 직접 조사한 믿을 수 있는 데이터입니다.`);
+      }
+    }
+  }, [festival]);
+
   if (!festival) return <div className="loading">불러오는 중...</div>
 
   return (

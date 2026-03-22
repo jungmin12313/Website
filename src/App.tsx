@@ -13,6 +13,8 @@ const About = lazy(() => import('./pages/About'))
 const Report = lazy(() => import('./pages/Report'))
 const Calendar = lazy(() => import('./pages/Calendar'))
 
+const Story = lazy(() => import('./pages/Story'))
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -23,6 +25,7 @@ export default function App() {
           <Route path="/maps" element={<FestivalList />} />
           <Route path="/maps/:id" element={<FestivalDetail />} />
           <Route path="/about" element={<About />} />
+          <Route path="/story" element={<Story />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/report" element={<Report />} />
           <Route path="/admin" element={<Admin />} />
