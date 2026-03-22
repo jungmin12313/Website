@@ -1,3 +1,5 @@
+import React from 'react';
+
 "use client";
 
 // 내일 · 무장애 축제 지도 — About 페이지
@@ -216,7 +218,7 @@ export default function About() {
   );
 }
 
-const s = {
+const s: Record<string, React.CSSProperties> = {
   root: { fontFamily: "'Noto Sans KR', sans-serif", background: C.bg, color: C.navy, maxWidth: 900, margin: "0 auto" },
 
   nav: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 36px", background: C.white, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 20 },
