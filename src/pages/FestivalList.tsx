@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Calendar, MapPin, Search } from 'lucide-react'
 import type { Festival } from '../types'
-import { getFestivals, seedInitialData } from '../firebaseUtils'
+import { getFestivals } from '../firebaseUtils'
 import './FestivalList.css'
 
 export default function FestivalList() {
@@ -18,17 +18,8 @@ export default function FestivalList() {
     const loadData = async () => {
       try {
         const data = await getFestivals()
-        if (data && data.length > 0) {
-          setFestivals(data)
-          setFiltered(data)
-        } else {
-          // Firebase가 비어있으면 초기 json 데이터로 채우기
-          const r = await fetch('/data/festivals.json')
-          const initialData: Festival[] = await r.json()
-          await seedInitialData(initialData)
-          setFestivals(initialData)
-          setFiltered(initialData)
-        }
+        setFestivals(data || [])
+        setFiltered(data || [])
       } catch (err) {
         console.error('Failed to load festivals from Firebase:', err)
       }

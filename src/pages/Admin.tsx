@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone, AlertTriangle } from 'lucide-react'
+import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone, AlertTriangle, Loader2, LogOut } from 'lucide-react'
+import { auth } from '../firebase'
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
 import './Admin.css'
@@ -24,16 +26,21 @@ export default function Admin() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [password, setPassword] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
   const mapRef = useRef<HTMLDivElement>(null)
   const mapAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Check auth
-    if (sessionStorage.getItem('naeil_admin_auth') === 'true') {
-      setIsAuthorized(true)
-    }
+    // Firebase Auth State Listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthorized(true)
+      } else {
+        setIsAuthorized(false)
+      }
+    });
 
     // Load festivals
     getFestivals().then(data => {
@@ -48,6 +55,8 @@ export default function Admin() {
     getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
     })
+
+    return () => unsubscribe();
   }, [])
 
   const updateAndSave = async (f: Festival, successMsg?: string) => {
@@ -151,6 +160,8 @@ export default function Admin() {
 
     const success = await updateAndSave(editingFestival, '축제 정보가 클라우드에 저장되었습니다.')
     if (success) {
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('SAVE_FESTIVAL', editingFestival.id, { name: editingFestival.name })
       setEditingFestival(null)
     }
   }
@@ -159,6 +170,8 @@ export default function Admin() {
     if (!confirm('정말 축제를 삭제하시겠습니까?')) return
     try {
       await dbDelete(id)
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('DELETE_FESTIVAL', id, {})
       setFestivals(prev => prev.filter(f => f.id !== id))
       if (selectedFestivalId === id) {
         setSelectedFestivalId('')
@@ -223,6 +236,8 @@ export default function Admin() {
     const updatedFestival = { ...festival, hotspots: newHotspots }
     const success = await updateAndSave(updatedFestival, '핫스팟이 클라우드에 연동되었습니다.')
     if (success) {
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
       setHotspots(newHotspots)
       setEditHs(null)
     }
@@ -259,13 +274,43 @@ export default function Admin() {
     reader.readAsDataURL(file)
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleManualSeed = async () => {
+    if (!confirm('초기 데이터를 데이터베이스에 강제로 동기화하시겠습니까? 기존 데이터가 있으면 중복될 수 있습니다.')) return
+    try {
+      const r = await fetch('/data/festivals.json')
+      const initialData: Festival[] = await r.json()
+      const { seedInitialData: seed } = await import('../firebaseUtils')
+      await seed(initialData)
+      alert('초기 데이터 동기화 완료!')
+      window.location.reload()
+    } catch (err) {
+      alert('동기화 실패: ' + err)
+    }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password === 'naeil2025') {
-      setIsAuthorized(true)
-      sessionStorage.setItem('naeil_admin_auth', 'true')
-    } else {
-      alert('비밀번호가 틀렸습니다.')
+    setLoginLoading(true)
+    try {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@naeil.app';
+      await signInWithEmailAndPassword(auth, adminEmail, password);
+    } catch (err: any) {
+      console.error('Login error:', err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+        alert('비밀번호가 틀렸습니다.');
+      } else {
+        alert('로그인 중 오류가 발생했습니다. (Firebase Auth 설정 확인 필요)');
+      }
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error('Logout error:', err);
     }
   }
 
@@ -284,7 +329,9 @@ export default function Admin() {
               onChange={e => setPassword(e.target.value)}
               autoFocus
             />
-            <button type="submit">인증하기</button>
+            <button type="submit" disabled={loginLoading}>
+              {loginLoading ? <Loader2 className="animate-spin" size={20} /> : '인증하기'}
+            </button>
           </form>
           <p className="login-footer">접속 코드는 관리자에게 문의하세요.</p>
         </div>
@@ -296,7 +343,11 @@ export default function Admin() {
     <div className="admin-page">
       <div className="admin-header">
         <div className="admin-title-row">
-          <h1>어드민 시스템</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h1>어드민 시스템</h1>
+            <button onClick={handleLogout} className="logout-btn" title="로그아웃" style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex' }}><LogOut size={18} /></button>
+            <button onClick={handleManualSeed} style={{ fontSize: '11px', background: '#f1f3f5', border: '1px solid #dee2e6', borderRadius: '4px', padding: '2px 8px', marginLeft: '8px', cursor: 'pointer', color: '#888' }}>DB 초기화</button>
+          </div>
           <div className="admin-tabs">
             <div className="storage-info">
               사용 중: <span>{getStorageUsage()}</span>
@@ -549,10 +600,9 @@ export default function Admin() {
         )}
       </div>
 
-      {/* Festival Editor Modal */}
       {editingFestival && (
         <FestivalEditor 
-          festival={editingFestival} 
+          festival={editingFestival!} 
           onSave={saveFestival} 
           onClose={() => setEditingFestival(null)} 
           setFestival={setEditingFestival} 
@@ -560,12 +610,11 @@ export default function Admin() {
         />
       )}
 
-      {/* Hotspot Editor Modal */}
       {editHs && (
         <HotspotEditor 
-          hotspot={editHs} 
+          hotspot={editHs!} 
           mapSrc={mapSrc}
-          otherHotspots={hotspots.filter(h => h.id !== editHs.id)}
+          otherHotspots={hotspots.filter(h => h.id !== editHs!.id)}
           onSave={saveHotspot} 
           onClose={() => setEditHs(null)} 
           compressImage={compressImage}
@@ -575,9 +624,10 @@ export default function Admin() {
       {/* Report Detail Modal */}
       {selectedReport && (
         <ReportDetailModal 
-          report={selectedReport} 
+          report={selectedReport!} 
           onClose={() => setSelectedReport(null)}
           onStatusChange={async (status) => {
+            if (!selectedReport) return;
             const updated = { ...selectedReport, status }
             await saveReport(updated)
             setReports(prev => prev.map(pr => pr.id === selectedReport.id ? updated : pr))

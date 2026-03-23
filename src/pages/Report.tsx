@@ -74,7 +74,23 @@ export default function ReportPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.contact || !formData.festivalId || !formData.content) {
+    
+    // 1. Rate Limit Check (브루트포스/도배 방지)
+    const lastSubmitStr = localStorage.getItem('naeil_last_report_submit')
+    if (lastSubmitStr) {
+      const diff = Date.now() - parseInt(lastSubmitStr)
+      if (diff < 60000) { 
+        alert('신고는 1분에 한 번만 가능합니다. 잠시 후 다시 시도해주세요.')
+        return
+      }
+    }
+    
+    // 2. Input Validation (데이터 무결성 및 SQL/스크립트 공격 기초 방어)
+    const name = formData.name.trim().substring(0, 20); // 길이 제한
+    const contact = formData.contact.trim().substring(0, 20);
+    const content = formData.content.trim().substring(0, 1000); // 대량 텍스트 공격 방지
+
+    if (!name || !contact || !formData.festivalId || !content) {
       alert('모든 필수 항목을 입력해주세요.')
       return
     }
@@ -82,7 +98,11 @@ export default function ReportPage() {
     setLoading(true)
     const newReport: Report = {
       id: `report-${Date.now()}`,
-      ...formData,
+      name,
+      contact,
+      festivalId: formData.festivalId,
+      locationDetail: formData.locationDetail.trim().substring(0, 100),
+      content,
       x: coords?.x,
       y: coords?.y,
       festivalName: selectedFestival?.name || '',
@@ -94,6 +114,7 @@ export default function ReportPage() {
 
     try {
       await saveReport(newReport)
+      localStorage.setItem('naeil_last_report_submit', Date.now().toString())
       alert('신고가 접수되었습니다. 소중한 의견 감사합니다.')
       setFormData({ name: '', contact: '', festivalId: '', locationDetail: '', content: '' })
       setImages([])

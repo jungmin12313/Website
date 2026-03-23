@@ -48,9 +48,27 @@ export async function deleteReport(reportId: string): Promise<void> {
   await deleteDoc(doc(db, 'reports', reportId))
 }
 
+// --- Audit Logs (행위 추적) ---
+export async function logAction(action: string, entityId: string, details: any): Promise<void> {
+  try {
+    const auditId = `log-${Date.now()}`;
+    await setDoc(doc(db, 'audit_logs', auditId), {
+      action,
+      entityId,
+      details: JSON.stringify(details),
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent
+    });
+  } catch (err) {
+    // Audit log failure shouldn't stop the main action but should be suppressed
+    console.warn('Logging failed silently.');
+  }
+}
+
 // 초기 데이터 세팅용 (만약 서버가 비어있다면)
 export async function seedInitialData(festivals: Festival[]) {
   for (const f of festivals) {
-    await saveFestival(f)
+    await saveFestival(f);
+    await logAction('SEED_DATA', f.id, { name: f.name });
   }
 }
