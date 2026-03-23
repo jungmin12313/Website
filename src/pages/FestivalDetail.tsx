@@ -208,6 +208,26 @@ export default function FestivalDetail() {
                 }}
                 onMouseUp={() => setIsDragging(false)}
                 onMouseLeave={() => setIsDragging(false)}
+                onTouchStart={(e) => {
+                  if (!mapRef.current) return
+                  setIsDragging(true)
+                  const touch = e.touches[0]
+                  setDragStart({
+                    x: touch.pageX,
+                    y: touch.pageY,
+                    scrollLeft: mapRef.current.scrollLeft,
+                    scrollTop: mapRef.current.scrollTop
+                  })
+                }}
+                onTouchMove={(e) => {
+                  if (!isDragging || !mapRef.current) return
+                  const touch = e.touches[0]
+                  const dx = touch.pageX - dragStart.x
+                  const dy = touch.pageY - dragStart.y
+                  mapRef.current.scrollLeft = dragStart.scrollLeft - dx
+                  mapRef.current.scrollTop = dragStart.scrollTop - dy
+                }}
+                onTouchEnd={() => setIsDragging(false)}
               >
                 <div 
                   className="map-scaler" 
@@ -259,6 +279,7 @@ export default function FestivalDetail() {
                           width: `${hs.w || 4}%`,
                           height: `${hs.h || 4}%`
                         }}
+                        onClick={() => setSelectedHotspot(hs)}
                         title={hs.label}
                       />
                     ))}
