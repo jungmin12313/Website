@@ -303,11 +303,19 @@ export default function Admin() {
       await signInWithEmailAndPassword(auth, adminEmail, password);
     } catch (err: any) {
       console.error('Login error:', err);
+      let errorMsg = '로그인 중 오류가 발생했습니다.';
+      
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-        alert('비밀번호가 틀렸습니다.');
+        errorMsg = '비밀번호가 틀렸습니다.';
+      } else if (err.code === 'auth/user-not-found') {
+        errorMsg = '등록된 관리자 계정이 없습니다. Firebase 콘솔에서 계정을 생성해 주세요.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMsg = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해 주세요.';
       } else {
-        alert('로그인 중 오류가 발생했습니다. (Firebase Auth 설정 확인 필요)');
+        errorMsg = `로그인 오류 (${err.code}): Firebase 설정을 확인해 주세요.`;
       }
+      
+      alert(errorMsg);
     } finally {
       setLoginLoading(false)
     }
