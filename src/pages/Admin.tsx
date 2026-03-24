@@ -282,7 +282,16 @@ export default function Admin() {
   }
 
   const handleManualSeed = async () => {
+    // 1차: 단순 확인창
     if (!confirm('초기 데이터를 데이터베이스에 강제로 동기화하시겠습니까? 기존 데이터가 있으면 중복될 수 있습니다.')) return
+    
+    // 2차: 강력한 마스터 비밀번호 확인 (직원 실수 방지용)
+    const masterPw = window.prompt('관리자 전용 마스터 비밀번호를 입력하세요.');
+    if (masterPw !== 'naeil-master-2025') {
+      alert('마스터 비밀번호가 틀렸습니다. 이 작업은 중단됩니다.');
+      return;
+    }
+
     try {
       const initialData = (await import('../data/festivals.json')).default as Festival[]
       const { seedInitialData: seed } = await import('../firebaseUtils')
