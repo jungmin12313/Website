@@ -655,12 +655,27 @@ export default function Admin() {
               setSelectedReport(null)
             }
           }}
-          onApproveChange={async (isApproved) => {
-            if (!selectedReport) return;
-            const updated = { ...selectedReport, isApproved }
-            await saveReport(updated)
-            setReports(prev => prev.map(pr => pr.id === selectedReport.id ? updated : pr))
-            setSelectedReport(updated)
+          onConvertToHotspot={(report) => {
+            const festa = festivals.find(f => f.id === report.festivalId);
+            if (!festa) {
+              alert('해당 축제 정보를 찾을 수 없습니다.');
+              return;
+            }
+            // 1. 축제 선택
+            setSelectedFestivalId(report.festivalId);
+            // 2. 핫스팟 에디터용 가상 객체 생성
+            const convertedHs: Hotspot = {
+              id: `hs-from-report-${Date.now()}`,
+              label: report.locationDetail || '제보된 장소',
+              x: 50, y: 50,
+              description: [report.content],
+              photos: [...(report.images || [])],
+              pictogramIds: [],
+              pictogramImages: []
+            };
+            // 3. 에디터 열기
+            setEditHs(convertedHs);
+            setSelectedReport(null);
           }}
         />
       )}
@@ -1194,13 +1209,13 @@ function ReportDetailModal({
   onClose, 
   onStatusChange,
   onDelete,
-  onApproveChange
+  onConvertToHotspot
 }: { 
   report: Report, 
   onClose: () => void,
   onStatusChange: (status: 'pending' | 'resolved') => void,
   onDelete: (id: string) => void,
-  onApproveChange: (isApproved: boolean) => void
+  onConvertToHotspot: (report: Report) => void
 }) {
   return (
     <div className="editor-overlay">
@@ -1215,33 +1230,24 @@ function ReportDetailModal({
             <span className="report-date">{report.createdAt ? new Date(report.createdAt).toLocaleString() : '날짜 없음'}</span>
           </div>
           
-          <div className="report-section">
-            <label>제보자 정보</label>
-            <div className="reporter-info-box">
-              <p><User size={14} /> {report.name}</p>
-              <p><Phone size={14} /> {report.contact}</p>
-            </div>
-          </div>
-
-          <div className="report-section">
-            <label>위치 정보</label>
-            <p className="location-text"><MapPin size={14} /> {report.locationDetail || '상세 위치 설명 없음'}</p>
-            {report.x !== undefined && <p className="coord-text">좌표: ({report.x.toFixed(2)}%, {report.y?.toFixed(2)}%)</p>}
+          <div className="report-info-box" style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '0.75rem', marginBottom: '1rem' }}>
+            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 700 }}><User size={14} /> {report.name} ({report.contact})</p>
+            <p style={{ margin: 0, color: '#666' }}><MapPin size={14} /> {report.festivalName} - {report.locationDetail}</p>
           </div>
 
           <div className="report-section">
             <label>제보 내용</label>
-            <div className="report-content-box">
+            <div className="report-content-box" style={{ background: 'white', border: '1px solid #eee', padding: '1rem', borderRadius: '0.5rem', minHeight: '5rem' }}>
               {report.content}
             </div>
           </div>
 
           {report.images && report.images.length > 0 && (
-            <div className="report-section">
+            <div className="report-section" style={{ marginTop: '1rem' }}>
               <label>현장 사진 ({report.images.length})</label>
-              <div className="report-images-preview">
+              <div className="report-images-preview" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {report.images.map((img, i) => (
-                  <img key={i} src={img} alt="report" onClick={() => window.open(img)} />
+                  <img key={i} src={img} alt="report" style={{ width: '5rem', height: '5rem', objectFit: 'cover', borderRadius: '0.4rem' }} onClick={() => window.open(img)} />
                 ))}
               </div>
             </div>
@@ -1251,13 +1257,14 @@ function ReportDetailModal({
           <button className="del-f-btn" onClick={() => onDelete(report.id)} style={{ padding: '0.5rem 1rem' }}>
             <Trash2 size={16} /> 삭제
           </button>
+          
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button 
-              className={`status-toggle-btn ${report.isApproved ? 'approved' : ''}`}
-              onClick={() => onApproveChange(!report.isApproved)}
-              style={{ background: report.isApproved ? '#fa5252' : '#f1f3f5', color: report.isApproved ? 'white' : '#666' }}
+              className="add-main-btn" 
+              onClick={() => onConvertToHotspot(report)}
+              style={{ background: '#27AE60', color: 'white' }}
             >
-              {report.isApproved ? '공개 취소' : '방문자 지도에 공개'}
+              <MapPin size={16} /> 이 내용으로 핫스팟 등록
             </button>
             <button 
               className={`status-toggle-btn ${report.status === 'resolved' ? 'resolved' : ''}`}
