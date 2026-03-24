@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Instagram } from 'lucide-react'
-import festivalsData from '../../public/data/festivals.json'
+import festivalsData from '../data/festivals.json'
 import './Footer.css'
 
 export default function Footer() {

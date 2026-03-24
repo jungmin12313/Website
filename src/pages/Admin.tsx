@@ -284,8 +284,7 @@ export default function Admin() {
   const handleManualSeed = async () => {
     if (!confirm('초기 데이터를 데이터베이스에 강제로 동기화하시겠습니까? 기존 데이터가 있으면 중복될 수 있습니다.')) return
     try {
-      const r = await fetch('/data/festivals.json')
-      const initialData: Festival[] = await r.json()
+      const initialData = (await import('../data/festivals.json')).default as Festival[]
       const { seedInitialData: seed } = await import('../firebaseUtils')
       await seed(initialData)
       alert('초기 데이터 동기화 완료!')
