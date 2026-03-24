@@ -565,13 +565,19 @@ export default function Admin() {
             </div>
             <div className="reports-grid">
               {reports.map(r => (
-                <div key={r.id} className="report-card">
+                <div 
+                  key={r.id} 
+                  className="report-card interactive-card"
+                  onClick={() => setSelectedReport(r)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="report-card-header">
                     <div className="report-meta">
                       <span className={`status-tag ${r.status}`}>{r.status === 'pending' ? '접수됨' : '처리완료'}</span>
                       <span className="report-date">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '날짜 없음'}</span>
                     </div>
-                    <button className="del-report-btn" onClick={async () => {
+                    <button className="del-report-btn" onClick={async (e) => {
+                      e.stopPropagation();
                       if (confirm('제보를 삭제하시겠습니까?')) {
                         await deleteReport(r.id)
                         setReports(prev => prev.filter(pr => pr.id !== r.id))
@@ -581,11 +587,11 @@ export default function Admin() {
                   <div className="report-card-body">
                     <div className="report-subject">
                       <strong>{r.festivalName}</strong>
-                      <p>{r.content}</p>
+                      <p className="report-summary-text">{r.content}</p>
                     </div>
                     {r.images && r.images.length > 0 && (
                       <div className="report-images">
-                        {r.images.map((img, i) => <img key={i} src={img} alt="report" onClick={() => window.open(img)} />)}
+                        {r.images.map((img, i) => <img key={i} src={img} alt="report" />)}
                       </div>
                     )}
                   </div>
@@ -594,17 +600,45 @@ export default function Admin() {
                       <span title="이름"><User size={12} /> {r.name}</span>
                       <span title="연락처"><Phone size={12} /> {r.contact}</span>
                     </div>
-                    <button 
-                      className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`}
-                      onClick={async () => {
-                        const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
-                        const updated = { ...r, status: newStatus as any }
-                        await saveReport(updated)
-                        setReports(prev => prev.map(pr => pr.id === r.id ? updated : pr))
-                      }}
-                    >
-                      {r.status === 'pending' ? <><CheckCircle size={14} /> 해결 처리</> : <><Clock size={14} /> 미해결로 되돌리기</>}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        className="quick-convert-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const festa = festivals.find(f => f.id === r.festivalId);
+                          if (!festa) return alert('축제를 찾을 수 없습니다.');
+                          
+                          // 축제 데이터 로드 (지도 이미지 등)
+                          loadFestivalForHotspots(r.festivalId);
+                          
+                          // 핫스팟 초기 데이터 설정
+                          setEditHs({
+                            id: `hs-from-report-${Date.now()}`,
+                            label: r.locationDetail || '제보된 장소',
+                            x: 50, y: 50,
+                            description: [r.content],
+                            photos: [...(r.images || [])],
+                            pictogramIds: [],
+                            pictogramImages: []
+                          });
+                        }}
+                        style={{ background: '#27AE60', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <MapPin size={12} /> 핫스팟 바로 등록
+                      </button>
+                      <button 
+                        className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
+                          const updated = { ...r, status: newStatus as any }
+                          await saveReport(updated)
+                          setReports(prev => prev.map(pr => pr.id === r.id ? updated : pr))
+                        }}
+                      >
+                        {r.status === 'pending' ? <><CheckCircle size={14} /> 해결</> : <><Clock size={14} /> 미해결</>}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
