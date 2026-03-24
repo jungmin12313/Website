@@ -12,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     getSetting('naeil_hero_bg').then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
-    }).catch(err => console.error(err))
+    }).catch(err => console.error('Failed to load hero background:', err))
   }, [])
 
   const handleSearch = () => {

@@ -4,11 +4,22 @@ import type { Festival, Report } from './types'
 
 // 축제 데이터 가져오기
 export async function getFestivals(): Promise<Festival[]> {
-  const snapshot = await getDocs(collection(db, 'festivals'))
-  if (snapshot.empty) return []
-  const reqs: Festival[] = []
-  snapshot.forEach(d => reqs.push(d.data() as Festival))
-  return reqs.sort((a, b) => a.id.localeCompare(b.id)) // ID순(또는 원하는 순서) 정렬
+  try {
+    const snapshot = await getDocs(collection(db, 'festivals'))
+    if (snapshot.empty) return []
+    const reqs: Festival[] = []
+    snapshot.forEach(d => {
+      const data = d.data() as Festival
+      if (data && data.id) {
+        reqs.push(data)
+      }
+    })
+    // id가 없는 데이터가 섞여 있어도 멈추지 않도록 안전 정렬
+    return reqs.sort((a, b) => (a.id || '').localeCompare(b.id || ''))
+  } catch (err) {
+    console.error('Critical fail in getFestivals:', err)
+    return []
+  }
 }
 
 // 단일 축제 저장(업데이트)

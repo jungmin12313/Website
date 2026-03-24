@@ -20,7 +20,7 @@ const PICTOGRAM_COLORS: Record<string, string> = {
 export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
   const [photoIdx, setPhotoIdx] = useState(0)
 
-  const pics = hotspot.pictogramIds
+  const pics = (hotspot.pictogramIds || [])
     .map(id => pictograms.find(p => p.id === id))
     .filter(Boolean) as Pictogram[]
 
@@ -35,9 +35,9 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
             <h2 className="modal-title">{hotspot.label}</h2>
 
             {/* 픽토그램 뱃지 및 이미지 */}
-            {(pics.length > 0 || (hotspot.pictogramImages && hotspot.pictogramImages.length > 0)) && (
+            {((pics && pics.length > 0) || (hotspot.pictogramImages && hotspot.pictogramImages.length > 0)) && (
               <div className="modal-pics">
-                {pics.map(p => (
+                {(pics || []).map(p => (
                   <div
                     key={p.id}
                     className="pic-badge"
@@ -55,7 +55,7 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
 
             {/* 설명 목록 */}
             <ul className="modal-desc">
-              {hotspot.description.map((line, i) => (
+              {(hotspot.description || []).map((line, i) => (
                 <li key={i}>{line}</li>
               ))}
             </ul>
@@ -73,7 +73,7 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
           </div>
 
           {/* 오른쪽: 사진 슬라이더 */}
-          {hotspot.photos.length > 0 && (
+          {hotspot.photos && hotspot.photos.length > 0 && (
             <div className="modal-right">
               <div className="photo-slider">
                 <img

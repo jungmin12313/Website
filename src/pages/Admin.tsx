@@ -35,10 +35,17 @@ export default function Admin() {
   useEffect(() => {
     // Firebase Auth State Listener
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@naeil.app';
+      if (user && user.email === adminEmail) {
         setIsAuthorized(true)
       } else {
         setIsAuthorized(false)
+        if (user) {
+          // 관리자가 아닌데 로그인한 경우 자동 로그아웃 또는 경고
+          console.warn('Unauthorized access attempt by:', user.email);
+          alert('관리자 전용 계정이 아닙니다.');
+          auth.signOut();
+        }
       }
     });
 
@@ -50,11 +57,11 @@ export default function Admin() {
     })
 
     // Load reports
-    getReports().then(setReports)
+    getReports().then(setReports).catch(err => console.error('Failed to load reports:', err))
 
     getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
-    })
+    }).catch(err => console.error('Failed to load hero settings:', err))
 
     return () => unsubscribe();
   }, [])
@@ -555,7 +562,7 @@ export default function Admin() {
                   <div className="report-card-header">
                     <div className="report-meta">
                       <span className={`status-tag ${r.status}`}>{r.status === 'pending' ? '접수됨' : '처리완료'}</span>
-                      <span className="report-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                      <span className="report-date">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '날짜 없음'}</span>
                     </div>
                     <button className="del-report-btn" onClick={async () => {
                       if (confirm('제보를 삭제하시겠습니까?')) {
@@ -1197,7 +1204,7 @@ function ReportDetailModal({
         <div className="editor-body">
           <div className="report-detail-row">
             <span className={`status-tag ${report.status}`}>{report.status === 'pending' ? '접수됨' : '처리완료'}</span>
-            <span className="report-date">{new Date(report.createdAt).toLocaleString()}</span>
+            <span className="report-date">{report.createdAt ? new Date(report.createdAt).toLocaleString() : '날짜 없음'}</span>
           </div>
           
           <div className="report-section">

@@ -19,7 +19,9 @@ export default function ReportPage() {
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    getFestivals().then(setFestivals)
+    getFestivals()
+      .then(setFestivals)
+      .catch(err => console.error('Failed to load festivals in report page:', err))
   }, [])
 
   useEffect(() => {
