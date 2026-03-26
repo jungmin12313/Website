@@ -5,10 +5,13 @@
   --green: #28A745;
   --orange: #E67E22;
   --red: #E53E3E;
-  --blue: #3E8EDE;
-  --blue-dark: #2C6EA6;
-  --blue-light: #A8CCEC;
-  --blue-bg: #EEF6FC;
+  --blue: #3B82F6;
+  --blue-dark: #2563EB;
+  --blue-light: #93C5FD;
+  --blue-bg: #EFF6FF;
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-blur: blur(12px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
   --gray-50: #F8F9FA;
   --gray-100: #F1F3F5;
   --gray-200: #E9ECEF;

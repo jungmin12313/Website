@@ -512,7 +512,7 @@ export default function Admin() {
                 {hotspots.filter(h => !editHs || h.id !== editHs.id).map(hs => (
                   <button 
                     key={hs.id} 
-                    className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''} ${adding ? 'adding-mode' : ''}`} 
+                    className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''}`} 
                     style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}
                     onMouseDown={(e) => { e.stopPropagation(); if(!adding) setDraggingHsId(hs.id) }}
                     onClick={e => { e.stopPropagation(); if(!adding && !draggingHsId) { setEditHs(hs); setAdding(true); } }}
@@ -523,17 +523,16 @@ export default function Admin() {
 
                 {editHs && (
                   <div 
-                    className="admin-hotspot is-editing" 
+                    className="admin-hotspot is-editing is-high-priority" 
                     style={{ 
                       left: `${editHs.x}%`, 
                       top: `${editHs.y}%`, 
                       width: `${editHs.w || 6}%`, 
                       height: `${editHs.h || 6}%`,
-                      pointerEvents: 'none',
-                      zIndex: 150
+                      pointerEvents: 'none'
                     }}
                   >
-                    <span className="admin-hs-label" style={{ background: '#ff4757' }}>{editHs.label || '편집 중...'}</span>
+                    <span className="admin-hs-label" style={{ background: '#E53E3E' }}>{editHs.label || '편집 중...'}</span>
                   </div>
                 )}
               </div>
