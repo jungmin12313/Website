@@ -43,15 +43,14 @@ export default function Footer() {
             ))}
           </div>
           <div>
-            <h4>축제캘린더</h4>
-            <Link to="/calendar">현재 진행중인 축제</Link>
-            <Link to="/calendar">월별 축제</Link>
-            <Link to="/calendar">지역별 축제</Link>
+            <h4>소개</h4>
+            <Link to="/about">'내일' 이야기</Link>
+            <Link to="/story">인터뷰 및 소식</Link>
           </div>
           <div>
-            <h4>신고센터</h4>
-            <Link to="/report">지도 수정사항 신고</Link>
-            <a href="mailto:contact@naeil.org">축제 관계자</a>
+            <h4>고객지원</h4>
+            <Link to="/report">지도 수정사항 제보</Link>
+            <Link to="/calendar">축제 캘린더</Link>
           </div>
         </div>
       </div>

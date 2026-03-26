@@ -18,8 +18,22 @@
   box-shadow: var(--shadow-lg);
   max-height: 90vh;
   overflow-y: auto;
+  transition: transform 0.3s ease;
 }
 
+.modal-report-mode {
+  border: 2px solid #fa5252;
+}
+
+.modal-report-mode .modal-title {
+  color: #fa5252;
+}
+
+.modal-report-mode .modal-desc li::before {
+  color: #fa5252;
+}
+
+/* Enhanced Modal Styles */
 .modal-close {
   position: absolute;
   top: 14px;
@@ -36,6 +50,19 @@
   display: flex;
   gap: 24px;
   padding: 28px;
+}
+
+/* Modal Stlyes */
+.modal-default .modal-inner {
+  flex-direction: column;
+}
+
+.modal-default .modal-right {
+  width: 100%;
+}
+
+.modal-enhanced .modal-inner {
+  display: flex; /* Two-column */
 }
 
 .modal-left {

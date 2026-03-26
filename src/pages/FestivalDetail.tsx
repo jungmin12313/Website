@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize,
-  AlertTriangle, AlertCircle, X
+  AlertCircle, X
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
@@ -210,24 +210,50 @@ export default function FestivalDetail() {
                 onMouseLeave={() => setIsDragging(false)}
                 onTouchStart={(e) => {
                   if (!mapRef.current) return
-                  setIsDragging(true)
-                  const touch = e.touches[0]
-                  setDragStart({
-                    x: touch.pageX,
-                    y: touch.pageY,
-                    scrollLeft: mapRef.current.scrollLeft,
-                    scrollTop: mapRef.current.scrollTop
-                  })
+                  if (e.touches.length === 2) {
+                    setIsDragging(false) // Stop dragging when pinching
+                    const dist = Math.hypot(
+                      e.touches[0].pageX - e.touches[1].pageX,
+                      e.touches[0].pageY - e.touches[1].pageY
+                    )
+                    ;(mapRef.current as any)._lastDist = dist
+                  } else {
+                    setIsDragging(true)
+                    const touch = e.touches[0]
+                    setDragStart({
+                      x: touch.pageX,
+                      y: touch.pageY,
+                      scrollLeft: mapRef.current.scrollLeft,
+                      scrollTop: mapRef.current.scrollTop
+                    })
+                  }
                 }}
                 onTouchMove={(e) => {
-                  if (!isDragging || !mapRef.current) return
-                  const touch = e.touches[0]
-                  const dx = touch.pageX - dragStart.x
-                  const dy = touch.pageY - dragStart.y
-                  mapRef.current.scrollLeft = dragStart.scrollLeft - dx
-                  mapRef.current.scrollTop = dragStart.scrollTop - dy
+                  if (!mapRef.current) return
+                  if (e.touches.length === 2) {
+                    const dist = Math.hypot(
+                      e.touches[0].pageX - e.touches[1].pageX,
+                      e.touches[0].pageY - e.touches[1].pageY
+                    )
+                    const lastDist = (mapRef.current as any)._lastDist || dist
+                    const delta = dist / lastDist
+                    const newScale = Math.max(0.5, Math.min(3, mapScale * delta))
+                    if (Math.abs(newScale - mapScale) > 0.01) {
+                      setMapScale(newScale)
+                      ;(mapRef.current as any)._lastDist = dist
+                    }
+                  } else if (isDragging) {
+                    const touch = e.touches[0]
+                    const dx = touch.pageX - dragStart.x
+                    const dy = touch.pageY - dragStart.y
+                    mapRef.current.scrollLeft = dragStart.scrollLeft - dx
+                    mapRef.current.scrollTop = dragStart.scrollTop - dy
+                  }
                 }}
-                onTouchEnd={() => setIsDragging(false)}
+                onTouchEnd={() => {
+                  setIsDragging(false)
+                  if (mapRef.current) delete (mapRef.current as any)._lastDist
+                }}
               >
                 <div 
                   className="map-scaler" 
@@ -272,12 +298,11 @@ export default function FestivalDetail() {
                     {festival.hotspots.map(hs => (
                       <button
                         key={hs.id}
-                        className="hotspot-btn"
+                        className={`hotspot-btn ${hs.isReportBased ? 'report-pin' : 'info-pin'}`}
                         style={{ 
                           left: `${hs.x}%`, 
                           top: `${hs.y}%`,
-                          width: `${hs.w || 4}%`,
-                          height: `${hs.h || 4}%`
+                          zIndex: hs.isReportBased ? 12 : 10
                         }}
                         onClick={() => setSelectedHotspot(hs)}
                         title={hs.label}
@@ -296,14 +321,14 @@ export default function FestivalDetail() {
                           transform: 'translate(-50%, -100%)',
                           background: 'none',
                           border: 'none',
-                          color: '#fa5252',
+                          color: 'var(--red)',
                           cursor: 'pointer',
                           zIndex: 10
                         }}
                         onClick={() => setSelectedReport(r)}
                         title="현장 변동사항 제보"
                       >
-                        <AlertTriangle size={24} fill="#fa5252" color="white" />
+                        <AlertCircle size={24} color="#E53E3E" fill="white" />
                       </button>
                     ))}
                   </div>
@@ -355,7 +380,7 @@ export default function FestivalDetail() {
           <div className="report-modal-box">
             <button className="modal-close" onClick={() => setSelectedReport(null)}><X size={20} /></button>
             <div className="report-modal-header">
-              <AlertCircle size={24} color="#fa5252" />
+              <AlertCircle size={24} color="#E53E3E" />
               <h3>현장 변동/불편사항 알림</h3>
             </div>
             <div className="report-modal-body">

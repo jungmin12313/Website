@@ -10,6 +10,8 @@ export interface Hotspot {
   photos: string[]
   pictogramImages: string[]
   note?: string
+  isReportBased?: boolean // 신고센터 제보 기반 핫스팟 여부
+  modalType?: 'default' | 'enhanced' // 모달 종류 구분
 }
 
 export interface TransportService {

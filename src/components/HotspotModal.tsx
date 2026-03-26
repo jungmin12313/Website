@@ -26,7 +26,7 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
 
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box">
+      <div className={`modal-box ${hotspot.photos.length >= 2 ? 'modal-enhanced' : 'modal-default'} ${hotspot.isReportBased ? 'modal-report-mode' : ''}`}>
         <button className="modal-close" onClick={onClose}><X size={20} /></button>
 
         <div className="modal-inner">

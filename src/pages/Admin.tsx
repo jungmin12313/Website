@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Trash2, Save, Upload, X, MapPin, Home, Calendar, Instagram, ShieldAlert, CheckCircle, Clock, User, Phone, AlertTriangle, Loader2, LogOut } from 'lucide-react'
+import { Plus, Trash2, Upload, MapPin, Home, Calendar, ShieldAlert, Loader2, LogOut, X } from 'lucide-react'
 import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report } from '../types'
@@ -25,28 +25,26 @@ export default function Admin() {
   const [editHs, setEditHs] = useState<Hotspot | null>(null)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [isAuthorized, setIsAuthorized] = useState(false)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [draggingHsId, setDraggingHsId] = useState<string | null>(null)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+  const [selection, setSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Firebase Auth State Listener
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@naeil.app';
-      if (user && user.email === adminEmail) {
+      if (user) {
         setIsAuthorized(true)
       } else {
         setIsAuthorized(false)
-        if (user) {
-          // 관리자가 아닌데 로그인한 경우 자동 로그아웃 또는 경고
-          console.warn('Unauthorized access attempt by:', user.email);
-          alert('관리자 전용 계정이 아닙니다.');
-          auth.signOut();
-        }
       }
+      setAuthLoading(false)
     });
 
     // Load festivals
@@ -82,13 +80,7 @@ export default function Admin() {
     }
   }
 
-  // Helper visibility for storage usage
-  const getStorageUsage = () => {
-    const total = JSON.stringify(localStorage).length
-    return (total / 1024 / 1024).toFixed(2) + ' MB'
-  }
-
-  const compressImage = (base64: string, maxWidth = 1200, quality = 0.7): Promise<string> => {
+  const compressImage = (base64: string, maxWidth = 800, quality = 0.4): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image()
       img.src = base64
@@ -105,7 +97,11 @@ export default function Admin() {
         canvas.width = width
         canvas.height = height
         const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, width, height)
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true
+          ctx.imageSmoothingQuality = 'high'
+          ctx.drawImage(img, 0, 0, width, height)
+        }
         resolve(canvas.toDataURL('image/jpeg', quality))
       }
     })
@@ -116,7 +112,6 @@ export default function Admin() {
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      // 1MB(Base64) 제한을 피하기 위해 크기와 품질을 낮춤
       const compressed = await compressImage(reader.result as string, 1280, 0.6)
       setHeroBg(compressed)
       try {
@@ -129,7 +124,6 @@ export default function Admin() {
     reader.readAsDataURL(file)
   }
 
-  // --- Festival Management ---
   const addNewFestival = () => {
     const newF: Festival = {
       id: `fest-${Date.now()}`,
@@ -158,13 +152,7 @@ export default function Admin() {
 
   const saveFestival = async () => {
     if (!editingFestival) return
-    
-    // Validation
-    if (!editingFestival.name.trim()) {
-      alert('축제 이름은 필수 입력 항목입니다.')
-      return
-    }
-
+    if (!editingFestival.name.trim()) return alert('축제 이름은 필수 입력 항목입니다.')
     const success = await updateAndSave(editingFestival, '축제 정보가 클라우드에 저장되었습니다.')
     if (success) {
       const { logAction } = await import('../firebaseUtils')
@@ -191,7 +179,6 @@ export default function Admin() {
     }
   }
 
-  // --- Hotspot Management ---
   const loadFestivalForHotspots = (id: string) => {
     const f = festivals.find(f => f.id === id)
     if (!f) return
@@ -200,69 +187,128 @@ export default function Admin() {
     setMapSrc(f.mapImage || '')
   }
 
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!adding) return
-    const rect = mapRef.current!.getBoundingClientRect()
-    // Increase precision to 3 decimal places (0.001% accuracy)
+  const handleSelectionStart = (e: React.MouseEvent) => {
+    if (adding) {
+      if (!mapRef.current) return
+      const rect = mapRef.current.getBoundingClientRect()
+      const x = ((e.clientX - rect.left) / rect.width) * 100
+      const y = ((e.clientY - rect.top) / rect.height) * 100
+      setSelection({ x1: x, y1: y, x2: x, y2: y })
+    } else {
+      if (!mapAreaRef.current) return
+      if ((e.target as HTMLElement).tagName === 'BUTTON') return // Don't drag when clicking buttons
+      setDragStart({ x: e.pageX, y: e.pageY, scrollLeft: mapAreaRef.current.scrollLeft, scrollTop: mapAreaRef.current.scrollTop })
+      setIsDragging(true)
+    }
+  }
+
+  const handleSelectionMove = (e: React.MouseEvent) => {
+    if (!adding || !selection || !mapRef.current) return
+    const rect = mapRef.current.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
-    const newHs: Hotspot = {
-      id: `hs-${Date.now()}`,
-      x: Math.round(x * 1000) / 1000,
-      y: Math.round(y * 1000) / 1000,
-      w: 4,
-      h: 4,
-      label: '',
+    setSelection({ ...selection, x2: x, y2: y })
+  }
 
-      description: [],
-      pictogramIds: [],
-      photos: [],
-      pictogramImages: [],
+  const handleSelectionEnd = () => {
+    if (!adding || !selection) return
+    
+    const x = (selection.x1 + selection.x2) / 2
+    const y = (selection.y1 + selection.y2) / 2
+    const w = Math.abs(selection.x1 - selection.x2)
+    const h = Math.abs(selection.y1 - selection.y2)
+
+    if (w < 0.5 || h < 0.5) {
+      setSelection(null)
+      return // Too small
     }
-    setEditHs(newHs)
+
+    if (editHs) {
+      // Update existing working hotspot
+      setEditHs({
+        ...editHs,
+        x: Math.round(x * 1000) / 1000,
+        y: Math.round(y * 1000) / 1000,
+        w: Math.round(w * 100) / 100,
+        h: Math.round(h * 100) / 100,
+      })
+    } else {
+      // Create new one
+      const newHs: Hotspot = {
+        id: `hs-${Date.now()}`,
+        x: Math.round(x * 1000) / 1000,
+        y: Math.round(y * 1000) / 1000,
+        w: Math.round(w * 100) / 100,
+        h: Math.round(h * 100) / 100,
+        label: '',
+        description: [],
+        pictogramIds: [],
+        photos: [],
+        pictogramImages: [],
+      }
+      setEditHs(newHs)
+    }
+    setSelection(null)
+  }
+
+  const closeEditor = () => {
+    setEditHs(null)
     setAdding(false)
   }
 
   const saveHotspot = async (hsWithDesc: Hotspot) => {
     if (!selectedFestivalId) return
-    
-    // Validation
-    if (!hsWithDesc.label.trim()) {
-      alert('장소 이름은 필수 입력 항목입니다.')
-      return
-    }
-
+    if (!hsWithDesc.label.trim()) return alert('장소 이름은 필수 입력 항목입니다.')
     const festival = festivals.find(f => f.id === selectedFestivalId)
     if (!festival) return
-
     const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
     const newHotspots = hotspotExists
       ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
       : [...(festival.hotspots || []), hsWithDesc]
-
     const updatedFestival = { ...festival, hotspots: newHotspots }
     const success = await updateAndSave(updatedFestival, '핫스팟이 클라우드에 연동되었습니다.')
     if (success) {
       const { logAction } = await import('../firebaseUtils')
       await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
       setHotspots(newHotspots)
-      setEditHs(null)
+      closeEditor()
     }
   }
 
   const deleteHotspot = async (id: string) => {
     if (!confirm('핫스팟을 삭제하시겠습니까?')) return
-    
     const festival = festivals.find(f => f.id === selectedFestivalId)
     if (!festival) return
-
     const newHotspots = (festival.hotspots || []).filter(h => h.id !== id)
     const updatedFestival = { ...festival, hotspots: newHotspots }
+    if (await updateAndSave(updatedFestival)) setHotspots(newHotspots)
+  }
+
+  const convertReportToHotspot = async (report: Report) => {
+    setActiveTab('hotspots')
+    loadFestivalForHotspots(report.festivalId)
     
-    const success = await updateAndSave(updatedFestival)
-    if (success) {
-      setHotspots(newHotspots)
+    const photosToConvert = (report.images || []).slice(0, 2);
+    const compressedPhotos = await Promise.all(
+      photosToConvert.map(img => compressImage(img, 500, 0.15))
+    )
+
+    const newHs: Hotspot = {
+      id: `hs-${Date.now()}`,
+      x: report.x || 50,
+      y: report.y || 50,
+      w: 8,
+      h: 8,
+      label: `제보: ${report.locationDetail || '확인 필요'}`,
+      description: [report.content],
+      pictogramIds: [],
+      photos: compressedPhotos,
+      pictogramImages: [],
+      isReportBased: true
     }
+    
+    setEditHs(newHs)
+    setSelectedReport(null)
   }
 
   const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,93 +316,51 @@ export default function Admin() {
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 2560, 0.85)
+      const compressed = await compressImage(reader.result as string, 1600, 0.5)
       setMapSrc(compressed)
-      
       const festival = festivals.find(f => f.id === selectedFestivalId)
-      if (festival) {
-        updateAndSave({ ...festival, mapImage: compressed })
-      }
+      if (festival) updateAndSave({ ...festival, mapImage: compressed })
     }
     reader.readAsDataURL(file)
   }
 
-  const handleManualSeed = async () => {
-    // 1차: 단순 확인창
-    if (!confirm('초기 데이터를 데이터베이스에 강제로 동기화하시겠습니까? 기존 데이터가 있으면 중복될 수 있습니다.')) return
-    
-    // 2차: 강력한 마스터 비밀번호 확인 (직원 실수 방지용)
-    const masterPw = window.prompt('관리자 전용 마스터 비밀번호를 입력하세요.');
-    if (masterPw !== 'naeil-master-2025') {
-      alert('마스터 비밀번호가 틀렸습니다. 이 작업은 중단됩니다.');
-      return;
-    }
-
-    try {
-      const initialData = (await import('../data/festivals.json')).default as Festival[]
-      const { seedInitialData: seed } = await import('../firebaseUtils')
-      await seed(initialData)
-      alert('초기 데이터 동기화 완료!')
-      window.location.reload()
-    } catch (err) {
-      alert('동기화 실패: ' + err)
-    }
-  }
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email.trim() || !password.trim()) return alert('이메일과 비밀번호를 모두 입력해주세요.')
     setLoginLoading(true)
     try {
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@naeil.app';
-      await signInWithEmailAndPassword(auth, adminEmail, password);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
     } catch (err: any) {
-      console.error('Login error:', err);
-      let errorMsg = '로그인 중 오류가 발생했습니다.';
-      
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-        errorMsg = '비밀번호가 틀렸습니다.';
+      console.error('Login error:', err.code)
+      if (err.code === 'auth/invalid-credential') {
+        alert('로그인 실패: 이메일 또는 비밀번호가 일치하지 않습니다.')
       } else if (err.code === 'auth/user-not-found') {
-        errorMsg = '등록된 관리자 계정이 없습니다. Firebase 콘솔에서 계정을 생성해 주세요.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMsg = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해 주세요.';
+        alert('로그인 실패: 해당 계정이 존재하지 않습니다.')
       } else {
-        errorMsg = `로그인 오류 (${err.code}): Firebase 설정을 확인해 주세요.`;
+        alert('로그인 중 오류가 발생했습니다: ' + err.code)
       }
-      
-      alert(errorMsg);
     } finally {
       setLoginLoading(false)
     }
   }
 
   const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
+    try { await signOut(auth); } catch (err) { console.error('Logout error:', err); }
   }
+
+  if (authLoading) return <div className="admin-login-page"><Loader2 className="animate-spin" /></div>
 
   if (!isAuthorized) {
     return (
       <div className="admin-login-page">
         <div className="login-card">
           <div className="login-icon"><Calendar size={32} /></div>
-          <h2>관리자 시스템 접속</h2>
-          <p>보안을 위해 비밀번호를 입력해주세요.</p>
+          <h2>관리자 시스템</h2>
           <form onSubmit={handleLogin}>
-            <input 
-              type="password" 
-              placeholder="비밀번호" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)}
-              autoFocus
-            />
-            <button type="submit" disabled={loginLoading}>
-              {loginLoading ? <Loader2 className="animate-spin" size={20} /> : '인증하기'}
-            </button>
+            <input type="email" placeholder="관리자 이메일" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} />
+            <button type="submit" disabled={loginLoading}>{loginLoading ? <Loader2 className="animate-spin" /> : '접속'}</button>
           </form>
-          <p className="login-footer">접속 코드는 관리자에게 문의하세요.</p>
         </div>
       </div>
     )
@@ -368,24 +372,17 @@ export default function Admin() {
         <div className="admin-title-row">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <h1>어드민 시스템</h1>
-            <button onClick={handleLogout} className="logout-btn" title="로그아웃" style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex' }}><LogOut size={18} /></button>
-            <button onClick={handleManualSeed} style={{ fontSize: '11px', background: '#f1f3f5', border: '1px solid #dee2e6', borderRadius: '4px', padding: '2px 8px', marginLeft: '8px', cursor: 'pointer', color: '#888' }}>DB 초기화</button>
+            <button onClick={handleLogout} className="logout-btn" title="로그아웃"><LogOut size={18} /></button>
           </div>
           <div className="admin-tabs">
-            <div className="storage-info">
-              사용 중: <span>{getStorageUsage()}</span>
-            </div>
-            <button className={`tab-btn ${activeTab === 'festivals' ? 'active' : ''}`} onClick={() => setActiveTab('festivals')}>
-              <Calendar size={18} /> 축제 관리
-            </button>
-            <button className={`tab-btn ${activeTab === 'hotspots' ? 'active' : ''}`} onClick={() => setActiveTab('hotspots')}>
-              <MapPin size={18} /> 핫스팟 설정
-            </button>
-            <button className={`tab-btn ${activeTab === 'hero' ? 'active' : ''}`} onClick={() => setActiveTab('hero')}>
-              <Home size={18} /> 홈 배경사진
-            </button>
+            <button className={`tab-btn ${activeTab === 'festivals' ? 'active' : ''}`} onClick={() => setActiveTab('festivals')}><Calendar size={18} /> 축제</button>
+            <button className={`tab-btn ${activeTab === 'hotspots' ? 'active' : ''}`} onClick={() => setActiveTab('hotspots')}><MapPin size={18} /> 핫스팟</button>
+            <button className={`tab-btn ${activeTab === 'hero' ? 'active' : ''}`} onClick={() => setActiveTab('hero')}><Home size={18} /> 배경</button>
             <button className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
-              <ShieldAlert size={18} /> 제보 관리 {reports.length > 0 && <span className="tab-badge">{reports.length}</span>}
+              <ShieldAlert size={18} /> 제보 
+              {reports.filter(r => r.status === 'pending').length > 0 && (
+                <span className="tab-badge">{reports.filter(r => r.status === 'pending').length}</span>
+              )}
             </button>
           </div>
         </div>
@@ -395,10 +392,11 @@ export default function Admin() {
         {activeTab === 'festivals' && (
           <div className="admin-management">
             <div className="admin-list-header">
-              <h3>축제 목록 ({festivals.length})</h3>
+              <h3>축제 목록</h3>
               <button className="add-main-btn" onClick={addNewFestival}><Plus size={18} /> 새 축제 추가</button>
             </div>
             <div className="admin-festival-grid">
+              {festivals.length === 0 && <div className="empty-text" style={{ gridColumn: '1/-1' }}>등록된 축제가 없습니다.</div>}
               {festivals.map(f => (
                 <div key={f.id} className="admin-f-card">
                   <div className="f-card-info">
@@ -418,151 +416,144 @@ export default function Admin() {
         {activeTab === 'hotspots' && (
           <div className="hotspot-management">
             <div className="admin-sidebar">
-              <div className="sidebar-section">
-                <label className="sidebar-label">축제 선택</label>
-                <select
-                  value={selectedFestivalId}
-                  onChange={e => loadFestivalForHotspots(e.target.value)}
-                  className="admin-select"
-                >
-                  <option value="">-- 축제를 선택하세요 --</option>
-                  {festivals.map(f => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
-                  ))}
-                </select>
-              </div>
-
+              <span className="sidebar-label">축제 선택</span>
+              <select className="admin-select" value={selectedFestivalId} onChange={e => loadFestivalForHotspots(e.target.value)}>
+                <option value="">-- 축제 선택 --</option>
+                {festivals.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+              
               {selectedFestivalId && (
                 <>
-                  <div className="sidebar-section">
-                    <label className="sidebar-label">지도 이미지 업로드</label>
-                    <label className="upload-btn">
-                      <Upload size={16} /> 이미지 선택
-                      <input type="file" accept="image/*" onChange={handleMapUpload} style={{ display: 'none' }} />
-                    </label>
-                  </div>
+                  <span className="sidebar-label">지도 설정</span>
+                  <label className="upload-btn"><Upload size={16} /> 지도 배경 업로드<input type="file" onChange={handleMapUpload} style={{ display: 'none' }} /></label>
+                  
+                  <span className="sidebar-label">핫스팟 도구</span>
+                  <button className={`add-btn ${adding ? 'active' : ''}`} onClick={() => setAdding(!adding)}>
+                    <MapPin size={16} /> {adding ? '지도 클릭하여 생성 중...' : '신규 핫스팟 생성'}
+                  </button>
 
-                  <div className="sidebar-section">
-                    <label className="sidebar-label">핫스팟 관리</label>
-                    <button className={`add-btn ${adding ? 'active' : ''}`} onClick={() => setAdding(!adding)}>
-                      <Plus size={16} /> {adding ? '클릭 취소' : '지도 위 위치 클릭해서 추가'}
-                    </button>
-                    <div className="hs-list">
-                      {hotspots.map(hs => (
-                        <div key={hs.id} className="hs-item">
-                          <button className="hs-name" onClick={() => setEditHs(hs)}>{hs.label || '(이름 없음)'}</button>
-                          <button className="hs-delete" onClick={() => deleteHotspot(hs.id)}><Trash2 size={14} /></button>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="hs-list">
+                    <span className="sidebar-label">핫스팟 목록 ({hotspots.length})</span>
+                    {hotspots.length === 0 && <div className="empty-text">장소가 없습니다.</div>}
+                    {hotspots.map(hs => (
+                      <div key={hs.id} className="hs-item">
+                    <button className="hs-name" onClick={() => { setEditHs(hs); setAdding(true); }}>{hs.label || '(이름없음)'}</button>
+                    <button className="hs-delete" onClick={() => deleteHotspot(hs.id)}><Trash2 size={14} /></button>
+                      </div>
+                    ))}
                   </div>
                 </>
               )}
             </div>
-
+            
             <div 
               className={`admin-map-area ${isDragging ? 'dragging' : ''}`} 
               ref={mapAreaRef}
-              onMouseDown={(e) => {
-                if (!mapAreaRef.current) return
-                const scrollLeft = mapAreaRef.current.scrollLeft
-                const scrollTop = mapAreaRef.current.scrollTop
-                setDragStart({
-                  x: e.pageX,
-                  y: e.pageY,
-                  scrollLeft,
-                  scrollTop
-                })
-                // Allow dragging even when adding a hotspot to help position the map
-
-                setIsDragging(true)
-              }}
               onMouseMove={(e) => {
-                if (!isDragging || !mapAreaRef.current) return
-                e.preventDefault()
-                const dx = e.pageX - dragStart.x
-                const dy = e.pageY - dragStart.y
-                mapAreaRef.current.scrollLeft = dragStart.scrollLeft - dx
-                mapAreaRef.current.scrollTop = dragStart.scrollTop - dy
-              }}
-              onMouseUp={() => setIsDragging(false)}
-              onMouseLeave={() => setIsDragging(false)}
-            >
-              {!selectedFestivalId ? (
-                <div className="admin-map-empty"><p>왼쪽에서 축제를 먼저 선택하세요</p></div>
-              ) : (
-                <div className={`admin-map ${adding ? 'cursor-crosshair' : ''}`} ref={mapRef} onClick={(e) => {
-                  // Only handle adding if we didn't drag
-                  if (isDragging) return;
-                  // Even if isDragging is false, double check movement to be safe
-                  if (Math.abs(e.pageX - dragStart.x) > 5 || Math.abs(e.pageY - dragStart.y) > 5) return;
-                  handleMapClick(e);
-                }}>
-                  {mapSrc ? <img src={mapSrc} className="admin-map-img" /> : <div className="admin-map-placeholder">지도 이미지를 업로드하세요</div>}
-                  {hotspots.map(hs => (
-                    <button 
-                      key={hs.id} 
-                      className={`admin-hotspot ${adding ? 'adding-mode' : ''}`} 
-                      style={{ 
-                        left: `${hs.x}%`, 
-                        top: `${hs.y}%`,
-                        width: `${hs.w || 4}%`,
-                        height: `${hs.h || 4}%`
-                      }} 
-                      onClick={e => { e.stopPropagation(); setEditHs(hs) }}
-                    >
+                if (adding && selection) {
+                  handleSelectionMove(e)
+                  return
+                }
 
-                      <span className="admin-hs-label">{hs.label}</span>
-                    </button>
-                  ))}
-                  {reports.filter(r => r.festivalId === selectedFestivalId && r.x !== undefined && r.y !== undefined).map(r => (
-                    <button 
-                      key={r.id} 
-                      className={`admin-report-pin ${r.status}`} 
-                      style={{ 
-                        left: `${r.x}%`, 
-                        top: `${r.y}%`,
-                        position: 'absolute',
-                        transform: 'translate(-50%, -100%)',
-                        background: 'none',
-                        border: 'none',
-                        color: r.status === 'resolved' ? '#27AE60' : '#fa5252',
-                        cursor: 'pointer',
-                        zIndex: 10,
-                        opacity: r.isApproved ? 1 : 0.4
-                      }} 
-                      onClick={e => { e.stopPropagation(); setSelectedReport(r) }}
-                      title={`${r.isApproved ? '[공개중] ' : '[비공개] '}${r.locationDetail || '민원 제보'}`}
-                    >
-                      <AlertTriangle size={24} fill={r.isApproved ? "currentColor" : "none"} color="currentColor" />
-                    </button>
-                  ))}
-                </div>
-              )}
+                if (draggingHsId && mapRef.current) {
+                  const rect = mapRef.current.getBoundingClientRect()
+                  const x = ((e.clientX - rect.left) / rect.width) * 100
+                  const y = ((e.clientY - rect.top) / rect.height) * 100
+                  const nx = Math.min(100, Math.max(0, Math.round(x * 1000) / 1000))
+                  const ny = Math.min(100, Math.max(0, Math.round(y * 1000) / 1000))
+                  setHotspots(prev => prev.map(h => h.id === draggingHsId ? { ...h, x: nx, y: ny } : h))
+                  return
+                }
+
+                if (!isDragging || !mapAreaRef.current) return
+                const dx = e.pageX - dragStart.x; const dy = e.pageY - dragStart.y
+                mapAreaRef.current.scrollLeft = dragStart.scrollLeft - dx; mapAreaRef.current.scrollTop = dragStart.scrollTop - dy
+              }}
+              onMouseUp={async () => {
+                if (adding && selection) {
+                  handleSelectionEnd()
+                  return
+                }
+                if (draggingHsId && selectedFestivalId) {
+                  const festival = festivals.find(f => f.id === selectedFestivalId)
+                  if (festival) await updateAndSave({ ...festival, hotspots })
+                }
+                setIsDragging(false)
+                setDraggingHsId(null)
+              }}
+              onMouseLeave={() => { setIsDragging(false); setDraggingHsId(null); setSelection(null) }}
+            >
+              <div 
+                className="admin-map" 
+                ref={mapRef} 
+                onMouseDown={handleSelectionStart}
+                style={{ cursor: adding ? 'crosshair' : (draggingHsId ? 'move' : 'inherit') }}
+              >
+                {!mapSrc && <div className="admin-map-placeholder">지도를 업로드해주세요.</div>}
+                {mapSrc && <img src={mapSrc} className="admin-map-img" draggable={false} />}
+                
+                {adding && selection && (
+                  <div 
+                    className="selection-box" 
+                    style={{
+                      position: 'absolute',
+                      left: `${Math.min(selection.x1, selection.x2)}%`,
+                      top: `${Math.min(selection.y1, selection.y2)}%`,
+                      width: `${Math.abs(selection.x1 - selection.x2)}%`,
+                      height: `${Math.abs(selection.y1 - selection.y2)}%`,
+                      border: '1px dashed #5BA4CF',
+                      background: 'rgba(91, 164, 207, 0.2)',
+                      pointerEvents: 'none',
+                      zIndex: 100
+                    }}
+                  />
+                )}
+
+                {hotspots.filter(h => !editHs || h.id !== editHs.id).map(hs => (
+                  <button 
+                    key={hs.id} 
+                    className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''} ${adding ? 'adding-mode' : ''}`} 
+                    style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}
+                    onMouseDown={(e) => { e.stopPropagation(); if(!adding) setDraggingHsId(hs.id) }}
+                    onClick={e => { e.stopPropagation(); if(!adding && !draggingHsId) { setEditHs(hs); setAdding(true); } }}
+                  >
+                    <span className="admin-hs-label">{hs.label}</span>
+                  </button>
+                ))}
+
+                {editHs && (
+                  <div 
+                    className="admin-hotspot is-editing" 
+                    style={{ 
+                      left: `${editHs.x}%`, 
+                      top: `${editHs.y}%`, 
+                      width: `${editHs.w || 6}%`, 
+                      height: `${editHs.h || 6}%`,
+                      pointerEvents: 'none',
+                      zIndex: 150
+                    }}
+                  >
+                    <span className="admin-hs-label" style={{ background: '#ff4757' }}>{editHs.label || '편집 중...'}</span>
+                  </div>
+                )}
+              </div>
             </div>
+
           </div>
         )}
 
         {activeTab === 'hero' && (
           <div className="hero-management">
-            <h3>홈 배경사진 설정</h3>
+            <div className="admin-list-header">
+              <h3>배경사진 관리</h3>
+            </div>
+            <p className="description" style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1.5rem' }}>메인 페이지(Home)의 최상단 배경으로 노출되는 이미지입니다.</p>
             <div className="hero-preview-area">
-              {heroBg ? (
-                <img src={heroBg} className="hero-bg-preview" />
-              ) : (
-                <div className="hero-no-bg">기본 배경사진 사용 중</div>
-              )}
+              {!heroBg ? <div className="empty-text">설정된 배경이 없습니다.</div> : <img src={heroBg} className="hero-bg-preview" />}
             </div>
             <div className="hero-actions">
-              <label className="upload-hero-btn">
-                <Upload size={18} /> 사진 업로드
-                <input type="file" accept="image/*" onChange={handleHeroBgUpload} style={{ display: 'none' }} />
-              </label>
-              {heroBg && (
-                <button className="reset-hero-btn" onClick={() => { setHeroBg(''); saveSetting(HERO_BG_STORAGE_KEY, '') }}>
-                  기본으로 초기화
-                </button>
-              )}
+              <label className="upload-hero-btn"><Upload size={18} /> 사진 변경 (1MB 제한)<input type="file" onChange={handleHeroBgUpload} style={{ display: 'none' }} /></label>
+              {heroBg && <button className="reset-hero-btn" onClick={() => { if(confirm('배경을 삭제하시겠습니까?')) { setHeroBg(''); saveSetting(HERO_BG_STORAGE_KEY, '') }}}>초기화</button>}
             </div>
           </div>
         )}
@@ -570,88 +561,48 @@ export default function Admin() {
         {activeTab === 'reports' && (
           <div className="reports-management">
             <div className="admin-list-header">
-              <h3>민원 제보 내역 ({reports.length})</h3>
+              <h3>사용자 제보 관리 ({reports.length})</h3>
             </div>
             <div className="reports-grid">
+              {reports.length === 0 && <div className="empty-text" style={{ gridColumn: '1/-1' }}>접수된 제보가 없습니다.</div>}
               {reports.map(r => (
-                <div 
-                  key={r.id} 
-                  className="report-card interactive-card"
-                  onClick={() => setSelectedReport(r)}
-                  style={{ cursor: 'pointer' }}
-                >
+                <div key={r.id} className="report-card" onClick={() => setSelectedReport(r)}>
                   <div className="report-card-header">
                     <div className="report-meta">
-                      <span className={`status-tag ${r.status}`}>{r.status === 'pending' ? '접수됨' : '처리완료'}</span>
-                      <span className="report-date">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '날짜 없음'}</span>
+                      <span className={`status-tag ${r.status}`}>{r.status === 'pending' ? '처리중' : '해결됨'}</span>
+                      <span className="report-date">{new Date(r.createdAt).toLocaleString()}</span>
                     </div>
-                    <button className="del-report-btn" onClick={async (e) => {
-                      e.stopPropagation();
-                      if (confirm('제보를 삭제하시겠습니까?')) {
-                        await deleteReport(r.id)
-                        setReports(prev => prev.filter(pr => pr.id !== r.id))
-                      }
-                    }}><Trash2 size={16} /></button>
+                    <button className="del-report-btn" onClick={(e) => { e.stopPropagation(); deleteReport(r.id).then(() => setReports(p => p.filter(v => v.id !== r.id))) }}>
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                  <div className="report-card-body">
-                    <div className="report-subject">
-                      <strong>{r.festivalName}</strong>
-                      <p className="report-summary-text">{r.content}</p>
+                  <div className="report-subject">
+                    <strong>{r.festivalName} {r.locationDetail ? `- ${r.locationDetail}` : ''}</strong>
+                    <p>{r.content.length > 100 ? r.content.substring(0, 100) + '...' : r.content}</p>
+                  </div>
+                  {r.images && r.images.length > 0 && (
+                    <div className="report-images">
+                      {r.images.slice(0, 4).map((img, i) => (
+                        <img key={i} src={img} alt="제보사진" />
+                      ))}
+                      {r.images.length > 4 && <div className="more-imgs">+{r.images.length - 4}</div>}
                     </div>
-                    {r.images && r.images.length > 0 && (
-                      <div className="report-images">
-                        {r.images.map((img, i) => <img key={i} src={img} alt="report" />)}
-                      </div>
-                    )}
-                  </div>
+                  )}
                   <div className="report-card-footer">
                     <div className="reporter-info">
-                      <span title="이름"><User size={12} /> {r.name}</span>
-                      <span title="연락처"><Phone size={12} /> {r.contact}</span>
+                      <span>👤 {r.name}</span>
+                      <span>📞 {r.contact}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button 
-                        className="quick-convert-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const festa = festivals.find(f => f.id === r.festivalId);
-                          if (!festa) return alert('축제를 찾을 수 없습니다.');
-                          
-                          // 축제 데이터 로드 (지도 이미지 등)
-                          loadFestivalForHotspots(r.festivalId);
-                          
-                          // 핫스팟 초기 데이터 설정
-                          setEditHs({
-                            id: `hs-from-report-${Date.now()}`,
-                            label: r.locationDetail || '제보된 장소',
-                            x: 50, y: 50,
-                            description: [r.content],
-                            photos: [...(r.images || [])],
-                            pictogramIds: [],
-                            pictogramImages: []
-                          });
-                        }}
-                        style={{ background: '#27AE60', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        <MapPin size={12} /> 핫스팟 바로 등록
-                      </button>
-                      <button 
-                        className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
-                          const updated = { ...r, status: newStatus as any }
-                          await saveReport(updated)
-                          setReports(prev => prev.map(pr => pr.id === r.id ? updated : pr))
-                        }}
-                      >
-                        {r.status === 'pending' ? <><CheckCircle size={14} /> 해결</> : <><Clock size={14} /> 미해결</>}
-                      </button>
-                    </div>
+                    <button className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`} onClick={(e) => {
+                      e.stopPropagation()
+                      const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
+                      saveReport({ ...r, status: newStatus }).then(() => setReports(p => p.map(v => v.id === r.id ? { ...r, status: newStatus } : v)))
+                    }}>
+                      {r.status === 'pending' ? '해결 완료로 변경' : '진행 중으로 변경'}
+                    </button>
                   </div>
                 </div>
               ))}
-              {reports.length === 0 && <div className="admin-map-placeholder">접수된 제보가 없습니다.</div>}
             </div>
           </div>
         )}
@@ -659,306 +610,304 @@ export default function Admin() {
 
       {editingFestival && (
         <FestivalEditor 
-          festival={editingFestival!} 
-          onSave={saveFestival} 
+          festival={editingFestival} 
           onClose={() => setEditingFestival(null)} 
           setFestival={setEditingFestival} 
+          onSave={saveFestival} 
           compressImage={compressImage}
         />
       )}
-
       {editHs && (
         <HotspotEditor 
-          hotspot={editHs!} 
+          hotspot={editHs} 
           mapSrc={mapSrc}
-          otherHotspots={hotspots.filter(h => h.id !== editHs!.id)}
+          allHotspots={hotspots}
           onSave={saveHotspot} 
-          onClose={() => setEditHs(null)} 
+          onClose={closeEditor} 
+          onChange={setEditHs}
           compressImage={compressImage}
         />
       )}
 
-      {/* Report Detail Modal */}
       {selectedReport && (
         <ReportDetailModal 
-          report={selectedReport!} 
-          onClose={() => setSelectedReport(null)}
-          onStatusChange={async (status) => {
-            if (!selectedReport) return;
-            const updated = { ...selectedReport, status }
-            await saveReport(updated)
-            setReports(prev => prev.map(pr => pr.id === selectedReport.id ? updated : pr))
-            setSelectedReport(updated)
-          }}
-          onDelete={async (id) => {
-            if (confirm('제보를 삭제하시겠습니까?')) {
+          report={selectedReport} 
+          onClose={() => setSelectedReport(null)} 
+          onDelete={async (id: string) => { 
+            if (confirm('제보를 삭제하시겠습니까?')){ 
               await deleteReport(id)
-              setReports(prev => prev.filter(pr => pr.id !== id))
+              setReports(p => p.filter(v => v.id !== id))
               setSelectedReport(null)
             }
-          }}
-          onConvertToHotspot={(report) => {
-            const festa = festivals.find(f => f.id === report.festivalId);
-            if (!festa) {
-              alert('해당 축제 정보를 찾을 수 없습니다.');
-              return;
-            }
-            // 1. 축제 선택
-            setSelectedFestivalId(report.festivalId);
-            // 2. 핫스팟 에디터용 가상 객체 생성
-            const convertedHs: Hotspot = {
-              id: `hs-from-report-${Date.now()}`,
-              label: report.locationDetail || '제보된 장소',
-              x: 50, y: 50,
-              description: [report.content],
-              photos: [...(report.images || [])],
-              pictogramIds: [],
-              pictogramImages: []
-            };
-            // 3. 에디터 열기
-            setEditHs(convertedHs);
-            setSelectedReport(null);
-          }}
+          }} 
+          onStatusChange={async (s: 'pending' | 'resolved') => { 
+            const u = { ...selectedReport, status: s }
+            await saveReport(u)
+            setReports(p => p.map(v => v.id === u.id ? u : v))
+            setSelectedReport(u)
+          }} 
+          onConvertToHotspot={() => convertReportToHotspot(selectedReport)} 
         />
       )}
     </div>
   )
 }
 
-function FestivalEditor({ 
-  festival, 
-  onSave, 
-  onClose, 
-  setFestival,
-  compressImage
-}: { 
-  festival: Festival, 
-  onSave: () => void, 
-  onClose: () => void, 
-  setFestival: React.Dispatch<React.SetStateAction<Festival | null>>,
-  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
-}) {
-  const update = (field: keyof Festival, val: any) => setFestival(prev => prev ? ({ ...prev, [field]: val }) : prev)
-  
-  const handleThumbUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 800, 0.7)
-      update('thumbnail', compressed)
-    }
-    reader.readAsDataURL(file)
-  }
+// --- Sub-components (Editors) ---
 
-  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    files.forEach(file => {
+interface FestivalEditorProps {
+  festival: Festival
+  onClose: () => void
+  setFestival: React.Dispatch<React.SetStateAction<Festival | null>>
+  onSave: () => void
+  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+}
+
+function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage }: FestivalEditorProps) {
+  const update = (field: string, val: any) => setFestival((prev: any) => (prev ? { ...prev, [field]: val } : null))
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'images' | 'mapImage') => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1200, 0.7)
-        setFestival(prev => prev ? ({ ...prev, images: [...prev.images, compressed] }) : prev)
+        const compressed = await compressImage(reader.result as string, field === 'mapImage' ? 1600 : 1200, 0.5)
+        if (field === 'images') {
+          update('images', [...(festival.images || []), compressed])
+        } else {
+          update(field, compressed)
+        }
       }
       reader.readAsDataURL(file)
     })
   }
 
-  const removeGalleryImage = (index: number) => {
-    setFestival(prev => prev ? ({ ...prev, images: prev.images.filter((_, i) => i !== index) }) : prev)
-  }
-
-  const addProgram = () => {
-    update('programs', [...festival.programs, ''])
-  }
-
-  const updateProgram = (index: number, val: string) => {
-    const newProgs = [...festival.programs]
-    newProgs[index] = val
-    update('programs', newProgs)
-  }
-
-  const removeProgram = (index: number) => {
-    update('programs', festival.programs.filter((_, i) => i !== index))
+  const removeImage = (idx: number) => {
+    update('images', festival.images.filter((_, i) => i !== idx))
   }
 
   return (
     <div className="editor-overlay">
       <div className="editor-panel extra-wide">
-        <div className="editor-header"><h3>축제 정보 수정</h3><button onClick={onClose}><X size={20} /></button></div>
-        <div className="editor-body grid-2">
-          <div className="editor-scroll">
-            <label className="required">축제 이름</label>
-            <input 
-              value={festival.name} 
-              onChange={e => update('name', e.target.value)} 
-              className={!festival.name.trim() ? 'error' : ''}
-              placeholder="축제 명칭을 입력하세요"
-            />
-            
-            <label>부제목</label>
-            <input value={festival.subtitle} onChange={e => update('subtitle', e.target.value)} placeholder="예: 공주알밤과 떠나는 달콤한 여행!" />
-            
+        <div className="editor-header">
+          <h3>축제 정보 수정</h3>
+          <button onClick={onClose} className="close-btn"><X size={20} /></button>
+        </div>
+        <div className="editor-body split-view">
+          <div className="editor-form">
             <div className="row">
-              <div><label>시작일</label><input value={festival.startDate} onChange={e => update('startDate', e.target.value)} placeholder="2025-01-16" /></div>
-              <div><label>종료일</label><input value={festival.endDate} onChange={e => update('endDate', e.target.value)} placeholder="2025-01-20" /></div>
+              <div className="col">
+                <label className="required">축제 이름</label>
+                <input value={festival.name} onChange={e => update('name', e.target.value)} placeholder="축제 이름" />
+              </div>
+              <div className="col">
+                <label>부제목</label>
+                <input value={festival.subtitle} onChange={e => update('subtitle', e.target.value)} placeholder="부제목" />
+              </div>
             </div>
 
             <div className="row">
-              <div>
-                <label>지역 (필터용)</label>
-                <select value={festival.location} onChange={e => update('location', e.target.value)}>
-                  <option value="">선택하세요</option>
-                  <option value="충청남도">충청남도</option>
-                  <option value="전라남도">전라남도</option>
-                  <option value="광주">광주</option>
-                  <option value="전라북도">전라북도</option>
+              <div className="col">
+                <label>시작일</label>
+                <input type="date" value={festival.startDate} onChange={e => update('startDate', e.target.value)} />
+              </div>
+              <div className="col">
+                <label>종료일</label>
+                <input type="date" value={festival.endDate} onChange={e => update('endDate', e.target.value)} />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label>장소 명칭</label>
+                <input value={festival.location} onChange={e => update('location', e.target.value)} placeholder="예: 한강 시민공원" />
+              </div>
+              <div className="col">
+                <label>상세 주소</label>
+                <input value={festival.address} onChange={e => update('address', e.target.value)} placeholder="도로명 주소 등" />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label>입장료/참가비</label>
+                <input value={festival.fee} onChange={e => update('fee', e.target.value)} placeholder="예: 무료 (일부 유료)" />
+              </div>
+              <div className="col">
+                <label>상태</label>
+                <select value={festival.status} onChange={e => update('status', e.target.value)}>
+                  <option value="active">진행 중</option>
+                  <option value="soon">예정</option>
+                  <option value="ended">종료</option>
                 </select>
               </div>
-              <div>
-                <label>카테고리</label>
-                <input value={festival.category || ''} onChange={e => update('category', e.target.value)} placeholder="예: 전통축제" />
-              </div>
             </div>
 
-            <label>주소</label><input value={festival.address} onChange={e => update('address', e.target.value)} placeholder="정확한 주소를 입력하세요" />
-            <label>입장료</label><input value={festival.fee} onChange={e => update('fee', e.target.value)} placeholder="예: 무료 / 부분 유료" />
-            <label>문의처</label><input value={festival.phone} onChange={e => update('phone', e.target.value)} placeholder="예: 041-840-8401" />
-            <div style={{display:'flex', alignItems:'center', gap: '0.5rem', marginBottom: '0.375rem'}}><label style={{margin:0}}>인스타그램 ID</label><Instagram size={14} color="#888" /></div>
-            <input value={festival.instagram} onChange={e => update('instagram', e.target.value)} placeholder="예: gongju_gunbam" />
+            <label>설명</label>
+            <textarea value={festival.description} onChange={e => update('description', e.target.value)} placeholder="축제 상세 설명" rows={5} />
+
+            <div className="row">
+              <div className="col">
+                <label>전화번호</label>
+                <input value={festival.phone} onChange={e => update('phone', e.target.value)} placeholder="010-0000-0000" />
+              </div>
+              <div className="col">
+                <label>인스타그램 ID</label>
+                <input value={festival.instagram} onChange={e => update('instagram', e.target.value)} placeholder="@naeil_map" />
+              </div>
+            </div>
             
-            <label>행사소개</label>
+            <label>주요 프로그램 (한 줄에 하나씩)</label>
             <textarea 
-              value={festival.description} 
-              onChange={e => update('description', e.target.value)} 
-              rows={5}
-              placeholder="상세한 행사 설명을 입력하세요"
+              value={festival.programs?.join('\n') || ''} 
+              onChange={e => update('programs', e.target.value.split('\n').filter(Boolean))} 
+              placeholder="예: 불꽃놀이&#10;공연&#10;플리마켓" 
+              rows={3} 
             />
+
+            <label>카테고리</label>
+            <input value={festival.category} onChange={e => update('category', e.target.value)} placeholder="꽃, 음식, 체험 등" />
           </div>
 
-          <div className="editor-scroll">
-            <label>상태</label>
-            <select value={festival.status} onChange={e => update('status', e.target.value)}>
-              <option value="active">진행중</option>
-              <option value="soon">준비중</option>
-              <option value="ended">종료됨</option>
-            </select>
-
-            <label style={{marginTop: '1rem'}}>썸네일 이미지 (목록용)</label>
-            <div 
-              className="thumb-preview f-thumb interactive"
-              title="마우스 휠이나 드래그로 위아래 위치를 맞추세요"
-              onMouseDown={(e) => {
-                const startY = e.pageY;
-                const startPos = festival.thumbnailPositionY ?? 50;
-                const onMouseMove = (moveEvent: MouseEvent) => {
-                  const delta = moveEvent.pageY - startY;
-                  // Sensitive drag: divide by container height (approx 180px)
-                  const next = Math.max(0, Math.min(100, startPos - (delta / 2)));
-                  update('thumbnailPositionY', next);
-                };
-                const onMouseUp = () => {
-                  document.removeEventListener('mousemove', onMouseMove);
-                  document.removeEventListener('mouseup', onMouseUp);
-                };
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-              }}
-              onWheel={(e) => {
-                const current = festival.thumbnailPositionY ?? 50;
-                const next = Math.max(0, Math.min(100, current + (e.deltaY > 0 ? 5 : -5)));
-                update('thumbnailPositionY', next);
-              }}
-            >
-              {festival.thumbnail ? (
+          <div className="editor-preview">
+            <label>대표 썸네일 (리스트 노출)</label>
+            <div className="thumb-preview interactive">
+              {!festival.thumbnail ? (
+                <label className="add-photo-box" style={{ width: '100%', height: '100%' }}>
+                  <Plus /> 썸네일 업로드
+                  <input type="file" onChange={e => handleImageUpload(e, 'thumbnail')} style={{ display: 'none' }} />
+                </label>
+              ) : (
                 <img 
                   src={festival.thumbnail} 
-                  style={{ 
-                    objectPosition: `center ${festival.thumbnailPositionY ?? 50}%`,
-                    pointerEvents: 'none'
-                  }} 
+                  style={{ objectPosition: `center ${festival.thumbnailPositionY || 50}%` }} 
+                  alt="thumbnail"
                 />
-              ) : (
-                <div className="empty-thumb-text">이미지를 선택하세요</div>
               )}
             </div>
-            
-            <div className="thumb-pos-control">
-              <label>세로 위치 조절 (목록 노출)</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={festival.thumbnailPositionY ?? 50} 
-                onChange={e => update('thumbnailPositionY', Number(e.target.value))}
-              />
-            </div>
+            {festival.thumbnail && (
+              <div className="thumb-pos-control">
+                <label>썸네일 수직 위치 조정 ({festival.thumbnailPositionY || 50}%)</label>
+                <input 
+                  type="range" 
+                  min="0" max="100" 
+                  value={festival.thumbnailPositionY || 50} 
+                  onChange={e => update('thumbnailPositionY', parseInt(e.target.value))} 
+                />
+                <button className="upload-inline-btn" onClick={() => update('thumbnail', '')}>썸네일 삭제</button>
+              </div>
+            )}
 
-            <label className="upload-inline-btn"><Upload size={14} /> 이미지 변경<input type="file" accept="image/*" onChange={handleThumbUpload} style={{ display: 'none' }} /></label>
-
-
-            <label style={{marginTop: '1rem'}}>상세 갤러리 이미지 (기본정보 탭)</label>
-            <div className="hs-photos-preview">
-              {festival.images?.map((p, i) => (
+            <label>축제 갤러리 이미지 ({festival.images?.length || 0})</label>
+            <div className="hs-photos-preview" style={{ marginBottom: '1.5rem' }}>
+              {festival.images?.map((img, i) => (
                 <div key={i} className="photo-wrapper">
-                  <img src={p} alt={`gallery-${i}`} />
-                  <button className="photo-remove-btn" onClick={() => removeGalleryImage(i)}><X size={12} /></button>
+                  <img src={img} alt="festival" />
+                  <button className="photo-remove-btn" onClick={() => removeImage(i)}><X size={10} /></button>
                 </div>
               ))}
-              <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handleGalleryUpload} style={{ display: 'none' }} /></label>
+              <label className="add-photo-box">
+                <Plus size={18} />
+                <input type="file" multiple onChange={e => handleImageUpload(e, 'images')} style={{ display: 'none' }} />
+              </label>
             </div>
 
-            <div className="programs-section" style={{marginTop: '1rem'}}>
-              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '0.5rem'}}>
-                <label style={{margin:0}}>주요 프로그램</label>
-                <button className="add-item-btn" onClick={addProgram}><Plus size={14} /> 추가</button>
+            <label>지도 배경 이미지</label>
+            {festival.mapImage ? (
+              <div className="map-img-preview" style={{ position: 'relative' }}>
+                <img src={festival.mapImage} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef' }} />
+                <button className="upload-inline-btn" onClick={() => update('mapImage', '')} style={{ marginTop: '0.5rem' }}>지도 삭제</button>
               </div>
-              <div className="program-inputs">
-                {festival.programs.map((p, i) => (
-                  <div key={i} className="prog-row">
-                    <span>{i+1}.</span>
-                    <input value={p} onChange={e => updateProgram(i, e.target.value)} placeholder="프로그램 명칭" />
-                    <button onClick={() => removeProgram(i)}><Trash2 size={14} /></button>
-                  </div>
-                ))}
-                {festival.programs.length === 0 && <p className="empty-text">프로그램이 없습니다.</p>}
-              </div>
-            </div>
+            ) : (
+              <label className="add-photo-box" style={{ width: '100%', padding: '2rem', height: 'auto' }}>
+                <Upload size={18} /> 지도 배경 업로드
+                <input type="file" onChange={e => handleImageUpload(e, 'mapImage')} style={{ display: 'none' }} />
+              </label>
+            )}
           </div>
         </div>
-        <div className="editor-footer"><button className="editor-save" onClick={onSave}><Save size={16} /> 저장하기</button></div>
+        <div className="editor-footer">
+          <button className="editor-save" onClick={onSave}><Upload size={18} /> 클라우드에 전체 저장</button>
+          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>취소</button>
+        </div>
       </div>
     </div>
   )
 }
 
-function HotspotEditor({ 
-  hotspot, 
-  mapSrc,
-  otherHotspots,
-  onSave, 
-  onClose,
-  compressImage 
-}: { 
-  hotspot: Hotspot, 
-  mapSrc: string,
-  otherHotspots: Hotspot[],
-  onSave: (hs: Hotspot) => void, 
-  onClose: () => void,
-  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
-}) {
-  const [hs, setHs] = useState<Hotspot>({ 
-    ...hotspot, 
-    pictogramImages: hotspot.pictogramImages || [] 
-  })
-  const [descText, setDescText] = useState(hotspot.description.join('\n'))
-  const [activePreviewTab, setActivePreviewTab] = useState<'map' | 'modal'>('map')
+interface HotspotEditorProps {
+  hotspot: Hotspot
+  mapSrc: string
+  allHotspots: Hotspot[]
+  onSave: (h: Hotspot) => void
+  onClose: () => void
+  onChange: (h: Hotspot) => void
+  compressImage: any
+}
 
-  const handleHsPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    files.forEach(file => {
+function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
+  const [hs, setHs] = useState(hotspot)
+  const [descText, setDescText] = useState(hotspot.description.join('\n'))
+  const [previewTab, setPreviewTab] = useState<'map' | 'modal' | 'info'>('map')
+  const [isMiniDragging, setIsMiniDragging] = useState(false)
+  const [miniSelection, setMiniSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
+  const miniMapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setHs(hotspot)
+    setDescText(hotspot.description.join('\n'))
+  }, [hotspot.id])
+
+  useEffect(() => {
+    onChange(hs)
+  }, [hs])
+
+  const handleMiniMapStart = (e: React.MouseEvent) => {
+    if (!miniMapRef.current) return
+    const rect = miniMapRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setMiniSelection({ x1: x, y1: y, x2: x, y2: y })
+    setIsMiniDragging(true)
+  }
+
+  const handleMiniMapMove = (e: React.MouseEvent) => {
+    if (!isMiniDragging || !miniSelection || !miniMapRef.current) return
+    const rect = miniMapRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setMiniSelection({ ...miniSelection, x2: x, y2: y })
+  }
+
+  const handleMiniMapEnd = () => {
+    if (!isMiniDragging || !miniSelection) return
+    const x = (miniSelection.x1 + miniSelection.x2) / 2
+    const y = (miniSelection.y1 + miniSelection.y2) / 2
+    const w = Math.abs(miniSelection.x1 - miniSelection.x2)
+    const h = Math.abs(miniSelection.y1 - miniSelection.y2)
+
+    if (w > 0.1 && h > 0.1) {
+      setHs({
+        ...hs,
+        x: Math.round(x * 1000) / 1000,
+        y: Math.round(y * 1000) / 1000,
+        w: Math.round(w * 100) / 100,
+        h: Math.round(h * 100) / 100
+      })
+    }
+    setMiniSelection(null)
+    setIsMiniDragging(false)
+  }
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 1000, 0.7)
+        const compressed = await compressImage(reader.result as string, 800, 0.3)
         setHs(prev => ({ ...prev, photos: [...prev.photos, compressed] }))
       }
       reader.readAsDataURL(file)
@@ -966,355 +915,231 @@ function HotspotEditor({
   }
 
   const handlePictogramUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    files.forEach(file => {
+    const files = e.target.files
+    if (!files) return
+    Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 400, 0.9)
-        setHs(prev => ({ ...prev, pictogramImages: [...prev.pictogramImages, compressed] }))
+        const compressed = await compressImage(reader.result as string, 200, 0.6)
+        setHs(prev => ({ ...prev, pictogramImages: [...(prev.pictogramImages || []), compressed] }))
       }
       reader.readAsDataURL(file)
     })
   }
 
-  const removePhoto = (index: number) => {
-    setHs(prev => ({ ...prev, photos: prev.photos.filter((_, i) => i !== index) }))
-  }
-
-  const removePictogram = (index: number) => {
-    setHs(prev => ({ ...prev, pictogramImages: prev.pictogramImages.filter((_, i) => i !== index) }))
-  }
-
-  const [dragMode, setDragMode] = useState<'none' | 'drawing' | 'moving'>('none')
-  const [moveStart, setMoveStart] = useState({ x: 0, y: 0, hsX: 0, hsY: 0 })
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 })
-  const [isHovering, setIsHovering] = useState(false)
-  const miniMapRef = useRef<HTMLDivElement>(null)
-
-  const currentDescLines = descText.split('\n').filter(Boolean)
-
-  const handleMiniMapMouseDown = (e: React.MouseEvent) => {
-    if (!miniMapRef.current) return
-    const rect = miniMapRef.current.getBoundingClientRect()
-    const curX = ((e.clientX - rect.left) / rect.width) * 100
-    const curY = ((e.clientY - rect.top) / rect.height) * 100
-
-    const width = hs.w || 4
-    const height = hs.h || 4
-    
-    // Check if we already have a box and the click is inside it (hs.x, hs.y is CENTER)
-    const isInside = curX >= (hs.x - width / 2) && curX <= (hs.x + width / 2) &&
-                     curY >= (hs.y - height / 2) && curY <= (hs.y + height / 2)
-
-    if (isInside) {
-      setDragMode('moving')
-      setMoveStart({ x: curX, y: curY, hsX: hs.x, hsY: hs.y })
-    } else {
-      setDragMode('drawing')
-      setResizeStart({ x: curX, y: curY })
-      // New drawing starts at this point as a 0-size box centered here
-      setHs(prev => ({
-        ...prev,
-        x: Math.round(curX * 1000) / 1000,
-        y: Math.round(curY * 1000) / 1000,
-        w: 0,
-        h: 0
-      }))
-    }
-  }
-
-  const handleMiniMapMouseMove = (e: React.MouseEvent) => {
-    if (!miniMapRef.current) return
-    const rect = miniMapRef.current.getBoundingClientRect()
-    const curX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
-    const curY = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100))
-
-    // Update hovering state if not dragging
-    if (dragMode === 'none') {
-      const width = hs.w || 4
-      const height = hs.h || 4
-      const inside = curX >= (hs.x - width / 2) && curX <= (hs.x + width / 2) &&
-                     curY >= (hs.y - height / 2) && curY <= (hs.y + height / 2)
-      setIsHovering(inside)
-      return
-    }
-
-    if (dragMode === 'drawing') {
-      const centerX = (resizeStart.x + curX) / 2
-      const centerY = (resizeStart.y + curY) / 2
-      const width = Math.abs(curX - resizeStart.x)
-      const height = Math.abs(curY - resizeStart.y)
-
-      setHs(prev => ({
-        ...prev,
-        x: Math.round(centerX * 1000) / 1000,
-        y: Math.round(centerY * 1000) / 1000,
-        w: Math.round(width * 1000) / 1000,
-        h: Math.round(height * 1000) / 1000
-      }))
-    } else if (dragMode === 'moving') {
-      const dx = curX - moveStart.x
-      const dy = curY - moveStart.y
-      
-      let newX = moveStart.hsX + dx
-      let newY = moveStart.hsY + dy
-      
-      const width = hs.w || 4
-      const height = hs.h || 4
-      
-      // Boundary check for center point
-      newX = Math.max(width / 2, Math.min(100 - width / 2, newX))
-      newY = Math.max(height / 2, Math.min(100 - height / 2, newY))
-
-      setHs(prev => ({
-        ...prev,
-        x: Math.round(newX * 1000) / 1000,
-        y: Math.round(newY * 1000) / 1000
-      }))
-    }
-  }
-
-  const handleMiniMapMouseUp = () => {
-    setDragMode('none')
-  }
-
   return (
     <div className="editor-overlay">
       <div className="editor-panel extra-wide">
-        <div className="editor-header"><h3>핫스팟 편집</h3><button onClick={onClose}><X size={20} /></button></div>
+        <div className="editor-header">
+          <h3>장소 상세 편집 ({hs.label || '새 장소'})</h3>
+          <button onClick={onClose} className="close-btn"><X size={20} /></button>
+        </div>
         <div className="editor-body split-view">
-          <div className="editor-form">
-            <label className="required">장소 이름</label>
-            <input 
-              value={hs.label} 
-              onChange={e => setHs({ ...hs, label: e.target.value })} 
-              className={!hs.label.trim() ? 'error' : ''}
-              placeholder="예: 휠체어 리프트 입구"
-            />
-            
-            <div className="row">
-              <div>
-                <label>X 위치 (%)</label>
-                <input type="number" value={hs.x} onChange={e => setHs({ ...hs, x: Number(e.target.value) })} step="0.1" />
-              </div>
-              <div>
-                <label>Y 위치 (%)</label>
-                <input type="number" value={hs.y} onChange={e => setHs({ ...hs, y: Number(e.target.value) })} step="0.1" />
-              </div>
-            </div>
-
-            <div className="row">
-              <div>
-                <label>너비 (W %)</label>
-                <input type="number" value={hs.w || 4} onChange={e => setHs({ ...hs, w: Number(e.target.value) })} step="0.5" />
-              </div>
-              <div>
-                <label>높이 (H %)</label>
-                <input type="number" value={hs.h || 4} onChange={e => setHs({ ...hs, h: Number(e.target.value) })} step="0.5" />
-              </div>
-            </div>
-
-            <label>설명 (줄바꿈 구분)</label>
-            <textarea 
-              rows={3} 
-              value={descText} 
-              onChange={e => setDescText(e.target.value)}
-              placeholder="• 입구 진입 경사로: 약 5도(1/12)&#10;• 출입구 폭: 약 0.9M"
-            />
-            
-            <div className="image-sections">
-              <div className="img-section">
-                <label>실제 장소 이미지</label>
-                <div className="hs-photos-preview">
-                  {hs.photos.map((p, i) => (
-                    <div key={i} className="photo-wrapper">
-                      <img src={p} alt={`hotspot-${i}`} />
-                      <button className="photo-remove-btn" onClick={() => removePhoto(i)}><X size={12} /></button>
-                    </div>
-                  ))}
-                  <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handleHsPhotoUpload} style={{ display: 'none' }} /></label>
-                </div>
-              </div>
-
-              <div className="img-section">
-                <label>픽토그램 이미지 (아이콘)</label>
-                <div className="hs-photos-preview">
-                  {hs.pictogramImages.map((p, i) => (
-                    <div key={i} className="photo-wrapper pic-wrap">
-                      <img src={p} alt={`pic-${i}`} />
-                      <button className="photo-remove-btn" onClick={() => removePictogram(i)}><X size={12} /></button>
-                    </div>
-                  ))}
-                  <label className="add-photo-box mini"><Plus /><input type="file" multiple onChange={handlePictogramUpload} style={{ display: 'none' }} /></label>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
           <div className="editor-preview-container">
             <div className="preview-tabs">
-              <button className={activePreviewTab === 'map' ? 'active' : ''} onClick={() => setActivePreviewTab('map')}>위치 미리보기</button>
-              <button className={activePreviewTab === 'modal' ? 'active' : ''} onClick={() => setActivePreviewTab('modal')}>팝업 상세 미리보기</button>
+              <button className={previewTab === 'map' ? 'active' : ''} onClick={() => setPreviewTab('map')}>지도 미리보기</button>
+              <button className={previewTab === 'modal' ? 'active' : ''} onClick={() => setPreviewTab('modal')}>팝업 미리보기</button>
+              <button className={previewTab === 'info' ? 'active' : ''} onClick={() => setPreviewTab('info')}>상세 정보</button>
             </div>
 
-            {activePreviewTab === 'map' ? (
-              <div className="mini-map-container">
-                {mapSrc ? (
-                  <div 
-                    className={`mini-map interactive ${isHovering ? 'can-move' : ''} ${dragMode === 'moving' ? 'is-moving' : ''}`} 
-                    ref={miniMapRef}
-                    onMouseDown={handleMiniMapMouseDown}
-                    onMouseMove={handleMiniMapMouseMove}
-                    onMouseUp={handleMiniMapMouseUp}
-                    onMouseLeave={handleMiniMapMouseUp}
-                  >
-                    <img src={mapSrc} className="mini-map-img" alt="Map Preview" style={{ userSelect: 'none', pointerEvents: 'none' }} />
-                    {otherHotspots.map(other => (
-                      <div 
-                        key={other.id} 
-                        className="mini-hotspot other" 
-                        style={{ 
-                          left: `${other.x}%`, 
-                          top: `${other.y}%`,
-                          width: `${other.w || 4}%`,
-                          height: `${other.h || 4}%`
-                        }}
-                      />
-                    ))}
-                    <div 
-                      className={`mini-hotspot current ${dragMode !== 'none' ? '' : 'pulse'}`} 
-                      style={{ 
-                        left: `${hs.x}%`, 
-                        top: `${hs.y}%`,
-                        width: `${hs.w || 4}%`,
-                        height: `${hs.h || 4}%`,
-                        minWidth: dragMode !== 'none' ? 0 : '10px',
-                        minHeight: dragMode !== 'none' ? 0 : '10px',
-                        pointerEvents: 'none'
-                      }}
-                    >
-                      {dragMode === 'none' && <span className="mini-hs-label">{hs.label || '현재 위치'}</span>}
-                    </div>
-                    {dragMode === 'none' && <div className="mini-map-hint">드래그하여 영역 설정 / 클릭 이동 가능</div>}
+            {previewTab === 'map' && (
+              <div className="mini-map-container" onMouseUp={handleMiniMapEnd} onMouseLeave={handleMiniMapEnd}>
+                <div className="mini-map interactive" ref={miniMapRef} onMouseDown={handleMiniMapStart} onMouseMove={handleMiniMapMove}>
+                  <img src={mapSrc} className="mini-map-img" draggable={false} />
+                  
+                  {allHotspots.filter(h => h.id !== hs.id).map(oh => (
+                    <div key={oh.id} className="mini-hotspot other" style={{ left: `${oh.x}%`, top: `${oh.y}%`, width: `${oh.w || 6}%`, height: `${oh.h || 6}%` }} />
+                  ))}
+
+                  <div className={`mini-hotspot current ${!isMiniDragging ? 'pulse' : ''}`} style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}>
+                    <span className="mini-hs-label">{hs.label || '편집 중'}</span>
                   </div>
-                ) : (
-                  <div className="mini-map-placeholder">지도가 없습니다</div>
-                )}
+
+                  {miniSelection && (
+                    <div className="selection-box" style={{
+                      position: 'absolute',
+                      left: `${Math.min(miniSelection.x1, miniSelection.x2)}%`,
+                      top: `${Math.min(miniSelection.y1, miniSelection.y2)}%`,
+                      width: `${Math.abs(miniSelection.x1 - miniSelection.x2)}%`,
+                      height: `${Math.abs(miniSelection.y1 - miniSelection.y2)}%`,
+                      border: '1px dashed #5BA4CF',
+                      background: 'rgba(91, 164, 207, 0.2)',
+                      pointerEvents: 'none'
+                    }} />
+                  )}
+                  <div className="mini-map-hint">지도 위를 드래그하여 위치와 크기를 잡으세요</div>
+                </div>
               </div>
-            ) : (
+            )}
+
+            {previewTab === 'modal' && (
               <div className="modal-preview-area">
                 <div className="mock-modal">
-                  <div className="mock-modal-content">
+                  <div className={`mock-modal-content ${hs.photos.length >= 2 ? 'is-enhanced' : 'is-default'}`}>
                     <div className="mock-modal-left">
-                      <h2 className="mock-title">{hs.label || '장소 이름'}</h2>
+                      <h4 className="mock-title">{hs.label || '장소 이름'}</h4>
                       <div className="mock-pictograms">
-                        {hs.pictogramImages.map((img, i) => (
-                          <img key={i} src={img} className="mock-pic-img" alt="pic" />
-                        ))}
+                        {hs.pictogramImages?.map((p, i) => <img key={i} src={p} className="mock-pic-img" alt="icon" />)}
                       </div>
                       <ul className="mock-desc-list">
-                        {currentDescLines.length > 0 ? currentDescLines.map((line, i) => (
-                          <li key={i}>{line}</li>
-                        )) : (
-                          <li className="placeholder">설명을 입력하면 여기에 표시됩니다.</li>
-                        )}
+                        {descText.split('\n').filter(Boolean).length > 0 
+                          ? descText.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line}</li>)
+                          : <li className="placeholder">설명 문구를 입력하면 여기에 노출됩니다.</li>
+                        }
                       </ul>
-                      <p className="mock-footer-note">*혹시 사용에 불편한 점이 생겼다면&#10;본 홈페이지 신고센터에 신고해주세요.</p>
+                      <p className="mock-footer-note">{hs.note || '축제 전용 상세 노트를 입력하세요.'}</p>
                     </div>
                     <div className="mock-modal-right">
                       {hs.photos.length > 0 ? (
                         <div className="mock-slider">
-                          <img src={hs.photos[0]} className="mock-main-img" alt="preview" />
-                          <div className="mock-dots">
-                            {hs.photos.map((_, i) => <span key={i} className={`mock-dot ${i === 0 ? 'active' : ''}`} />)}
-                          </div>
+                          <img src={hs.photos[0]} className="mock-main-img" />
                         </div>
                       ) : (
-                        <div className="mock-img-placeholder">실제 장소 사진을 추가하세요</div>
+                        <div className="mock-img-placeholder">업로드된 사진이 없습니다</div>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
             )}
+
+            {previewTab === 'info' && (
+              <div className="info-guide-preview">
+                <div className="guide-card">
+                  <h5>💡 팁 / 가이드</h5>
+                  <p>• 장소 사진은 최대 10장까지 권장합니다.</p>
+                  <p>• 픽토그램은 1:1 정사각 비율 이미지를 권장합니다 (PNG 투명 배경).</p>
+                  <p>• 드래그를 통해 영역을 보정하면 메인 지도에도 즉시 반영됩니다.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="editor-form">
+            <label className="required">장소 이름 (Label)</label>
+            <input value={hs.label} onChange={e => setHs({ ...hs, label: e.target.value })} placeholder="예: 무대 뒤 화장실" />
+
+            <label>설명 목록 (한 줄에 하나씩)</label>
+            <textarea 
+              value={descText} 
+              onChange={e => {
+                setDescText(e.target.value)
+                setHs({ ...hs, description: e.target.value.split('\n').filter(Boolean) })
+              }} 
+              placeholder="안내사항 입력" 
+              rows={4} 
+            />
+
+
+            <div className="image-sections">
+              <div className="img-section">
+                <label>장소 사진 ({hs.photos.length})</label>
+                <div className="hs-photos-preview">
+                  {hs.photos.map((p, i) => (
+                    <div key={i} className="photo-wrapper">
+                      <img src={p} alt="hs" />
+                      <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
+                    </div>
+                  ))}
+                  <label className="add-photo-box mini"><Plus size={18} /><input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} /></label>
+                </div>
+              </div>
+
+              <div className="img-section">
+                <label>픽토그램 ({hs.pictogramImages?.length || 0})</label>
+                <div className="hs-photos-preview">
+                  {hs.pictogramImages?.map((p, i) => (
+                    <div key={i} className="photo-wrapper pic-wrap">
+                      <img src={p} alt="pic" />
+                      <button className="photo-remove-btn" onClick={() => setHs({ ...hs, pictogramImages: hs.pictogramImages?.filter((_, idx) => idx !== i) })}><X size={10} /></button>
+                    </div>
+                  ))}
+                  <label className="add-photo-box mini"><Plus size={14} /><input type="file" multiple onChange={handlePictogramUpload} style={{ display: 'none' }} /></label>
+                </div>
+              </div>
+            </div>
+
+            <label>추가 노트</label>
+            <input value={hs.note || ''} onChange={e => setHs({ ...hs, note: e.target.value })} placeholder="주의사항 등" />
           </div>
         </div>
-        <div className="editor-footer"><button className="editor-save" onClick={() => onSave({ ...hs, description: currentDescLines })}><Save size={16} /> 저장</button></div>
+        <div className="editor-footer">
+          <button className="editor-save" onClick={() => onSave(hs)}>저장</button>
+          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>취소</button>
+        </div>
       </div>
     </div>
   )
 }
 
-function ReportDetailModal({ 
-  report, 
-  onClose, 
-  onStatusChange,
-  onDelete,
-  onConvertToHotspot
-}: { 
-  report: Report, 
-  onClose: () => void,
-  onStatusChange: (status: 'pending' | 'resolved') => void,
-  onDelete: (id: string) => void,
-  onConvertToHotspot: (report: Report) => void
-}) {
+interface ReportDetailModalProps {
+  report: Report
+  onClose: () => void
+  onDelete: (id: string) => Promise<void>
+  onStatusChange: (status: 'pending' | 'resolved') => Promise<void>
+  onConvertToHotspot: () => void
+}
+
+function ReportDetailModal({ report, onClose, onDelete, onStatusChange, onConvertToHotspot }: ReportDetailModalProps) {
   return (
     <div className="editor-overlay">
-      <div className="editor-panel">
+      <div className="editor-panel wide">
         <div className="editor-header">
-          <h3>민원 제보 상세</h3>
-          <button onClick={onClose}><X size={20} /></button>
+          <h3>제보 상세 확인</h3>
+          <button onClick={onClose} className="close-btn"><X size={20} /></button>
         </div>
         <div className="editor-body">
           <div className="report-detail-row">
-            <span className={`status-tag ${report.status}`}>{report.status === 'pending' ? '접수됨' : '처리완료'}</span>
-            <span className="report-date">{report.createdAt ? new Date(report.createdAt).toLocaleString() : '날짜 없음'}</span>
+            <div className="report-meta">
+              <span className={`status-tag ${report.status}`}>{report.status === 'pending' ? '처리 예정' : '해결 완료'}</span>
+              <span className="report-date">{new Date(report.createdAt).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className={`status-toggle-btn ${report.status === 'resolved' ? 'resolved' : ''}`}
+                onClick={() => onStatusChange(report.status === 'pending' ? 'resolved' : 'pending')}
+              >
+                {report.status === 'pending' ? '해결 완료로 표시' : '미해결로 복원'}
+              </button>
+              <button className="del-f-btn" onClick={() => onDelete(report.id)} style={{ padding: '0.5rem' }}><Trash2 size={20} /></button>
+            </div>
           </div>
-          
-          <div className="report-info-box" style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '0.75rem', marginBottom: '1rem' }}>
-            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 700 }}><User size={14} /> {report.name} ({report.contact})</p>
-            <p style={{ margin: 0, color: '#666' }}><MapPin size={14} /> {report.festivalName} - {report.locationDetail}</p>
+
+          <div className="report-section">
+            <label>제보자 정보</label>
+            <div className="reporter-info-box">
+              <p>👤 <strong>{report.name}</strong></p>
+              <p>📞 {report.contact}</p>
+            </div>
+          </div>
+
+          <div className="report-section">
+            <label>제보 대상 및 위치</label>
+            <div className="reporter-info-box">
+              <div className="location-text">📍 {report.festivalName} {report.locationDetail ? `- ${report.locationDetail}` : ''}</div>
+              <div className="coord-text">좌표: X {report.x?.toFixed(1)}%, Y {report.y?.toFixed(1)}%</div>
+            </div>
           </div>
 
           <div className="report-section">
             <label>제보 내용</label>
-            <div className="report-content-box" style={{ background: 'white', border: '1px solid #eee', padding: '1rem', borderRadius: '0.5rem', minHeight: '5rem' }}>
-              {report.content}
-            </div>
+            <div className="report-content-box">{report.content}</div>
           </div>
 
           {report.images && report.images.length > 0 && (
-            <div className="report-section" style={{ marginTop: '1rem' }}>
+            <div className="report-section">
               <label>현장 사진 ({report.images.length})</label>
-              <div className="report-images-preview" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div className="report-images-preview">
                 {report.images.map((img, i) => (
-                  <img key={i} src={img} alt="report" style={{ width: '5rem', height: '5rem', objectFit: 'cover', borderRadius: '0.4rem' }} onClick={() => window.open(img)} />
+                  <img key={i} src={img} alt="제보 사진" onClick={() => window.open(img)} />
                 ))}
               </div>
             </div>
           )}
         </div>
-        <div className="editor-footer" style={{ justifyContent: 'space-between' }}>
-          <button className="del-f-btn" onClick={() => onDelete(report.id)} style={{ padding: '0.5rem 1rem' }}>
-            <Trash2 size={16} /> 삭제
-          </button>
-          
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button 
-              className="add-main-btn" 
-              onClick={() => onConvertToHotspot(report)}
-              style={{ background: '#27AE60', color: 'white' }}
-            >
-              <MapPin size={16} /> 이 내용으로 핫스팟 등록
-            </button>
-            <button 
-              className={`status-toggle-btn ${report.status === 'resolved' ? 'resolved' : ''}`}
-              onClick={() => onStatusChange(report.status === 'pending' ? 'resolved' : 'pending')}
-            >
-              {report.status === 'pending' ? <><CheckCircle size={14} /> 해결 처리</> : <><Clock size={14} /> 미해결 처리</>}
-            </button>
-          </div>
+        <div className="editor-footer">
+          <button className="editor-save" onClick={onConvertToHotspot}>📍 이 내용을 바탕으로 핫스팟 생성</button>
+          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>닫기</button>
         </div>
       </div>
     </div>

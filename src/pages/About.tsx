@@ -57,12 +57,6 @@ const VOICES = [
   },
 ];
 
-const METHODS = [
-  { num: "01", title: "당사자 동행 조사", desc: "휠체어 이용 당사자와 함께 현장을 돌며 동선, 단차, 경사도를 직접 확인합니다. 눈이 아닌 바퀴로 검증합니다." },
-  { num: "02", title: "다층 체크리스트", desc: "접근로·경사로·화장실·매표소·관람석 등 항목별로 구조화된 기준을 현장에서 적용합니다. '가능'이 아닌 '왜 가능한가'를 기록합니다." },
-  { num: "03", title: "실측 수치 기록", desc: "단차 높이, 경사 각도, 통로 폭을 수치로 기록합니다. '완만한 경사'가 아니라 '12도 경사'로 표기합니다." },
-  { num: "04", title: "현장 연락망 구축", desc: "지도를 믿고 방문했을 때 문제가 생기면, 축제 관계자와 즉각 연결될 수 있는 핫라인을 운영합니다." },
-];
 
 export default function About() {
   useEffect(() => {
@@ -97,7 +91,7 @@ export default function About() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "내일 · 무장애 축제 지도",
+            "name": "내일(Naeil) · 무장애 축제 지도",
             "description": "장애인의 문화예술 접근성을 높이기 위해 휠체어 이용자와 함께 현장을 조사하는 비영리 학생 자치단체",
             "url": "https://naeil-website.vercel.app",
             "foundingDate": "2024",
@@ -113,13 +107,27 @@ export default function About() {
         .reveal {
           opacity: 0;
           transform: translateY(24px);
-          transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
-                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), 
+                      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .reveal.visible {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        .diff-card {
+           background: white;
+           border: 1px solid #d8e4f2;
+           padding: 40px;
+           border-radius: 24px;
+           transition: all 0.4s ease;
+           box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .diff-card:hover {
+           transform: translateY(-10px);
+           box-shadow: 0 20px 40px rgba(82, 165, 255, 0.1);
+           border-color: #52a5ff;
         }
       `}</style>
 
@@ -127,23 +135,20 @@ export default function About() {
 
         {/* HERO */}
         <section style={s.hero} aria-label="프로젝트 소개">
-          <div style={s.heroGhost} aria-hidden="true">97</div>
+          <div style={s.heroGhost} aria-hidden="true">Naeil</div>
           <div style={s.pill} className="reveal">문화 접근권 프로젝트</div>
           <h1 style={s.heroHeadline} className="reveal">
-            <span style={{ position: "relative", display: "inline-block" }}>
-              97.4%
-              <span style={s.strikeLine} aria-hidden="true" />
-            </span>
-            <br />의 침묵을<br />우리가 깹니다
+            모두의 <span style={{ color: "#1A1A1A" }}>내일</span>은,<br />
+            모두가 함께하는<br />축제입니다
           </h1>
           <p className="reveal" style={{ ...s.heroSub, transitionDelay: '0.1s' }}>
             장애인의 문화예술 직접 참여율은 단 3.6%.<br />
-            나머지 97.4%는 아직 문 앞에 서 있습니다.<br />
-            '내일'은 그 문을 함께 열러 갑니다.
+            당연한 축제가 누군가에겐 큰 용기가 필요한 일이라면<br />
+            우리는 그 장벽을 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>과 함께 허물어갑니다.
           </p>
           <div className="reveal" style={{ ...s.heroCta, transitionDelay: '0.2s' }}>
             <Link to="/maps" style={s.btnMain}>지도 보러 가기</Link>
-            <a href="#story" style={s.btnGhost}>우리가 시작한 이유 →</a>
+            <a href="#diff" style={s.btnGhost}>차별점 확인하기 ➔</a>
           </div>
         </section>
 
@@ -167,6 +172,31 @@ export default function About() {
           ))}
         </div>
 
+        {/* DIFFERENCES SECTION */}
+        <section id="diff" style={{ padding: "100px 36px", background: C.white }}>
+          <div style={s.secKicker} className="reveal">THE DIFFERENCE</div>
+          <h2 style={{ ...s.storyHeading, marginBottom: 50 }} className="reveal">'내일'은 무엇이 무엇이 다른가요?</h2>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+             <div className="reveal diff-card">
+                <div style={s.mvLabel}>Difference 01</div>
+                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>무장애지도 + 핫스팟 모달</h3>
+                <p style={{ ...s.methodDesc, fontSize: 15 }}>
+                  현장 지도 위에 핫스팟을 직접 찍어 사진과 접근성 정보를 팝업으로 제공합니다.<br/><br/>
+                  <strong>"지도 위에서 바로 확인하는 진짜 현장 정보"</strong>
+                </p>
+             </div>
+             <div className="reveal diff-card" style={{ transitionDelay: '0.1s' }}>
+                <div style={s.mvLabel}>Difference 02</div>
+                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>함께 만드는 신고센터</h3>
+                <p style={{ ...s.methodDesc, fontSize: 15 }}>
+                  사용자가 현장에서 직접 제보한 정보가 실시간으로 지도에 반영됩니다.<br/><br/>
+                  <strong>"당신의 제보가 내일의 지도를 바꿉니다"</strong>
+                </p>
+             </div>
+          </div>
+        </section>
+
         {/* STORY */}
         <section id="story" style={s.story} aria-label="우리가 시작한 이유">
           <div style={s.secKicker} className="reveal">우리가 시작한 이유</div>
@@ -177,23 +207,11 @@ export default function About() {
             </div>
             <div className="reveal" style={{ ...s.storyBody, transitionDelay: '0.1s' }}>
               <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 우리는 직접 들었습니다.</p>
-              <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 장애인 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
-              <p style={{ marginTop: 16 }}>그래서 '내일'은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 바퀴가 닿는 모든 곳을 직접 확인하면서.</p>
+              <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
+              <p style={{ marginTop: 16 }}>그래서 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 바퀴가 닿는 모든 곳을 직접 확인하면서.</p>
             </div>
           </div>
         </section>
-
-        {/* MISSION + VISION */}
-        <div style={s.mvRow}>
-          <div style={s.mvCard} className="reveal">
-            <div style={s.mvLabel}>Mission</div>
-            <div style={s.mvText}>장애인의 문화 접근<br />장벽을 허문다.</div>
-          </div>
-          <div className="reveal" style={{ ...s.mvCard, transitionDelay: '0.1s' }}>
-            <div style={s.mvLabel}>Vision</div>
-            <div style={s.mvText}>모두가 즐길 수 있는<br />무장애 관광 인프라 구축</div>
-          </div>
-        </div>
 
         {/* VOICE */}
         <section style={s.voice} aria-label="당사자의 목소리">
@@ -202,10 +220,6 @@ export default function About() {
             <div className="reveal" style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14, transitionDelay: '0.1s' }}>
               우리가 현장으로 나간<br />진짜 이유
             </div>
-            <p className="reveal" style={{ fontSize: 14, lineHeight: 1.9, color: C.muted, fontWeight: 300, transitionDelay: '0.2s' }}>
-              여름엔 뙤약볕 아래서, 겨울엔 칼바람 속에서 전국 각지의 축제장을 방문합니다.
-              휠체어 이용자의 시선에서 바라보는 축제는 우리가 알던 모습과 사뭇 달랐습니다.
-            </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {VOICES.map((v, i) => (
@@ -213,11 +227,6 @@ export default function About() {
                 <div style={s.voiceBar} />
                 <div>
                   <div style={s.voiceQ}>&ldquo;{v.quote}&rdquo;</div>
-                  <div style={s.voiceContext}>
-                    {v.contextParts[0]}
-                    <strong style={{ color: C.blueDark, fontWeight: 500 }}>{v.contextParts[1]}</strong>
-                    {v.contextParts[2]}
-                  </div>
                   <div style={s.voiceWho}>{v.who}</div>
                 </div>
               </div>
@@ -225,40 +234,21 @@ export default function About() {
           </div>
         </section>
 
-        {/* METHOD */}
-        <section style={s.method} aria-label="조사 방법론">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 44 }}>
-            <h2 style={s.storyHeading} className="reveal">신뢰는 현장에서<br />나옵니다</h2>
-            <div className="reveal" style={{ fontSize: 13, color: C.muted, fontWeight: 300, maxWidth: 220, lineHeight: 1.75, textAlign: "right" as const, transitionDelay: '0.1s' }}>
-              우리가 지키는 조사 원칙.<br />책상이 아닌 바퀴가 닿는 현장에서.
-            </div>
-          </div>
-          <div style={s.methodGrid}>
-            {METHODS.map((m, i) => (
-              <div key={m.num} className="reveal" style={{ ...s.methodCard, transitionDelay: `${i * 0.1 + 0.1}s` }}>
-                <div style={s.methodNum}>{m.num}</div>
-                <div style={s.methodTitle}>{m.title}</div>
-                <div style={s.methodDesc}>{m.desc}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* CTA */}
         <section style={s.cta} aria-label="함께하기">
-          <p style={s.ctaBig} className="reveal">당신이 보고 싶은 것을,<br />두려움 없이 보러 갈 권리.</p>
+          <p style={s.ctaBig} className="reveal">모두에게 즐거운 축제의 <span style={{ color: "white" }}>내일</span></p>
           <p className="reveal" style={{ ...(s.ctaSub as React.CSSProperties), transitionDelay: '0.1s' }}>
-            그것은 특별한 배려가 아닙니다.<br />
-            처음부터 당신의 것이었던 권리입니다.<br />
-            '내일'은 그 권리를 지도 위에 새겨갑니다.
+            우리의 지도는 기술이 아닌 따뜻한 관심으로 채워집니다.<br />
+            더 많은 이들이 문밖으로 나설 수 있도록,<br />
+            지금 <span style={{ color: "white", fontWeight: 700 }}>'내일'</span>과 함께해주세요.
           </p>
           <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="reveal" style={{ ...s.btnWhite, transitionDelay: '0.2s' }}>지금 함께하기</a>
         </section>
 
         {/* FOOTER */}
         <footer style={s.footer}>
-          <div style={{ fontFamily: "'Noto Serif KR', serif", fontSize: 17, fontWeight: 700, color: C.navy }}>
-            내<span style={{ color: C.blue }}>일</span> · 무장애 축제 지도
+          <div style={{ fontFamily: "'Noto Serif KR', serif", fontSize: 17, fontWeight: 700, color: "#1A1A1A" }}>
+            내일 · 무장애 축제 지도
           </div>
           <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.75, textAlign: "right" }}>
             비영리 학생 자치단체<br />장애인 문화 접근권 프로젝트
