@@ -317,41 +317,38 @@
 .map-placeholder-sub { font-size: 13px !important; color: var(--gray-400) !important; }
 
 /* 핫스팟 버튼 (투명한 클릭 영역) */
-/* 핫스팟 버튼 */
+/* 핫스팟 버튼 (중앙 원) */
 .hotspot-btn {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 24px;
   height: 24px;
-  background: rgba(91, 164, 207, 0.2);
+  background: var(--blue);
+  opacity: 0.6;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   z-index: 5;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: pin-pulse-blue 2s infinite;
 }
 
 .hotspot-btn.report-pin {
-  background: rgba(229, 62, 62, 0.2);
-  border-color: var(--red);
+  background: var(--red);
+  animation-name: pin-pulse-red;
 }
 
 .hotspot-btn:hover {
   transform: translate(-50%, -50%) scale(1.3);
-  background: rgba(62, 142, 222, 0.7);
+  opacity: 1;
   z-index: 20;
-}
-
-.hotspot-btn.report-pin:hover {
-  background: rgba(229, 62, 62, 0.5);
-  z-index: 21;
 }
 
 .hotspot-btn:active {
   transform: translate(-50%, -50%) scale(0.9);
 }
 
-/* ripple animations */
+/* 물결 애니메이션 (바깥 링) */
 .hotspot-btn::before {
   content: '';
   position: absolute;
@@ -360,7 +357,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: inherit;
+  background: var(--blue);
   transform: translate(-50%, -50%);
   animation: ripple-blue 2s infinite;
   z-index: -1;
@@ -373,13 +370,25 @@
 }
 
 @keyframes ripple-blue {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-  100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
 }
 
 @keyframes ripple-red {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-  100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+}
+
+@keyframes pin-pulse-blue {
+  0% { background-color: var(--blue); transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { background-color: #5bb4ef; transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
+  100% { background-color: var(--blue); transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+}
+
+@keyframes pin-pulse-red {
+  0% { background-color: var(--red); transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { background-color: #ff5e5e; transform: translate(-50% , -50%) scale(1.1); opacity: 0.9; }
+  100% { background-color: var(--red); transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
 }
 
 /* 편의정보 탭 */
