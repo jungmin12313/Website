@@ -21,8 +21,8 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Navbar />
-      <main className="main-content">
-        <Suspense fallback={<div className="loading-fallback" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw' }}>로딩 중...</div>}>
+      <main className="main-content fade-in">
+        <Suspense fallback={<div className="loading-fallback">로딩 중...</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/maps" element={<FestivalList />} />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { getSetting } from '../firebaseUtils'
+import defaultHero from '../assets/hero.png'
 import './Home.css'
 
 export default function Home() {
@@ -24,7 +25,11 @@ export default function Home() {
       {/* 히어로 섹션 */}
       <section 
         className="hero" 
-        style={heroBg ? { backgroundImage: `url("${heroBg}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+        style={{ 
+          backgroundImage: `url("${heroBg || defaultHero}")`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center' 
+        }}
       >
         <div className="hero-overlay" />
         <div className="hero-content">
