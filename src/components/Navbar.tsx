@@ -1,24 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Minus, Plus, RotateCcw } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 import './Navbar.css'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('naeil_font_size')) || 100)
+  const [isHighContrast, setIsHighContrast] = useState(() => localStorage.getItem('naeil_hcm') === 'true')
   const location = useLocation()
 
   useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}%`
-    localStorage.setItem('naeil_font_size', String(fontSize))
-  }, [fontSize])
-
-  const changeFontSize = (delta: number) => {
-    const next = Math.min(150, Math.max(70, fontSize + delta))
-    setFontSize(next)
-  }
-
-  const resetFontSize = () => setFontSize(100)
+    if (isHighContrast) {
+      document.body.setAttribute('data-theme', 'high-contrast')
+    } else {
+      document.body.removeAttribute('data-theme')
+    }
+    localStorage.setItem('naeil_hcm', String(isHighContrast))
+  }, [isHighContrast])
 
   const navLinks = [
     { to: '/about', label: '소개' },
@@ -28,54 +25,75 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="navbar">
-      <div className="navbar-inner">
-        <div className="navbar-left">
-          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-          <Link to="/" className="logo-link">
-            <img src="/logo.png" alt="내일" className="logo-img" />
-          </Link>
-        </div>
+    <>
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <div className="navbar-left">
+            <button className="menu-btn" onClick={() => setMenuOpen(true)}>
+              <Menu size={26} />
+            </button>
+            <Link to="/" className="logo-link">
+              <img src="/logo_minimal.png" alt="내일" className="logo-img" />
+            </Link>
+          </div>
 
-        <div className="font-control">
-          <span className="control-label">화면 크기</span>
-          <div className="zoom-pill">
-            <button onClick={() => changeFontSize(-10)} title="축소"><Minus size={16} /></button>
-            <span className="zoom-value">{fontSize}%</span>
-            <button onClick={() => changeFontSize(10)} title="확대"><Plus size={16} /></button>
-            <button onClick={resetFontSize} className="reset-btn" title="초기화"><RotateCcw size={16} /></button>
+          <div className="navbar-right">
+            <div className="navbar-links">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <button 
+              className={`hcm-toggle ${isHighContrast ? 'active' : ''}`} 
+              onClick={() => setIsHighContrast(!isHighContrast)}
+              title="고대비 모드"
+            >
+              {isHighContrast ? <Sun size={20} /> : <Moon size={20} />}
+              <span>고대비</span>
+            </button>
           </div>
         </div>
+      </nav>
 
-        <div className="navbar-links">
-          {navLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`nav-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
+      {/* Slide-in Sidebar Menu */}
+      <div className={`sidebar-overlay ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+        <div className={`sidebar ${menuOpen ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
+          <div className="sidebar-header">
+            <img src="/logo_minimal.png" alt="내일" className="sidebar-logo" />
+            <button className="sidebar-close" onClick={() => setMenuOpen(false)}>
+              <X size={28} />
+            </button>
+          </div>
+          <div className="sidebar-links">
+            {navLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`sidebar-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <div className="sidebar-footer">
+            <button 
+              className="hcm-toggle" 
+              onClick={() => setIsHighContrast(!isHighContrast)}
             >
-              {link.label}
-            </Link>
-          ))}
+              {isHighContrast ? <Sun size={20} /> : <Moon size={20} />}
+              고대비 모드 {isHighContrast ? '끄기' : '켜기'}
+            </button>
+          </div>
         </div>
       </div>
-
-      {menuOpen && (
-        <div className="mobile-menu">
-          {navLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="mobile-link"
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </nav>
+    </>
   )
 }

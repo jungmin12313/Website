@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://naeil-website.vercel.app/sitemap.xml
+Disallow: /admin

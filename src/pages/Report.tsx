@@ -142,7 +142,7 @@ export default function ReportPage() {
             <input 
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              type="text" placeholder="성함을 입력하세요" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', transition: 'border-color 0.2s' }} 
+              type="text" placeholder="성함을 입력하세요" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit' }} 
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -150,7 +150,7 @@ export default function ReportPage() {
             <input 
               value={formData.contact}
               onChange={e => setFormData({ ...formData, contact: e.target.value })}
-              type="tel" placeholder="010-0000-0000" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none' }} 
+              type="tel" placeholder="010-0000-0000" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', fontFamily: 'inherit' }} 
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function ReportPage() {
           <select 
             value={formData.festivalId}
             onChange={e => setFormData({ ...formData, festivalId: e.target.value })}
-            style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', background: 'white' }}
+            style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', background: 'white', fontFamily: 'inherit' }}
           >
             <option value="">축제를 선택해주세요</option>
             {festivals.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
@@ -172,7 +172,7 @@ export default function ReportPage() {
           <input 
             value={formData.locationDetail}
             onChange={e => setFormData({ ...formData, locationDetail: e.target.value })}
-            type="text" placeholder="예: 메인 무대 왼쪽 입구 근처, 푸드트럭 구역 끝쪽" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none' }} 
+            type="text" placeholder="예: 메인 무대 왼쪽 입구 근처, 푸드트럭 구역 끝쪽" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', fontFamily: 'inherit' }} 
           />
           
           {selectedFestival && selectedFestival.mapImage && (
@@ -209,7 +209,7 @@ export default function ReportPage() {
             value={formData.content}
             onChange={e => setFormData({ ...formData, content: e.target.value })}
             rows={5} placeholder="예: 무대를 보기에 휠체어석 앞이 막혀있어요. 특정 구간의 경사로가 너무 가팔라 이용이 힘들어요." 
-            style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '1rem', fontSize: '0.9375rem', outline: 'none', resize: 'vertical', lineHeight: '1.6' }} 
+            style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '1rem', fontSize: '0.9375rem', outline: 'none', resize: 'vertical', lineHeight: '1.6', fontFamily: 'inherit' }} 
           />
         </div>
 

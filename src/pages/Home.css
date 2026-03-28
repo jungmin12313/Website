@@ -7,13 +7,11 @@
 /* 히어로 */
 .hero {
   position: relative;
-  flex: 1;
-  min-height: calc(100vh - var(--nav-height) - 15rem); /* Minimum visible height for hero */
-  background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
-  background-color: #2c3e50;
+  min-height: calc(100vh - var(--nav-height));
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--gray-900);
 }
 
 .hero-overlay {

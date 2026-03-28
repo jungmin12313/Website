@@ -33,6 +33,7 @@ export default function Admin() {
   const [draggingHsId, setDraggingHsId] = useState<string | null>(null)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
   const [selection, setSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
+  const [isLocked, setIsLocked] = useState(true)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapAreaRef = useRef<HTMLDivElement>(null)
 
@@ -428,9 +429,15 @@ export default function Admin() {
                   <label className="upload-btn"><Upload size={16} /> 지도 배경 업로드<input type="file" onChange={handleMapUpload} style={{ display: 'none' }} /></label>
                   
                   <span className="sidebar-label">핫스팟 도구</span>
-                  <button className={`add-btn ${adding ? 'active' : ''}`} onClick={() => setAdding(!adding)}>
+                   <button className={`add-btn ${adding ? 'active' : ''}`} onClick={() => setAdding(!adding)}>
                     <MapPin size={16} /> {adding ? '지도 클릭하여 생성 중...' : '신규 핫스팟 생성'}
                   </button>
+
+                  <div className="hs-tools">
+                    <button className={`tool-btn ${!isLocked ? 'warn' : ''}`} onClick={() => setIsLocked(!isLocked)}>
+                      {isLocked ? '🔒 위치 잠금 (안전)' : '🔓 위치 수정 모드 (드래그 가능)'}
+                    </button>
+                  </div>
 
                   <div className="hs-list">
                     <span className="sidebar-label">핫스팟 목록 ({hotspots.length})</span>
@@ -487,7 +494,9 @@ export default function Admin() {
                 className="admin-map" 
                 ref={mapRef} 
                 onMouseDown={handleSelectionStart}
-                style={{ cursor: adding ? 'crosshair' : (draggingHsId ? 'move' : 'inherit') }}
+                style={{ 
+                  cursor: adding ? 'crosshair' : (draggingHsId ? 'move' : (isLocked ? 'inherit' : 'pointer')),
+                }}
               >
                 {!mapSrc && <div className="admin-map-placeholder">지도를 업로드해주세요.</div>}
                 {mapSrc && <img src={mapSrc} className="admin-map-img" draggable={false} />}
@@ -512,9 +521,9 @@ export default function Admin() {
                 {hotspots.filter(h => !editHs || h.id !== editHs.id).map(hs => (
                   <button 
                     key={hs.id} 
-                    className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''}`} 
+                    className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''} ${!isLocked ? 'editable' : ''}`} 
                     style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}
-                    onMouseDown={(e) => { e.stopPropagation(); if(!adding) setDraggingHsId(hs.id) }}
+                    onMouseDown={(e) => { e.stopPropagation(); if(!adding && !isLocked) setDraggingHsId(hs.id) }}
                     onClick={e => { e.stopPropagation(); if(!adding && !draggingHsId) { setEditHs(hs); setAdding(true); } }}
                   >
                     <span className="admin-hs-label">{hs.label}</span>
@@ -852,6 +861,7 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
   const [previewTab, setPreviewTab] = useState<'map' | 'modal' | 'info'>('map')
   const [isMiniDragging, setIsMiniDragging] = useState(false)
   const [miniSelection, setMiniSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
+  const [miniZoom, setMiniZoom] = useState(1)
   const miniMapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -942,33 +952,58 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
             </div>
 
             {previewTab === 'map' && (
-              <div className="mini-map-container" onMouseUp={handleMiniMapEnd} onMouseLeave={handleMiniMapEnd}>
-                <div className="mini-map interactive" ref={miniMapRef} onMouseDown={handleMiniMapStart} onMouseMove={handleMiniMapMove}>
-                  <img src={mapSrc} className="mini-map-img" draggable={false} />
-                  
-                  {allHotspots.filter(h => h.id !== hs.id).map(oh => (
-                    <div key={oh.id} className="mini-hotspot other" style={{ left: `${oh.x}%`, top: `${oh.y}%`, width: `${oh.w || 6}%`, height: `${oh.h || 6}%` }} />
-                  ))}
-
-                  <div className={`mini-hotspot current ${!isMiniDragging ? 'pulse' : ''}`} style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}>
-                    <span className="mini-hs-label">{hs.label || '편집 중'}</span>
+              <>
+                <div className="mini-map-header">
+                  <div className="mini-zoom-header">
+                    <span>지도 확대: {Math.round(miniZoom * 100)}%</span>
+                    <input 
+                      type="range" min="1" max="4" step="0.25" 
+                      value={miniZoom} onChange={e => setMiniZoom(parseFloat(e.target.value))} 
+                    />
                   </div>
-
-                  {miniSelection && (
-                    <div className="selection-box" style={{
-                      position: 'absolute',
-                      left: `${Math.min(miniSelection.x1, miniSelection.x2)}%`,
-                      top: `${Math.min(miniSelection.y1, miniSelection.y2)}%`,
-                      width: `${Math.abs(miniSelection.x1 - miniSelection.x2)}%`,
-                      height: `${Math.abs(miniSelection.y1 - miniSelection.y2)}%`,
-                      border: '1px dashed #5BA4CF',
-                      background: 'rgba(91, 164, 207, 0.2)',
-                      pointerEvents: 'none'
-                    }} />
-                  )}
-                  <div className="mini-map-hint">지도 위를 드래그하여 위치와 크기를 잡으세요</div>
                 </div>
-              </div>
+
+                <div className="mini-map-container" onMouseUp={handleMiniMapEnd} onMouseLeave={handleMiniMapEnd}>
+                  <div 
+                    className="mini-map interactive" 
+                    ref={miniMapRef} 
+                    onMouseDown={handleMiniMapStart} 
+                    onMouseMove={handleMiniMapMove}
+                    style={{
+                      transform: `scale(${miniZoom})`,
+                      transformOrigin: '0 0'
+                    }}
+                  >
+                    <img src={mapSrc} className="mini-map-img" draggable={false} />
+                    
+                    {allHotspots.filter(h => h.id !== hs.id).map(oh => (
+                      <div key={oh.id} className="mini-hotspot other" style={{ left: `${oh.x}%`, top: `${oh.y}%`, width: `${oh.w || 6}%`, height: `${oh.h || 6}%` }} />
+                    ))}
+
+                    <div className={`mini-hotspot current ${!isMiniDragging ? 'pulse' : ''}`} style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}>
+                      <span className="mini-hs-label">{hs.label || '편집 중'}</span>
+                    </div>
+
+                    {miniSelection && (
+                      <div className="selection-box" style={{
+                        position: 'absolute',
+                        left: `${Math.min(miniSelection.x1, miniSelection.x2)}%`,
+                        top: `${Math.min(miniSelection.y1, miniSelection.y2)}%`,
+                        width: `${Math.abs(miniSelection.x1 - miniSelection.x2)}%`,
+                        height: `${Math.abs(miniSelection.y1 - miniSelection.y2)}%`,
+                        border: '1px dashed #5BA4CF',
+                        background: 'rgba(91, 164, 207, 0.2)',
+                        pointerEvents: 'none'
+                      }} />
+                    )}
+                  </div>
+                </div>
+
+                <div className="mini-map-hint-box">
+                  <ShieldAlert size={16} />
+                  <span>지도 위를 드래그하여 위치와 크기를 잡으세요 (현재 설정이 즉시 반영됩니다)</span>
+                </div>
+              </>
             )}
 
             {previewTab === 'modal' && (

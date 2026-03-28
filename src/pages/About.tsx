@@ -180,18 +180,18 @@ export default function About() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
              <div className="reveal diff-card">
                 <div style={s.mvLabel}>Difference 01</div>
-                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>무장애지도 + 핫스팟 모달</h3>
+                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>더 직관적인 무장애지도</h3>
                 <p style={{ ...s.methodDesc, fontSize: 15 }}>
-                  현장 지도 위에 핫스팟을 직접 찍어 사진과 접근성 정보를 팝업으로 제공합니다.<br/><br/>
-                  <strong>"지도 위에서 바로 확인하는 진짜 현장 정보"</strong>
+                  지도 위 픽토그램을 클릭하면 현장 사진과 함께 실제 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
+                  <strong>"가보기 전에도 현장의 모습을 생생하게"</strong>
                 </p>
              </div>
              <div className="reveal diff-card" style={{ transitionDelay: '0.1s' }}>
                 <div style={s.mvLabel}>Difference 02</div>
-                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>함께 만드는 신고센터</h3>
+                <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>함께 만들어가는 정보</h3>
                 <p style={{ ...s.methodDesc, fontSize: 15 }}>
-                  사용자가 현장에서 직접 제보한 정보가 실시간으로 지도에 반영됩니다.<br/><br/>
-                  <strong>"당신의 제보가 내일의 지도를 바꿉니다"</strong>
+                  사용자가 직접 경험하고 제보한 현장의 디테일이 실시간으로 지도에 더해집니다.<br/><br/>
+                  <strong>"당신의 발걸음이 누군가에게는 새로운 길이 됩니다"</strong>
                 </p>
              </div>
           </div>
