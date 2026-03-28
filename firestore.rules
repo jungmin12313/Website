@@ -1,33 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 모든 사용자가 읽기 가능 (축제 정보 등)
-    match /{document=**} {
-      allow read: if true;
-    }
-    
     // 이메일을 통한 관리자 검증 함수
     function isAdmin() {
       return request.auth != null && request.auth.token.email == 'admin@naeil.app';
     }
     
-    // 축제 데이터 수정: 오직 지정된 관리자 이메일만 가능
+    // 축제 데이터: 누구나 조회 가능, 수정은 관리자만
     match /festivals/{festivalId} {
+      allow read: if true;
       allow write: if isAdmin();
     }
     
-    // 제보 데이터: 누구나 제보 생성 가능, 관리(해결/삭제)는 관리자만
+    // 제보 데이터: 누구나 제보 생성(create)만 가능, 조회/수정/삭제는 오직 관리자만
+    // (사용자 전화번호 등 개인정보 보호를 위함)
     match /reports/{reportId} {
       allow create: if true;
-      allow update, delete: if isAdmin();
+      allow read, update, delete: if isAdmin();
     }
     
-    // 설정 및 감사 로그: 관리자 전용
+    // 설정: 관리자 전용
     match /settings/{settingId} {
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
+    
+    // 감사 로그: 클라이언트 행위 기록(create)은 허용하되, 조회 및 관리는 관리자만
     match /audit_logs/{logId} {
-      allow create: if true; // 클라이언트 행위 기록 허용
+      allow create: if true;
       allow read, update, delete: if isAdmin();
     }
   }
