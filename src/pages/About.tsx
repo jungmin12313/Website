@@ -93,7 +93,7 @@ export default function About() {
             "@type": "Organization",
             "name": "내일(Naeil) · 무장애 축제 지도",
             "description": "장애인의 문화예술 접근성을 높이기 위해 휠체어 이용자와 함께 현장을 조사하는 비영리 학생 자치단체",
-            "url": "https://naeil-website.vercel.app",
+            "url": "https://naeilmap.com",
             "foundingDate": "2024",
             "areaServed": "KR",
             "keywords": "무장애 축제, 장애인 문화 접근성, 휠체어 축제 지도"
