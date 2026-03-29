@@ -8,6 +8,7 @@ import {
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
 import HotspotModal from '../components/HotspotModal'
+import { useSEO } from '../hooks/useSEO'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -48,20 +49,32 @@ export default function FestivalDetail() {
     loadData()
   }, [id, navigate])
 
-  useEffect(() => {
-    if (festival) {
-      document.title = `${festival.name} 무장애 정보 · 내일`;
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute("content", `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 확인하세요. 당사자와 함께 직접 조사한 믿을 수 있는 데이터입니다.`);
-      }
-    }
-  }, [festival]);
+  useSEO({
+    title: festival ? `${festival.name} 무장애 정보 | 내일` : '무장애 축제 정보 불러오는 중 | 내일',
+    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 확인하세요. 당사자와 함께 직접 조사한 믿을 수 있는 데이터입니다.` : '로딩 중...',
+    url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps'
+  });
 
   if (!festival) return <div className="loading">불러오는 중...</div>
 
   return (
     <div className="detail-page">
+      {festival && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+                { "@type": "ListItem", "position": 2, "name": "무장애 축제 검색", "item": "https://naeilmap.com/maps" },
+                { "@type": "ListItem", "position": 3, "name": festival.name, "item": `https://naeilmap.com/maps/${festival.id}` }
+              ]
+            })
+          }}
+        />
+      )}
       {/* 탭 */}
       <div className="tab-bar">
         {(['info', 'map', 'access'] as Tab[]).map(t => (

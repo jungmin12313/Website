@@ -4,6 +4,7 @@ import { Calendar, MapPin } from 'lucide-react'
 import type { Festival } from '../types'
 import { getFestivals } from '../firebaseUtils'
 import Skeleton from '../components/Skeleton'
+import { useSEO } from '../hooks/useSEO'
 import './FestivalList.css'
 
 export default function FestivalList() {
@@ -13,6 +14,12 @@ export default function FestivalList() {
   const [regionFilter, setRegionFilter] = useState('all')
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+
+  useSEO({
+    title: '전국 무장애 축제 지도 | 내일',
+    description: '전국 각지의 무장애 축제 일정을 확인하고 다채로운 즐길 거리를 찾아보세요.',
+    url: 'https://naeilmap.com/maps'
+  });
 
   useEffect(() => {
     const loadData = async () => {

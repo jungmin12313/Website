@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 
 "use client";
 
@@ -59,14 +60,13 @@ const VOICES = [
 
 
 export default function About() {
+  useSEO({
+    title: '내일 · 무장애 축제 지도 — 소개',
+    description: '장애인의 문화예술 직접 참여율은 3.6%. 내일은 휠체어 이용자와 함께 현장을 누비며 만든 무장애 축제 지도입니다.',
+    url: 'https://naeilmap.com/about'
+  });
+
   useEffect(() => {
-    // SEO 최적화 (Vite 환경에 맞춤)
-    document.title = "내일 · 무장애 축제 지도 — 소개";
-    
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", "장애인의 문화예술 직접 참여율은 3.6%. 내일은 휠체어 이용자와 함께 현장을 누비며 만든 무장애 축제 지도입니다.");
-    }
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
