@@ -1,6 +1,19 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "(.*)\\.vercel\\.app"
+        }
+      ],
+      "destination": "https://naeilmap.com/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!robots\\.txt|sitemap\\.xml|manifest\\.json|favicon.*|og-image\\.png|logo.*|assets/|images/|maps/|data/).*)",
