@@ -970,8 +970,7 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
                     onMouseDown={handleMiniMapStart} 
                     onMouseMove={handleMiniMapMove}
                     style={{
-                      transform: `scale(${miniZoom})`,
-                      transformOrigin: '0 0'
+                      width: `${miniZoom * 100}%`
                     }}
                   >
                     <img src={mapSrc} className="mini-map-img" draggable={false} />
