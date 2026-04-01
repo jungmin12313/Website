@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search } from 'lucide-react'
-import { getSetting } from '../firebaseUtils'
+import { Search, ChevronRight } from 'lucide-react'
+import { getSetting, getFestivals } from '../firebaseUtils'
+import type { Festival } from '../types'
 import defaultHero from '../assets/hero.png'
 import { useSEO } from '../hooks/useSEO'
 import './Home.css'
@@ -9,6 +10,7 @@ import './Home.css'
 export default function Home() {
   const [query, setQuery] = useState('')
   const [heroBg, setHeroBg] = useState('')
+  const [mainFestivals, setMainFestivals] = useState<Festival[]>([])
   const navigate = useNavigate()
 
   useSEO({
@@ -21,6 +23,11 @@ export default function Home() {
     getSetting('naeil_hero_bg').then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
     }).catch(err => console.error('Failed to load hero background:', err))
+
+    getFestivals().then(fests => {
+      const onMain = fests.filter(f => f.showOnMain === true && f.mapImage)
+      setMainFestivals(onMain.slice(0, 3))
+    }).catch(err => console.error('Failed to load festivals:', err))
   }, [])
 
   const handleSearch = () => {
@@ -52,6 +59,31 @@ export default function Home() {
             />
             <button onClick={handleSearch}><Search size={20} /></button>
           </div>
+
+          {mainFestivals.length > 0 && (
+            <div className="latest-maps-container">
+              {mainFestivals.map(fest => (
+                <div key={fest.id} className="latest-map-widget glass-card" onClick={() => navigate(`/maps/${fest.id}`)}>
+                  <img src={fest.mapImage} alt={fest.name} className="widget-map-img" />
+                  
+                  <div className="widget-content">
+                    <div className="widget-header">
+                      <span className="pulse-dot"></span>
+                      <span className="widget-badge-text">방금 전 업데이트 됨</span>
+                    </div>
+                    <div className="widget-info">
+                      <strong>{fest.name}</strong>
+                      <p>{fest.address}</p>
+                    </div>
+                  </div>
+
+                  <div className="widget-arrow">
+                    <ChevronRight size={24} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

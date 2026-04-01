@@ -57,6 +57,7 @@ export interface Festival {
   transport: Transport | null
   pictograms: Pictogram[]
   category?: string
+  showOnMain?: boolean // 어드민에서 메인에 띄울지 제어하는 플래그
 }
 
 export interface Report {

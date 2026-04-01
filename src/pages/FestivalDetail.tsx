@@ -17,7 +17,7 @@ export default function FestivalDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [festival, setFestival] = useState<Festival | null>(null)
-  const [tab, setTab] = useState<Tab>('info')
+  const [tab, setTab] = useState<Tab>('map')
   const [imgIdx, setImgIdx] = useState(0)
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
   const [reports, setReports] = useState<Report[]>([])
@@ -77,7 +77,7 @@ export default function FestivalDetail() {
       )}
       {/* 탭 */}
       <div className="tab-bar">
-        {(['info', 'map', 'access'] as Tab[]).map(t => (
+        {(['map', 'info', 'access'] as Tab[]).map(t => (
           <button
             key={t}
             className={`tab-btn ${tab === t ? 'active' : ''}`}

@@ -29,6 +29,12 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
       <div className={`modal-box ${hotspot.photos.length >= 2 ? 'modal-enhanced' : 'modal-default'} ${hotspot.isReportBased ? 'modal-report-mode' : ''}`}>
         <button className="modal-close" onClick={onClose}><X size={20} /></button>
 
+        {hotspot.isReportBased && (
+          <div className="report-badge-banner">
+            📢 이 정보는 신고센터를 통해 제보된 현장 변경사항을 반영한 정보입니다.
+          </div>
+        )}
+
         <div className="modal-inner">
           {/* 왼쪽: 텍스트 */}
           <div className="modal-left">

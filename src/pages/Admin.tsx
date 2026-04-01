@@ -146,7 +146,8 @@ export default function Admin() {
       hotspots: [],
       transport: null,
       pictograms: [],
-      category: ''
+      category: '',
+      showOnMain: false
     }
     setEditingFestival(newF)
   }
@@ -777,6 +778,13 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
 
             <label>카테고리</label>
             <input value={festival.category} onChange={e => update('category', e.target.value)} placeholder="꽃, 음식, 체험 등" />
+
+            <div className="row" style={{ marginTop: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: '#f8f9fa', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e9ecef', fontWeight: 600 }}>
+                <input type="checkbox" checked={!!festival.showOnMain} onChange={e => update('showOnMain', e.target.checked)} style={{ width: 'auto', margin: 0, transform: 'scale(1.2)' }} />
+                🎯 메인 화면 최상단 위젯으로 노출하기 (최대 3개 권장)
+              </label>
+            </div>
           </div>
 
           <div className="editor-preview">
