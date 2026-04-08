@@ -14,8 +14,8 @@ export default function Home() {
   const navigate = useNavigate()
 
   useSEO({
-    title: '내일 | 모두가 축제를 참여하는 내일을 위해',
-    description: '휠체어, 유아차, 어르신도 망설임 없이 즐길 수 있는 무장애 축제 정보',
+    title: '내일 | 무장애 축제 지도',
+    description: '장애인, 노인, 휠체어 사용자 모두가 즐길 수 있는 무장애 축제 지도. 내일(NAEIL)은 배리어프리 축제 접근성 정보를 제공합니다.',
     url: 'https://naeilmap.com/'
   });
 
@@ -47,7 +47,9 @@ export default function Home() {
       >
         <div className="hero-overlay" />
         <div className="hero-content">
-          <h1 className="hero-title">모두의 더 나은 내일을 위해 내 일처럼</h1>
+          <h1 className="hero-title">
+            모두를 위한 무장애 축제 지도, 내일
+          </h1>
           <div className="search-bar">
             <input
               type="text"
