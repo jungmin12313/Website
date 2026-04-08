@@ -117,7 +117,10 @@ export default function FestivalList() {
                     <img
                       src={f.thumbnail || '/placeholder.svg'}
                       alt={f.name}
-                      style={{ objectPosition: `center ${f.thumbnailPositionY || 50}%` }}
+                      style={{ 
+                        objectFit: 'contain',
+                        transform: `scale(${(f.thumbnailZoom || 100) / 100})`
+                      }}
                       onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
                     />
 

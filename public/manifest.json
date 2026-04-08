@@ -1,7 +1,7 @@
 {
   "name": "내일(Naeil) - 무장애 축제 지도",
   "short_name": "Naeil",
-  "description": "모두의 더 나은 내일을 위해 내 일처럼. 무장애 축제 지도 서비스입니다.",
+  "description": "모두가 참여할 수 있는 무장애 축제 지도 서비스",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

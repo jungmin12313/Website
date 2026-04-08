@@ -25,7 +25,7 @@ export default function Home() {
     }).catch(err => console.error('Failed to load hero background:', err))
 
     getFestivals().then(fests => {
-      const onMain = fests.filter(f => f.showOnMain === true && f.mapImage)
+      const onMain = fests.filter(f => f.showOnMain === true && (f.thumbnail || f.mapImage))
       setMainFestivals(onMain.slice(0, 3))
     }).catch(err => console.error('Failed to load festivals:', err))
   }, [])
@@ -66,7 +66,18 @@ export default function Home() {
             <div className="latest-maps-container">
               {mainFestivals.map(fest => (
                 <div key={fest.id} className="latest-map-widget glass-card" onClick={() => navigate(`/maps/${fest.id}`)}>
-                  <img src={fest.mapImage} alt={fest.name} className="widget-map-img" />
+                  <div className="widget-map-img" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: '2px solid rgba(255, 255, 255, 0.8)' }}>
+                    <img 
+                      src={fest.thumbnail || fest.mapImage} 
+                      alt={fest.name} 
+                      style={{ 
+                        objectFit: 'contain', 
+                        width: '100%', 
+                        height: '100%', 
+                        transform: fest.thumbnail ? `scale(${(fest.thumbnailZoom || 100) / 100})` : 'none' 
+                      }} 
+                    />
+                  </div>
                   
                   <div className="widget-content">
                     <div className="widget-header">

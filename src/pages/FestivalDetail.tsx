@@ -103,6 +103,10 @@ export default function FestivalDetail() {
                     <img
                       src={displayImages[imgIdx] || '/placeholder.svg'}
                       alt={festival.name}
+                      style={{ 
+                        objectFit: 'contain',
+                        transform: `scale(${(festival.images.length > 0 ? (festival.galleryZoom || 100) : (festival.thumbnailZoom || 100)) / 100})`
+                      }}
                       onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
                     />
                     {displayImages.length > 1 && (

@@ -789,7 +789,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
 
           <div className="editor-preview">
             <label>대표 썸네일 (리스트 노출)</label>
-            <div className="thumb-preview interactive">
+            <div className="thumb-preview interactive" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {!festival.thumbnail ? (
                 <label className="add-photo-box" style={{ width: '100%', height: '100%' }}>
                   <Plus /> 썸네일 업로드
@@ -798,29 +798,43 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
               ) : (
                 <img 
                   src={festival.thumbnail} 
-                  style={{ objectPosition: `center ${festival.thumbnailPositionY || 50}%` }} 
+                  style={{ 
+                    objectFit: 'contain', 
+                    width: '100%', 
+                    height: '100%', 
+                    transform: `scale(${(festival.thumbnailZoom || 100) / 100})` 
+                  }} 
                   alt="thumbnail"
                 />
               )}
             </div>
             {festival.thumbnail && (
               <div className="thumb-pos-control">
-                <label>썸네일 수직 위치 조정 ({festival.thumbnailPositionY || 50}%)</label>
+                <label>썸네일 크기 확대/축소 ({festival.thumbnailZoom || 100}%)</label>
                 <input 
                   type="range" 
-                  min="0" max="100" 
-                  value={festival.thumbnailPositionY || 50} 
-                  onChange={e => update('thumbnailPositionY', parseInt(e.target.value))} 
+                  min="10" max="300" 
+                  value={festival.thumbnailZoom || 100} 
+                  onChange={e => update('thumbnailZoom', parseInt(e.target.value))} 
                 />
                 <button className="upload-inline-btn" onClick={() => update('thumbnail', '')}>썸네일 삭제</button>
               </div>
             )}
 
             <label>축제 갤러리 이미지 ({festival.images?.length || 0})</label>
-            <div className="hs-photos-preview" style={{ marginBottom: '1.5rem' }}>
+            <div className="hs-photos-preview" style={{ marginBottom: festival.images?.length ? '0.5rem' : '1.5rem' }}>
               {festival.images?.map((img, i) => (
-                <div key={i} className="photo-wrapper">
-                  <img src={img} alt="festival" />
+                <div key={i} className="photo-wrapper" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img 
+                    src={img} 
+                    alt="festival" 
+                    style={{ 
+                      objectFit: 'contain', 
+                      width: '100%', 
+                      height: '100%', 
+                      transform: `scale(${(festival.galleryZoom || 100) / 100})` 
+                    }} 
+                  />
                   <button className="photo-remove-btn" onClick={() => removeImage(i)}><X size={10} /></button>
                 </div>
               ))}
@@ -829,6 +843,17 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                 <input type="file" multiple onChange={e => handleImageUpload(e, 'images')} style={{ display: 'none' }} />
               </label>
             </div>
+            {festival.images && festival.images.length > 0 && (
+              <div className="thumb-pos-control" style={{ marginBottom: '1.5rem' }}>
+                <label>갤러리 이미지 크기 확대/축소 ({festival.galleryZoom || 100}%)</label>
+                <input 
+                  type="range" 
+                  min="10" max="300" 
+                  value={festival.galleryZoom || 100} 
+                  onChange={e => update('galleryZoom', parseInt(e.target.value))} 
+                />
+              </div>
+            )}
 
             <label>지도 배경 이미지</label>
             {festival.mapImage ? (
