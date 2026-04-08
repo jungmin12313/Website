@@ -18,6 +18,7 @@ export default function FestivalDetail() {
   const navigate = useNavigate()
   const [festival, setFestival] = useState<Festival | null>(null)
   const [tab, setTab] = useState<Tab>('map')
+  const [activeMapIndex, setActiveMapIndex] = useState(0)
   const [imgIdx, setImgIdx] = useState(0)
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
   const [reports, setReports] = useState<Report[]>([])
@@ -192,12 +193,24 @@ export default function FestivalDetail() {
 
             {/* 우측 지도 */}
             <div className="map-area">
+              {(() => {
+                const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
+                if (maps.length > 1) {
+                  return (
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <button style={{ flex: 1, padding: '0.5rem', background: activeMapIndex === 0 ? 'var(--primary)' : 'white', color: activeMapIndex === 0 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setActiveMapIndex(0)}>앞면 지도</button>
+                      <button style={{ flex: 1, padding: '0.5rem', background: activeMapIndex === 1 ? 'var(--primary)' : 'white', color: activeMapIndex === 1 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setActiveMapIndex(1)}>뒷면 지도</button>
+                    </div>
+                  )
+                }
+                return null
+              })()}
               <div className="map-controls">
                 <button onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
                 <span>{Math.round(mapScale * 100)}%</span>
                 <button onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
                 <div className="control-divider" />
-                <button onClick={() => festival.mapImage && window.open(festival.mapImage, '_blank')} title="원본 이미지 보기">
+                <button onClick={() => window.open((festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : []))[activeMapIndex], '_blank')} title="원본 이미지 보기">
                   <Maximize size={16} />
                 </button>
               </div>
@@ -286,9 +299,12 @@ export default function FestivalDetail() {
                       transformOrigin: '0 0'
                     }}
                   >
-                    {festival.mapImage ? (
+                    {(() => {
+                      const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
+                      const currentMap = maps[activeMapIndex]
+                      return currentMap ? (
                        <img
-                        src={festival.mapImage}
+                        src={currentMap}
                         alt="축제 무장애지도"
                         className="map-img"
                         onLoad={(e) => {
@@ -309,10 +325,11 @@ export default function FestivalDetail() {
                         <p>지도 이미지가 준비 중입니다.</p>
                         <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
                       </div>
-                    )}
+                    )
+                    })()}
                     
                     {/* 핫스팟 */}
-                    {festival.hotspots.map(hs => (
+                    {festival.hotspots.filter(hs => (hs.mapIndex || 0) === activeMapIndex).map(hs => (
                       <button
                         key={hs.id}
                         className={`hotspot-btn ${hs.isReportBased ? 'report-pin' : 'info-pin'}`}
@@ -327,7 +344,7 @@ export default function FestivalDetail() {
                     ))}
                     
                     {/* 승인된 제보 아이콘 (빨간 느낌표) */}
-                    {reports.map(r => (
+                    {reports.filter(r => (r.mapIndex || 0) === activeMapIndex).map(r => (
                       <button
                         key={r.id}
                         className="report-pin-btn pulse"

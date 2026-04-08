@@ -15,6 +15,7 @@ export default function ReportPage() {
     content: ''
   })
   const [coords, setCoords] = useState<{ x: number, y: number } | null>(null)
+  const [selectedMapIndex, setSelectedMapIndex] = useState(0)
   const [images, setImages] = useState<string[]>([])
   const mapRef = useRef<HTMLDivElement>(null)
 
@@ -27,7 +28,10 @@ export default function ReportPage() {
   useEffect(() => {
     const f = festivals.find(f => f.id === formData.festivalId)
     setSelectedFestival(f || null)
-    if (!f) setCoords(null)
+    if (!f) {
+      setCoords(null)
+      setSelectedMapIndex(0)
+    }
   }, [formData.festivalId, festivals])
 
   const compressImage = (base64: string, maxWidth = 1000, quality = 0.7): Promise<string> => {
@@ -107,6 +111,7 @@ export default function ReportPage() {
       content,
       x: coords?.x,
       y: coords?.y,
+      mapIndex: selectedMapIndex,
       festivalName: selectedFestival?.name || '',
       images,
       createdAt: Date.now(),
@@ -175,32 +180,48 @@ export default function ReportPage() {
             type="text" placeholder="예: 메인 무대 왼쪽 입구 근처, 푸드트럭 구역 끝쪽" style={{ border: '1px solid #dee2e6', borderRadius: '0.625rem', padding: '0.875rem 1rem', fontSize: '0.9375rem', outline: 'none', fontFamily: 'inherit' }} 
           />
           
-          {selectedFestival && selectedFestival.mapImage && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>지도에서 위치를 직접 클릭하면 관리자가 더 정확히 파악할 수 있습니다.</p>
-              <div 
-                ref={mapRef}
-                onClick={handleMapClick}
-                style={{ position: 'relative', width: '100%', borderRadius: '0.75rem', overflow: 'hidden', cursor: 'crosshair', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #dee2e6' }}
-              >
-                <img src={selectedFestival.mapImage} alt="map" style={{ width: '100%', display: 'block' }} />
-                {coords && (
-                  <div style={{ position: 'absolute', left: `${coords.x}%`, top: `${coords.y}%`, transform: 'translate(-50%, -100%)', color: '#fa5252' }}>
-                    <AlertTriangle size={24} fill="#fa5252" color="white" />
+          {(() => {
+            const maps = selectedFestival?.mapImages?.length ? selectedFestival.mapImages : (selectedFestival?.mapImage ? [selectedFestival.mapImage] : [])
+            const currentMap = maps[selectedMapIndex]
+            
+            if (currentMap) {
+              return (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>지도에서 위치를 직접 클릭하면 관리자가 더 정확히 파악할 수 있습니다.</p>
+                  
+                  {maps.length > 1 && (
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <button type="button" style={{ flex: 1, padding: '0.5rem', background: selectedMapIndex === 0 ? '#1a1a1a' : '#f8f9fa', color: selectedMapIndex === 0 ? 'white' : '#495057', border: '1px solid #dee2e6', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => { setSelectedMapIndex(0); setCoords(null); }}>앞면 지도</button>
+                      <button type="button" style={{ flex: 1, padding: '0.5rem', background: selectedMapIndex === 1 ? '#1a1a1a' : '#f8f9fa', color: selectedMapIndex === 1 ? 'white' : '#495057', border: '1px solid #dee2e6', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => { setSelectedMapIndex(1); setCoords(null); }}>뒷면 지도</button>
+                    </div>
+                  )}
+
+                  <div 
+                    ref={mapRef}
+                    onClick={handleMapClick}
+                    style={{ position: 'relative', width: '100%', borderRadius: '0.75rem', overflow: 'hidden', cursor: 'crosshair', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #dee2e6' }}
+                  >
+                    <img src={currentMap} alt="map" style={{ width: '100%', display: 'block' }} />
+                    {coords && (
+                      <div style={{ position: 'absolute', left: `${coords.x}%`, top: `${coords.y}%`, transform: 'translate(-50%, -100%)', color: '#fa5252' }}>
+                        <AlertTriangle size={24} fill="#fa5252" color="white" />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {coords && (
-                <button 
-                  type="button"
-                  onClick={() => setCoords(null)}
-                  style={{ marginTop: '0.5rem', background: 'none', border: 'none', color: '#888', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                >
-                  <X size={12} /> 위치 선택 취소
-                </button>
-              )}
-            </div>
-          )}
+                  {coords && (
+                    <button 
+                      type="button"
+                      onClick={() => setCoords(null)}
+                      style={{ marginTop: '0.5rem', background: 'none', border: 'none', color: '#888', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                    >
+                      <X size={12} /> 위치 선택 취소
+                    </button>
+                  )}
+                </div>
+              )
+            }
+            return null
+          })()}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

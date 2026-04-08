@@ -12,6 +12,7 @@ export interface Hotspot {
   note?: string
   isReportBased?: boolean // 신고센터 제보 기반 핫스팟 여부
   modalType?: 'default' | 'enhanced' // 모달 종류 구분
+  mapIndex?: number // 0: 앞면, 1: 뒷면
 }
 
 export interface TransportService {
@@ -54,6 +55,7 @@ export interface Festival {
   description: string
   programs: string[]
   mapImage: string
+  mapImages?: string[] // [0]: 앞면, [1]: 뒷면
   hotspots: Hotspot[]
   transport: Transport | null
   pictograms: Pictogram[]
@@ -70,6 +72,7 @@ export interface Report {
   locationDetail?: string // 대략적인 위치 설명
   x?: number             // % 좌표 (지도 표시용)
   y?: number             // % 좌표 (지도 표시용)
+  mapIndex?: number      // 0: 앞면, 1: 뒷면
   content: string
   images: string[]
   createdAt: number

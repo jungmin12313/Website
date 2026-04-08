@@ -19,6 +19,7 @@ export default function Admin() {
   
   // Hotspot state
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('')
+  const [selectedMapIndex, setSelectedMapIndex] = useState<number>(0)
   const [hotspots, setHotspots] = useState<Hotspot[]>([])
   const [mapSrc, setMapSrc] = useState<string>('')
   const [adding, setAdding] = useState(false)
@@ -186,7 +187,9 @@ export default function Admin() {
     if (!f) return
     setSelectedFestivalId(id)
     setHotspots(f.hotspots || [])
-    setMapSrc(f.mapImage || '')
+    const maps = f.mapImages?.length ? f.mapImages : (f.mapImage ? [f.mapImage] : [])
+    setMapSrc(maps[0] || '')
+    setSelectedMapIndex(0)
   }
 
   const handleSelectionStart = (e: React.MouseEvent) => {
@@ -247,6 +250,7 @@ export default function Admin() {
         pictogramIds: [],
         photos: [],
         pictogramImages: [],
+        mapIndex: selectedMapIndex
       }
       setEditHs(newHs)
     }
@@ -295,6 +299,14 @@ export default function Admin() {
       photosToConvert.map(img => compressImage(img, 500, 0.15))
     )
 
+    const targetMapIdx = report.mapIndex || 0
+    setSelectedMapIndex(targetMapIdx)
+    const festival = festivals.find(f => f.id === report.festivalId)
+    if (festival) {
+      const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
+      setMapSrc(maps[targetMapIdx] || '')
+    }
+
     const newHs: Hotspot = {
       id: `hs-${Date.now()}`,
       x: report.x || 50,
@@ -306,7 +318,8 @@ export default function Admin() {
       pictogramIds: [],
       photos: compressedPhotos,
       pictogramImages: [],
-      isReportBased: true
+      isReportBased: true,
+      mapIndex: targetMapIdx
     }
     
     setEditHs(newHs)
@@ -321,7 +334,11 @@ export default function Admin() {
       const compressed = await compressImage(reader.result as string, 1600, 0.5)
       setMapSrc(compressed)
       const festival = festivals.find(f => f.id === selectedFestivalId)
-      if (festival) updateAndSave({ ...festival, mapImage: compressed })
+      if (festival) {
+        const maps = [...(festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : []))]
+        maps[selectedMapIndex] = compressed
+        updateAndSave({ ...festival, mapImages: maps, mapImage: maps[0] || '' })
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -426,8 +443,20 @@ export default function Admin() {
               
               {selectedFestivalId && (
                 <>
-                  <span className="sidebar-label">지도 설정</span>
-                  <label className="upload-btn"><Upload size={16} /> 지도 배경 업로드<input type="file" onChange={handleMapUpload} style={{ display: 'none' }} /></label>
+                  {(() => {
+                    const f = festivals.find(f => f.id === selectedFestivalId)
+                    const maps = f?.mapImages?.length ? f.mapImages : (f?.mapImage ? [f.mapImage] : [])
+                    if (maps.length > 1) {
+                      return (
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                           <button className={`tab-btn ${selectedMapIndex === 0 ? 'active' : ''}`} style={{ flex: 1, minWidth: '45%', padding: '0.5rem' }} onClick={() => { setSelectedMapIndex(0); setMapSrc(maps[0] || '') }}>앞면 지도</button>
+                           <button className={`tab-btn ${selectedMapIndex === 1 ? 'active' : ''}`} style={{ flex: 1, minWidth: '45%', padding: '0.5rem' }} onClick={() => { setSelectedMapIndex(1); setMapSrc(maps[1] || '') }}>뒷면 지도</button>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
+
                   
                   <span className="sidebar-label">핫스팟 도구</span>
                    <button className={`add-btn ${adding ? 'active' : ''}`} onClick={() => setAdding(!adding)}>
@@ -441,9 +470,9 @@ export default function Admin() {
                   </div>
 
                   <div className="hs-list">
-                    <span className="sidebar-label">핫스팟 목록 ({hotspots.length})</span>
-                    {hotspots.length === 0 && <div className="empty-text">장소가 없습니다.</div>}
-                    {hotspots.map(hs => (
+                    <span className="sidebar-label">핫스팟 목록 ({hotspots.filter(h => (h.mapIndex || 0) === selectedMapIndex).length})</span>
+                    {hotspots.filter(h => (h.mapIndex || 0) === selectedMapIndex).length === 0 && <div className="empty-text">장소가 없습니다.</div>}
+                    {hotspots.filter(h => (h.mapIndex || 0) === selectedMapIndex).map(hs => (
                       <div key={hs.id} className="hs-item">
                     <button className="hs-name" onClick={() => { setEditHs(hs); setAdding(true); }}>{hs.label || '(이름없음)'}</button>
                     <button className="hs-delete" onClick={() => deleteHotspot(hs.id)}><Trash2 size={14} /></button>
@@ -519,7 +548,7 @@ export default function Admin() {
                   />
                 )}
 
-                {hotspots.filter(h => !editHs || h.id !== editHs.id).map(hs => (
+                {hotspots.filter(h => (!editHs || h.id !== editHs.id) && (h.mapIndex || 0) === selectedMapIndex).map(hs => (
                   <button 
                     key={hs.id} 
                     className={`admin-hotspot ${hs.isReportBased ? 'report-pin' : ''} ${!isLocked ? 'editable' : ''}`} 
@@ -856,17 +885,45 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
             )}
 
             <label>지도 배경 이미지</label>
-            {festival.mapImage ? (
-              <div className="map-img-preview" style={{ position: 'relative' }}>
-                <img src={festival.mapImage} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef' }} />
-                <button className="upload-inline-btn" onClick={() => update('mapImage', '')} style={{ marginTop: '0.5rem' }}>지도 삭제</button>
-              </div>
-            ) : (
-              <label className="add-photo-box" style={{ width: '100%', padding: '2rem', height: 'auto' }}>
-                <Upload size={18} /> 지도 배경 업로드
-                <input type="file" onChange={e => handleImageUpload(e, 'mapImage')} style={{ display: 'none' }} />
-              </label>
-            )}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              {[0, 1].map(idx => {
+                const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
+                const mapUrl = maps[idx]
+                return (
+                  <div key={idx} style={{ flex: 1, minWidth: '200px' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#495057', marginBottom: '0.5rem' }}>{idx === 0 ? '앞면 지도' : '뒷면 지도'}</div>
+                    {mapUrl ? (
+                      <div className="map-img-preview" style={{ position: 'relative' }}>
+                        <img src={mapUrl} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef' }} />
+                        <button className="upload-inline-btn" onClick={() => {
+                          const newMaps = [...maps]
+                          newMaps[idx] = ''
+                          update('mapImages', newMaps)
+                          if(idx === 0) update('mapImage', '')
+                        }} style={{ marginTop: '0.5rem' }}>지도 삭제</button>
+                      </div>
+                    ) : (
+                      <label className="add-photo-box" style={{ width: '100%', padding: '2rem', height: 'auto' }}>
+                        <Upload size={18} /> {idx === 0 ? '앞면 추가' : '뒷면 추가'}
+                        <input type="file" onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          const reader = new FileReader()
+                          reader.onloadend = async () => {
+                            const compressed = await compressImage(reader.result as string, 1600, 0.5)
+                            const newMaps = [...maps]
+                            newMaps[idx] = compressed
+                            update('mapImages', newMaps)
+                            if (idx === 0) update('mapImage', compressed)
+                          }
+                          reader.readAsDataURL(file)
+                        }} style={{ display: 'none' }} />
+                      </label>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
         <div className="editor-footer">
