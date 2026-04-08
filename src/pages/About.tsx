@@ -61,8 +61,8 @@ const VOICES = [
 
 export default function About() {
   useSEO({
-    title: '내일 · 무장애 축제 지도 — 소개',
-    description: '장애인의 문화예술 직접 참여율은 3.6%. 내일은 휠체어 이용자와 함께 현장을 누비며 만든 무장애 축제 지도입니다.',
+    title: "서비스 소개 | 내일 무장애 축제 지도",
+    description: "내일은 장애인·노인·휠체어 사용자 모두가 참여할 수 있는 무장애 축제 지도입니다. 전국 축제의 배리어프리 접근성 정보를 한눈에 확인하세요.",
     url: 'https://naeilmap.com/about'
   });
 
@@ -144,7 +144,7 @@ export default function About() {
           <p className="reveal" style={{ ...s.heroSub, transitionDelay: '0.1s' }}>
             장애인의 문화예술 직접 참여율은 단 3.6%.<br />
             당연한 축제가 누군가에겐 큰 용기가 필요한 일이라면<br />
-            우리는 그 장벽을 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>과 함께 허물어갑니다.
+            우리는 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>과 함께, 배리어프리 무장애 축제를 향한 접근성 장벽을 허물어갑니다.
           </p>
           <div className="reveal" style={{ ...s.heroCta, transitionDelay: '0.2s' }}>
             <Link to="/maps" style={s.btnMain}>지도 보러 가기</Link>
@@ -182,7 +182,7 @@ export default function About() {
                 <div style={s.mvLabel}>Difference 01</div>
                 <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>더 직관적인 무장애지도</h3>
                 <p style={{ ...s.methodDesc, fontSize: 15 }}>
-                  지도 위 픽토그램을 클릭하면 현장 사진과 함께 실제 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
+                  무장애지도 위 픽토그램을 클릭하면 현장 사진은 물론 실제 휠체어 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
                   <strong>"가보기 전에도 현장의 모습을 생생하게"</strong>
                 </p>
              </div>
@@ -208,7 +208,7 @@ export default function About() {
             <div className="reveal" style={{ ...s.storyBody, transitionDelay: '0.1s' }}>
               <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 우리는 직접 들었습니다.</p>
               <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
-              <p style={{ marginTop: 16 }}>그래서 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 바퀴가 닿는 모든 곳을 직접 확인하면서.</p>
+              <p style={{ marginTop: 16 }}>그래서 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 휠체어 바퀴가 닿는 모든 곳의 배리어프리 접근성을 직접 확인하면서.</p>
             </div>
           </div>
         </section>
