@@ -2,4 +2,16 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
 Sitemap: https://naeilmap.com/sitemap.xml

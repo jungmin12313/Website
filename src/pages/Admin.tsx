@@ -814,6 +814,104 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                 🎯 메인 화면 최상단 위젯으로 노출하기 (최대 3개 권장)
               </label>
             </div>
+
+            <div className="transport-section" style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid #e9ecef', borderRadius: '0.75rem', background: '#fcfcfc' }}>
+              <h4 style={{ margin: '0 0 1rem 0', color: '#343a40' }}>무장애 편의정보 (교통/접근성)</h4>
+              <label>전반적인 안내 설명</label>
+              <textarea
+                value={festival.transport?.description || ''}
+                onChange={e => {
+                  const currentParams = festival.transport || { description: '', services: [] }
+                  update('transport', { ...currentParams, description: e.target.value })
+                }}
+                placeholder="예: 행사장까지 저상버스가 15분 간격으로 운행됩니다."
+                rows={3}
+              />
+              <div style={{ marginTop: '1.5rem' }}>
+                <label style={{ marginBottom: '0.5rem', display: 'block' }}>교통/편의 서비스 항목</label>
+                {(festival.transport?.services || []).map((service, idx) => (
+                  <div key={idx} style={{ background: '#fff', border: '1px solid #dee2e6', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', position: 'relative' }}>
+                    <button 
+                      className="upload-inline-btn" 
+                      style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.25rem 0.5rem', background: '#ffe3e3', color: '#c92a2a', border: 'none' }}
+                      onClick={() => {
+                        const newServices = festival.transport!.services.filter((_, i) => i !== idx)
+                        update('transport', { ...festival.transport, services: newServices })
+                      }}
+                    >
+                      삭제
+                    </button>
+                    <div className="row">
+                      <div className="col">
+                        <label>서비스명</label>
+                        <input value={service.name} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, name: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 무장애 셔틀버스" />
+                      </div>
+                      <div className="col">
+                        <label>이용대상</label>
+                        <input value={service.target} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, target: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 휠체어 이용자 및 동반 1인" />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col">
+                        <label>이용방법 및 수단</label>
+                        <input value={service.phone} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, phone: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 사전 예약 (010-0000-0000)" />
+                      </div>
+                      <div className="col">
+                        <label>이용요금</label>
+                        <input value={service.fee} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, fee: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 무료" />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col">
+                        <label>운행 정보 / 시간</label>
+                        <input value={service.operator} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, operator: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 09:00 ~ 18:00 순환" />
+                      </div>
+                      <div className="col">
+                        <label>기타 문의</label>
+                        <input value={service.inquiry} onChange={e => {
+                          const newServices = [...festival.transport!.services]
+                          newServices[idx] = { ...service, inquiry: e.target.value }
+                          update('transport', { ...festival.transport, services: newServices })
+                        }} placeholder="예: 다산콜센터 120" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button 
+                  className="add-main-btn" 
+                  style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', background: '#339af0', color: 'white', borderRadius: '0.5rem', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  onClick={() => {
+                    const currentTransport = festival.transport || { description: '', services: [] }
+                    update('transport', {
+                      ...currentTransport,
+                      services: [...currentTransport.services, { name: '', target: '', phone: '', fee: '', operator: '', inquiry: '' }]
+                    })
+                  }}
+                >
+                  <Plus size={16} /> 서비스 항목 추가
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="editor-preview">

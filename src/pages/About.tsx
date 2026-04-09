@@ -43,17 +43,17 @@ const STATS = [
 const VOICES = [
   {
     quote: "정보가 없는 건 아니에요. 근데 그 정보가 진짜인지 믿기가 힘들죠. 가보기 전까지는 늘 불안함이 앞서요.",
-    contextParts: ["이 말이 '내일'의 출발점이었습니다. 불안을 없애는 건 더 많은 정보가 아니라, ", "더 믿을 수 있는 정보", "였습니다. 우리가 직접 현장에 나가 바퀴로 확인하기 시작한 이유입니다."],
+    contextParts: ["이 말이 '내일'의 출발점이었습니다. 불안을 없애는 건 더 많은 정보가 아니라, ", "더 믿을 수 있는 정보", "였습니다. 내일이 직접 현장에 나가 바퀴로 확인하기 시작한 이유입니다."],
     who: "휠체어 이용자 · 현장 인터뷰",
   },
   {
     quote: "경사로가 있다는 표시보다, 그 경사가 얼마나 가파른지가 더 중요해요. 그걸 아는 사람이 직접 가서 봐줘야 해요.",
-    contextParts: ["그래서 우리는 '있다/없다'가 아닌 ", "'쓸 수 있다/없다'", "로 기준을 바꿨습니다. 경사도, 단차 높이, 통로 폭을 직접 측정하고 수치로 기록합니다."],
+    contextParts: ["그래서 내일은 '있다/없다'가 아닌 ", "'쓸 수 있다/없다'", "로 기준을 바꿨습니다. 경사도, 단차 높이, 통로 폭을 직접 측정하고 수치로 기록합니다."],
     who: "장애인 이동권 활동가 · 현장 인터뷰",
   },
   {
     quote: "축제를 즐기러 간 건데, 입구에서 발길을 돌릴 때의 기분을 설명하기가 어려워요.",
-    contextParts: ["이 기분을 다시는 느끼지 않도록. 지도 한 장이 그 무게를 담을 수 있다고, 우리는 믿습니다. ", "수익을 쫓는 기업이 아닌, 사회적 가치를 쫓는 학생들의 순수한 열정", "입니다."],
+    contextParts: ["이 기분을 다시는 느끼지 않도록. 지도 한 장이 그 무게를 담을 수 있다고, 내일은 믿습니다. ", "수익을 쫓는 기업이 아닌, 사회적 가치를 쫓는 학생들의 순수한 열정", "입니다."],
     who: "휠체어 이용자 · 현장 인터뷰",
   },
 ];
@@ -144,7 +144,7 @@ export default function About() {
           <p className="reveal" style={{ ...s.heroSub, transitionDelay: '0.1s' }}>
             장애인의 문화예술 직접 참여율은 단 3.6%.<br />
             당연한 축제가 누군가에겐 큰 용기가 필요한 일이라면<br />
-            우리는 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>과 함께, 배리어프리 무장애 축제를 향한 접근성 장벽을 허물어갑니다.
+            <span style={{ color: "#1A1A1A", fontWeight: 700 }}>내일</span>은 장애인·휠체어 사용자·노인 모두가 축제를 즐길 수 있도록 배리어프리 접근성 정보를 제공합니다.
           </p>
           <div className="reveal" style={{ ...s.heroCta, transitionDelay: '0.2s' }}>
             <Link to="/maps" style={s.btnMain}>지도 보러 가기</Link>
@@ -206,7 +206,7 @@ export default function About() {
               그 정보가<br /><span style={{ color: C.blue }}>'진짜'인지</span><br />몰랐던 겁니다.
             </div>
             <div className="reveal" style={{ ...s.storyBody, transitionDelay: '0.1s' }}>
-              <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 우리는 직접 들었습니다.</p>
+              <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 내일은 직접 들었습니다.</p>
               <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
               <p style={{ marginTop: 16 }}>그래서 <span style={{ color: "#1A1A1A", fontWeight: 700 }}>'내일'</span>은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 휠체어 바퀴가 닿는 모든 곳의 배리어프리 접근성을 직접 확인하면서.</p>
             </div>
@@ -218,7 +218,7 @@ export default function About() {
           <div style={{ maxWidth: 560, marginBottom: 48 }}>
             <div style={s.pill} className="reveal">당사자의 목소리</div>
             <div className="reveal" style={{ ...s.storyHeading, marginTop: 12, marginBottom: 14, transitionDelay: '0.1s' }}>
-              우리가 현장으로 나간<br />진짜 이유
+              내일이 현장으로 나간<br />진짜 이유
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -238,7 +238,7 @@ export default function About() {
         <section style={s.cta} aria-label="함께하기">
           <p style={s.ctaBig} className="reveal">모두에게 즐거운 축제의 <span style={{ color: "white" }}>내일</span></p>
           <p className="reveal" style={{ ...(s.ctaSub as React.CSSProperties), transitionDelay: '0.1s' }}>
-            우리의 지도는 기술이 아닌 따뜻한 관심으로 채워집니다.<br />
+            내일의 지도는 기술이 아닌 따뜻한 관심으로 채워집니다.<br />
             더 많은 이들이 문밖으로 나설 수 있도록,<br />
             지금 <span style={{ color: "white", fontWeight: 700 }}>'내일'</span>과 함께해주세요.
           </p>
