@@ -102,7 +102,6 @@ export default function About() {
       />
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         
         .reveal {
           opacity: 0;

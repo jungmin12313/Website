@@ -37,15 +37,16 @@ export default function Home() {
   return (
     <div className="home">
       {/* 히어로 섹션 */}
-      <section 
-        className="hero" 
-        style={{ 
-          backgroundImage: `url("${heroBg || defaultHero}")`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center' 
-        }}
-      >
-        <div className="hero-overlay" />
+      <section className="hero">
+        <img 
+          src={heroBg || defaultHero} 
+          alt="무장애 축제 지도 내일 배경" 
+          fetchPriority="high" 
+          width="1920" 
+          height="1080" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} 
+        />
+        <div className="hero-overlay" style={{ zIndex: 1 }} />
         <div className="hero-content">
           <h1 className="hero-title">
             모두를 위한 무장애 축제 지도, 내일
@@ -70,6 +71,9 @@ export default function Home() {
                     <img 
                       src={fest.thumbnail || fest.mapImage} 
                       alt={fest.name} 
+                      width="90"
+                      height="90"
+                      loading="lazy"
                       style={{ 
                         objectFit: 'contain', 
                         width: '100%', 

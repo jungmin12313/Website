@@ -326,22 +326,7 @@ export default function Admin() {
     setSelectedReport(null)
   }
 
-  const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1600, 0.5)
-      setMapSrc(compressed)
-      const festival = festivals.find(f => f.id === selectedFestivalId)
-      if (festival) {
-        const maps = [...(festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : []))]
-        maps[selectedMapIndex] = compressed
-        updateAndSave({ ...festival, mapImages: maps, mapImage: maps[0] || '' })
-      }
-    }
-    reader.readAsDataURL(file)
-  }
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

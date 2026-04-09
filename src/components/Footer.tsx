@@ -8,7 +8,10 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-brand">
           <Link to="/" className="f-logo-link">
-            <img src="/logo.png" alt="내일" className="footer-logo" style={{ filter: 'contrast(1.2) brightness(0.9)' }} />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img src="/logo.png" alt="내일" className="footer-logo" loading="lazy" width="120" height="40" style={{ filter: 'contrast(1.2) brightness(0.9)' }} />
+            </picture>
           </Link>
           <div className="footer-contact">
             <a href="mailto:jm56s@naver.com" className="contact-item">
