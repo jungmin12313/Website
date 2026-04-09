@@ -11,10 +11,12 @@ export default defineConfig({
     minify: true, // esbuild (default, faster)
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          firebase: ['firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/auth'],
-          icons: ['lucide-react']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react/') || id.includes('react-dom/')) return 'vendor';
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('lucide-react')) return 'icons';
+          }
         }
       }
     },
