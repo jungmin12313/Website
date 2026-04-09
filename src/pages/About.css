@@ -1,5 +1,5 @@
 .about-page {
-  background: white;
+  background: var(--white);
   color: var(--gray-900);
 }
 
@@ -89,7 +89,7 @@
 }
 
 .value-card {
-  background: white;
+  background: var(--white);
   padding: 2.5rem;
   border-radius: 1.5rem;
   border: 1px solid var(--gray-200);

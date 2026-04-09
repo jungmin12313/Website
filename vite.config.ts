@@ -14,13 +14,15 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('react/') || id.includes('react-dom/')) return 'vendor';
-            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('firebase/app')) return 'firebase-core';
+            if (id.includes('firebase/firestore')) return 'firebase-db';
+            if (id.includes('firebase/auth')) return 'firebase-auth';
             if (id.includes('lucide-react')) return 'icons';
           }
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
   },
   base: '/',
 })

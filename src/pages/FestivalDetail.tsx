@@ -121,11 +121,13 @@ export default function FestivalDetail() {
                       </>
                     )}
                   </div>
-                  <div className="slider-dots">
-                    {(displayImages.length > 0 ? displayImages : ['']).map((_, i) => (
-                      <span key={i} className={`dot ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)} />
-                    ))}
-                  </div>
+                  {displayImages.length > 1 && (
+                    <div className="slider-dots">
+                      {displayImages.map((_, i) => (
+                        <span key={i} className={`dot ${i === imgIdx ? 'active' : ''}`} onClick={() => setImgIdx(i)} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )
             })()}

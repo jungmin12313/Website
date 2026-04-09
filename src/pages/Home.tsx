@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, ChevronRight } from 'lucide-react'
-import { getSetting, getFestivals } from '../firebaseUtils'
 import type { Festival } from '../types'
 import defaultHero from '../assets/hero.png'
 import { useSEO } from '../hooks/useSEO'
@@ -9,7 +8,7 @@ import './Home.css'
 
 export default function Home() {
   const [query, setQuery] = useState('')
-  const [heroBg, setHeroBg] = useState('')
+  const [heroBg, setHeroBg] = useState(() => localStorage.getItem('naeil_hero_bg_cache') || '')
   const [mainFestivals, setMainFestivals] = useState<Festival[]>([])
   const navigate = useNavigate()
 
@@ -20,14 +19,28 @@ export default function Home() {
   });
 
   useEffect(() => {
-    getSetting('naeil_hero_bg').then(savedHero => {
-      if (savedHero) setHeroBg(savedHero)
-    }).catch(err => console.error('Failed to load hero background:', err))
+    // Firebase 함수들을 동적 임포트하여 초기 번들 크기 감소 및 실행 지연 방지
+    const loadData = async () => {
+      try {
+        const { getSetting, getFestivals } = await import('../firebaseUtils');
+        
+        getSetting('naeil_hero_bg').then(savedHero => {
+          if (savedHero) {
+            setHeroBg(savedHero);
+            localStorage.setItem('naeil_hero_bg_cache', savedHero); // 캐시 업데이트
+          }
+        });
 
-    getFestivals().then(fests => {
-      const onMain = fests.filter(f => f.showOnMain === true && (f.thumbnail || f.mapImage))
-      setMainFestivals(onMain.slice(0, 3))
-    }).catch(err => console.error('Failed to load festivals:', err))
+        getFestivals().then(fests => {
+          const onMain = fests.filter(f => f.showOnMain === true && (f.thumbnail || f.mapImage));
+          setMainFestivals(onMain.slice(0, 3));
+        });
+      } catch (err) {
+        console.error('Failed to load data:', err);
+      }
+    };
+
+    loadData();
   }, [])
 
   const handleSearch = () => {
@@ -42,9 +55,10 @@ export default function Home() {
           src={heroBg || defaultHero} 
           alt="무장애 축제 지도 내일 배경" 
           fetchPriority="high" 
+          decoding="async"
           width="1920" 
           height="1080" 
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} 
+          className={`hero-img ${heroBg ? 'loaded' : ''}`}
         />
         <div className="hero-overlay" style={{ zIndex: 1 }} />
         <div className="hero-content">
@@ -74,6 +88,7 @@ export default function Home() {
                       width="90"
                       height="90"
                       loading="lazy"
+                      decoding="async"
                       style={{ 
                         objectFit: 'contain', 
                         width: '100%', 
