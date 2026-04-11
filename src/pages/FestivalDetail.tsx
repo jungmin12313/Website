@@ -51,8 +51,8 @@ export default function FestivalDetail() {
   }, [id, navigate])
 
   useSEO({
-    title: festival ? `${festival.name} 무장애 정보 | 내일` : '무장애 축제 정보 불러오는 중 | 내일',
-    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 확인하세요. 당사자와 함께 직접 조사한 믿을 수 있는 데이터입니다.` : '로딩 중...',
+    title: festival ? `${festival.name} | 무장애지도 전문 플랫폼 '내일'` : '무장애 축제 정보 불러오는 중 | 내일',
+    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 상세한 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 데이터입니다.` : '로딩 중...',
     url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps'
   });
 

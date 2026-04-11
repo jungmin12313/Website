@@ -16,8 +16,8 @@ export default function FestivalList() {
   const navigate = useNavigate()
 
   useSEO({
-    title: '전국 무장애 축제 지도 | 내일',
-    description: '전국 각지의 무장애 축제 일정을 확인하고 다채로운 즐길 거리를 찾아보세요.',
+    title: "전국 무장애지도 목록 | 내일",
+    description: "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
     url: 'https://naeilmap.com/maps'
   });
 

@@ -61,8 +61,8 @@ const VOICES = [
 
 export default function About() {
   useSEO({
-    title: "서비스 소개 | 내일 무장애 축제 지도",
-    description: "내일은 장애인·노인·휠체어 사용자 모두가 참여할 수 있는 무장애 축제 지도입니다. 전국 축제의 배리어프리 접근성 정보를 한눈에 확인하세요.",
+    title: "서비스 소개 | 무장애지도",
+    description: "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
     url: 'https://naeilmap.com/about'
   });
 
@@ -91,12 +91,12 @@ export default function About() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "내일(Naeil) · 무장애 축제 지도",
-            "description": "장애인의 문화예술 접근성을 높이기 위해 휠체어 이용자와 함께 현장을 조사하는 비영리 학생 자치단체",
+            "name": "무장애지도 | 모두가 참여할 수 있는 축제, 내일",
+            "description": "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
             "url": "https://naeilmap.com",
             "foundingDate": "2024",
             "areaServed": "KR",
-            "keywords": "무장애 축제, 장애인 문화 접근성, 휠체어 축제 지도"
+            "keywords": "무장애지도, 무장애 축제, 무장애축제지도, 배리어프리, 장애인 문화 접근성, 휠체어 축제 지도"
           })
         }}
       />

@@ -33,10 +33,7 @@ export default function Navbar() {
               <Menu size={26} />
             </button>
             <Link to="/" className="logo-link">
-              <picture>
-                <source srcSet="/logo_minimal.webp" type="image/webp" />
-                <img src="/logo_minimal.png" alt="내일" className="logo-img" width="100" height="30" loading="lazy" />
-              </picture>
+              <img src="/logo_transparent.png" alt="내일" className="logo-img" width="100" height="30" loading="lazy" />
             </Link>
           </div>
 
@@ -69,10 +66,7 @@ export default function Navbar() {
       <div className={`sidebar-overlay ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
         <div className={`sidebar ${menuOpen ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="sidebar-header">
-            <picture>
-              <source srcSet="/logo_minimal.webp" type="image/webp" />
-              <img src="/logo_minimal.png" alt="내일" className="sidebar-logo" width="100" height="30" loading="lazy" />
-            </picture>
+            <img src="/logo_transparent.png" alt="내일" className="sidebar-logo" width="100" height="30" loading="lazy" />
             <button className="sidebar-close" onClick={() => setMenuOpen(false)}>
               <X size={28} />
             </button>
