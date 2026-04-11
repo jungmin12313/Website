@@ -35,7 +35,7 @@
 }
 
 .logo-img {
-  height: 4.8rem;
+  height: 3.2rem;
   width: auto;
   transition: transform 0.2s;
   mix-blend-mode: multiply; /* Removes white background */
