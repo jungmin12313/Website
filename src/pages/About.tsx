@@ -61,8 +61,8 @@ const VOICES = [
 
 export default function About() {
   useSEO({
-    title: "서비스 소개 | 무장애지도",
-    description: "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
+    title: "브랜드 스토리 | 내일 - 무장애지도 전문 플랫폼",
+    description: "휠체어 사용자도 즐길 수 있는 축제를 꿈꾸는 '내일'의 이야기. 왜 우리가 직접 현장에서 무장애지도를 제작하는지 그 이유를 들려드립니다.",
     url: 'https://naeilmap.com/about'
   });
 

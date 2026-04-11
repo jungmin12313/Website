@@ -16,8 +16,8 @@ export default function FestivalList() {
   const navigate = useNavigate()
 
   useSEO({
-    title: "전국 무장애지도 목록 | 내일",
-    description: "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
+    title: "전국 무장애지도 전체 보기 | 내일",
+    description: "전국 각지의 축제 현장을 직접 조사하여 제작한 무장애지도를 만나보세요. 휠체어 접근 시설과 편의 정보를 한눈에 제공합니다.",
     url: 'https://naeilmap.com/maps'
   });
 

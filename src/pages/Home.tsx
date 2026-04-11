@@ -13,8 +13,8 @@ export default function Home() {
   const navigate = useNavigate()
 
   useSEO({
-    title: "무장애지도 | 모두가 참여할 수 있는 축제, 내일",
-    description: "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
+    title: "무장애지도 내일 | 모두가 함께 즐기는 전국 무장애 축제 지도",
+    description: "무장애지도 전문 플랫폼 '내일'은 장애인, 노인, 휠체어 사용자 모두가 즐길 수 있는 전국 축제 배리어프리 접근성 정보를 제공합니다. 휠체어 접근 경로와 편의시설 정보를 무장애지도로 확인하세요.",
     url: 'https://naeilmap.com/'
   });
 

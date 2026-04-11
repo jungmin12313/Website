@@ -25,6 +25,14 @@
   mix-blend-mode: multiply; /* Removes white background */
 }
 
+.footer-desc {
+  font-size: 0.9375rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
 [data-theme='high-contrast'] .footer-logo {
   filter: invert(1) brightness(1.2);
   mix-blend-mode: screen; 
