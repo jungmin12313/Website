@@ -1,12 +1,13 @@
 .modal-backdrop {
-  position: fixed;
+  position: absolute; /* Using absolute to stay within fullscreen container if needed */
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  z-index: 99999; /* Very high z-index */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 1.5rem;
+  backdrop-filter: blur(4px);
 }
 
 .modal-box {
@@ -15,10 +16,16 @@
   max-width: 780px;
   width: 100%;
   position: relative;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
   max-height: 90vh;
   overflow-y: auto;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: modal-pop 0.4s ease-out;
+}
+
+@keyframes modal-pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .modal-report-mode {
@@ -221,6 +228,12 @@
 .dot.active { background: white; }
 
 @media (max-width: 600px) {
-  .modal-inner { flex-direction: column; }
+  .modal-backdrop { padding: 0.75rem; }
+  .modal-inner { flex-direction: column; padding: 1.5rem; gap: 1rem; }
   .modal-right { width: 100%; }
+  .modal-title { font-size: 1.25rem; }
+  .pic-badge, .modal-pic-img { width: 44px; height: 44px; }
+  .pic-icon { font-size: 18px; }
+  .modal-description { font-size: 0.875rem; }
+  .modal-close { top: 10px; right: 10px; }
 }

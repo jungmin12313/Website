@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
-  ChevronLeft, ChevronRight, Minus, Plus, Maximize,
+  ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
   AlertCircle, X
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
@@ -27,7 +27,55 @@ export default function FestivalDetail() {
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+  const [isFullScreen, setIsFullScreen] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+
+  // 전체화면 상태 변화 감지
+  useEffect(() => {
+    const handleFsChange = () => {
+      const doc = document as any
+      setIsFullScreen(!!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement))
+    }
+    document.addEventListener('fullscreenchange', handleFsChange)
+    document.addEventListener('webkitfullscreenchange', handleFsChange)
+    document.addEventListener('mozfullscreenchange', handleFsChange)
+    document.addEventListener('MSFullscreenChange', handleFsChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange)
+      document.removeEventListener('webkitfullscreenchange', handleFsChange)
+      document.removeEventListener('mozfullscreenchange', handleFsChange)
+      document.removeEventListener('MSFullscreenChange', handleFsChange)
+    }
+  }, [])
+
+  // 전체화면 토글
+  const toggleFullScreen = () => {
+    const doc = document as any
+    const el = mapContainerRef.current as any
+
+    if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch((err: any) => console.error(err))
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen()
+      } else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen()
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen()
+      }
+    } else {
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen()
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen()
+      } else if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen()
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen()
+      }
+    }
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -54,7 +102,7 @@ export default function FestivalDetail() {
     title: festival ? `${festival.name} | 무장애지도 전문 플랫폼 '내일'` : '무장애 축제 정보 불러오는 중 | 내일',
     description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 상세한 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 데이터입니다.` : '로딩 중...',
     url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps'
-  });
+  })
 
   if (!festival) return <div className="loading">불러오는 중...</div>
 
@@ -76,6 +124,7 @@ export default function FestivalDetail() {
           }}
         />
       )}
+
       {/* 탭 */}
       <div className="tab-bar">
         {(['map', 'info', 'access'] as Tab[]).map(t => (
@@ -193,32 +242,38 @@ export default function FestivalDetail() {
         <div className="tab-content map-tab">
           <div className="map-layout full-map">
 
-            {/* 우측 지도 */}
-            <div className="map-area">
+            {/* 지도 영역 - ref를 여기에 연결해 전체화면 대상이 됨 */}
+            <div
+              className={`map-area${isFullScreen ? ' is-fullscreen' : ''}`}
+              ref={mapContainerRef}
+            >
               {(() => {
                 const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
                 if (maps.length > 1) {
                   return (
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                      <button style={{ flex: 1, padding: '0.5rem', background: activeMapIndex === 0 ? 'var(--primary)' : 'white', color: activeMapIndex === 0 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setActiveMapIndex(0)}>앞면 지도</button>
-                      <button style={{ flex: 1, padding: '0.5rem', background: activeMapIndex === 1 ? 'var(--primary)' : 'white', color: activeMapIndex === 1 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setActiveMapIndex(1)}>뒷면 지도</button>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', position: 'absolute', top: '0.75rem', left: '0.75rem', zIndex: 11 }}>
+                      <button style={{ padding: '0.4rem 0.9rem', background: activeMapIndex === 0 ? 'var(--primary)' : 'white', color: activeMapIndex === 0 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.85rem' }} onClick={() => setActiveMapIndex(0)}>앞면 지도</button>
+                      <button style={{ padding: '0.4rem 0.9rem', background: activeMapIndex === 1 ? 'var(--primary)' : 'white', color: activeMapIndex === 1 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.85rem' }} onClick={() => setActiveMapIndex(1)}>뒷면 지도</button>
                     </div>
                   )
                 }
                 return null
               })()}
+
+              {/* 하단 컨트롤 */}
               <div className="map-controls">
                 <button onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
                 <span>{Math.round(mapScale * 100)}%</span>
                 <button onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
                 <div className="control-divider" />
-                <button onClick={() => window.open((festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : []))[activeMapIndex], '_blank')} title="원본 이미지 보기">
-                  <Maximize size={16} />
+                <button onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
+                  {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
                 </button>
               </div>
 
-              <div 
-                className={`map-viewport ${isDragging ? 'dragging' : ''}`} 
+              {/* 지도 뷰포트 */}
+              <div
+                className={`map-viewport ${isDragging ? 'dragging' : ''}`}
                 ref={mapRef}
                 onMouseDown={(e) => {
                   if (!mapRef.current) return
@@ -243,7 +298,7 @@ export default function FestivalDetail() {
                 onTouchStart={(e) => {
                   if (!mapRef.current) return
                   if (e.touches.length === 2) {
-                    setIsDragging(false) // Stop dragging when pinching
+                    setIsDragging(false)
                     const dist = Math.hypot(
                       e.touches[0].pageX - e.touches[1].pageX,
                       e.touches[0].pageY - e.touches[1].pageY
@@ -287,16 +342,16 @@ export default function FestivalDetail() {
                   if (mapRef.current) delete (mapRef.current as any)._lastDist
                 }}
               >
-                <div 
-                  className="map-scaler" 
-                  style={{ 
+                <div
+                  className="map-scaler"
+                  style={{
                     width: imgSize.w ? `${imgSize.w * mapScale}px` : 'auto',
                     height: imgSize.h ? `${imgSize.h * mapScale}px` : 'auto'
                   }}
                 >
-                  <div 
-                    className="map-image-wrap" 
-                    style={{ 
+                  <div
+                    className="map-image-wrap"
+                    style={{
                       transform: `scale(${mapScale})`,
                       transformOrigin: '0 0'
                     }}
@@ -305,38 +360,38 @@ export default function FestivalDetail() {
                       const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
                       const currentMap = maps[activeMapIndex]
                       return currentMap ? (
-                       <img
-                        src={currentMap}
-                        alt="축제 무장애지도"
-                        className="map-img"
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          const viewport = mapRef.current;
-                          setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
-                          if (viewport) {
-                            const scaleX = (viewport.clientWidth - 40) / img.naturalWidth;
-                            const scaleY = (viewport.clientHeight - 40) / img.naturalHeight;
-                            const fitScale = Math.min(scaleX, scaleY, 1);
-                            setMapScale(fitScale);
-                          }
-                        }}
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-                      />
-                    ) : (
-                      <div className="map-placeholder">
-                        <p>지도 이미지가 준비 중입니다.</p>
-                        <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
-                      </div>
-                    )
+                        <img
+                          src={currentMap}
+                          alt="축제 무장애지도"
+                          className="map-img"
+                          onLoad={(e) => {
+                            const img = e.currentTarget
+                            const viewport = mapRef.current
+                            setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
+                            if (viewport) {
+                              const scaleX = (viewport.clientWidth - 40) / img.naturalWidth
+                              const scaleY = (viewport.clientHeight - 40) / img.naturalHeight
+                              const fitScale = Math.min(scaleX, scaleY, 1)
+                              setMapScale(fitScale)
+                            }
+                          }}
+                          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        />
+                      ) : (
+                        <div className="map-placeholder">
+                          <p>지도 이미지가 준비 중입니다.</p>
+                          <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
+                        </div>
+                      )
                     })()}
-                    
+
                     {/* 핫스팟 */}
                     {festival.hotspots.filter(hs => (hs.mapIndex || 0) === activeMapIndex).map(hs => (
                       <button
                         key={hs.id}
                         className={`hotspot-btn ${hs.isReportBased ? 'report-pin' : 'info-pin'}`}
-                        style={{ 
-                          left: `${hs.x}%`, 
+                        style={{
+                          left: `${hs.x}%`,
                           top: `${hs.y}%`,
                           zIndex: hs.isReportBased ? 12 : 10
                         }}
@@ -344,14 +399,14 @@ export default function FestivalDetail() {
                         title={hs.label}
                       />
                     ))}
-                    
-                    {/* 승인된 제보 아이콘 (빨간 느낌표) */}
+
+                    {/* 승인된 제보 아이콘 */}
                     {reports.filter(r => (r.mapIndex || 0) === activeMapIndex).map(r => (
                       <button
                         key={r.id}
                         className="report-pin-btn pulse"
-                        style={{ 
-                          left: `${r.x}%`, 
+                        style={{
+                          left: `${r.x}%`,
                           top: `${r.y}%`,
                           position: 'absolute',
                           transform: 'translate(-50%, -100%)',
@@ -370,6 +425,45 @@ export default function FestivalDetail() {
                   </div>
                 </div>
               </div>
+
+              {/* 모달: map-area 안에 배치해야 전체화면에서도 보임 */}
+              {selectedHotspot && (
+                <HotspotModal
+                  hotspot={selectedHotspot}
+                  pictograms={festival.pictograms}
+                  onClose={() => setSelectedHotspot(null)}
+                />
+              )}
+
+              {selectedReport && (
+                <div className="report-modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedReport(null)}>
+                  <div className="report-modal-box">
+                    <button className="modal-close" onClick={() => setSelectedReport(null)}><X size={20} /></button>
+                    <div className="report-modal-header">
+                      <AlertCircle size={24} color="#E53E3E" />
+                      <h3>현장 변동/불편사항 알림</h3>
+                    </div>
+                    <div className="report-modal-body">
+                      <div className="report-info-section">
+                        <p className="report-location"><MapPin size={14} /> {selectedReport.locationDetail || '상세 위치 정보 없음'}</p>
+                        <div className="report-text-content">
+                          {selectedReport.content}
+                        </div>
+                      </div>
+                      {selectedReport.images && selectedReport.images.length > 0 && (
+                        <div className="report-gallery">
+                          {selectedReport.images.map((img, i) => (
+                            <img key={i} src={img} alt="현장 사진" onClick={() => window.open(img)} />
+                          ))}
+                        </div>
+                      )}
+                      <p className="report-notice">
+                        * 위 내용은 방문자의 제보를 바탕으로 관리자가 승인한 현장 정보입니다. 이용에 참고하시기 바랍니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -398,48 +492,6 @@ export default function FestivalDetail() {
           ) : (
             <div className="empty-state">교통정보가 준비 중입니다.</div>
           )}
-        </div>
-      )}
-
-      {/* 핫스팟 모달 */}
-      {selectedHotspot && (
-        <HotspotModal
-          hotspot={selectedHotspot}
-          pictograms={festival.pictograms}
-          onClose={() => setSelectedHotspot(null)}
-        />
-      )}
-
-      {/* 제보 상세 모달 (방문자용) */}
-      {selectedReport && (
-        <div className="report-modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedReport(null)}>
-          <div className="report-modal-box">
-            <button className="modal-close" onClick={() => setSelectedReport(null)}><X size={20} /></button>
-            <div className="report-modal-header">
-              <AlertCircle size={24} color="#E53E3E" />
-              <h3>현장 변동/불편사항 알림</h3>
-            </div>
-            <div className="report-modal-body">
-              <div className="report-info-section">
-                <p className="report-location"><MapPin size={14} /> {selectedReport.locationDetail || '상세 위치 정보 없음'}</p>
-                <div className="report-text-content">
-                  {selectedReport.content}
-                </div>
-              </div>
-              
-              {selectedReport.images && selectedReport.images.length > 0 && (
-                <div className="report-gallery">
-                  {selectedReport.images.map((img, i) => (
-                    <img key={i} src={img} alt="현장 사진" onClick={() => window.open(img)} />
-                  ))}
-                </div>
-              )}
-              
-              <p className="report-notice">
-                * 위 내용은 방문자의 제보를 바탕으로 관리자가 승인한 현장 정보입니다. 이용에 참고하시기 바랍니다.
-              </p>
-            </div>
-          </div>
         </div>
       )}
     </div>
