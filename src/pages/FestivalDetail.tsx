@@ -262,11 +262,11 @@ export default function FestivalDetail() {
 
               {/* 하단 컨트롤 */}
               <div className="map-controls">
-                <button onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
+                <button type="button" onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
                 <span>{Math.round(mapScale * 100)}%</span>
-                <button onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
+                <button type="button" onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
                 <div className="control-divider" />
-                <button onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
+                <button type="button" onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
                   {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
                 </button>
               </div>
@@ -317,6 +317,11 @@ export default function FestivalDetail() {
                 }}
                 onTouchMove={(e) => {
                   if (!mapRef.current) return
+                  // 핀치 줌 또는 드래그 중에는 브라우저 스크롤 방지
+                  if (e.touches.length === 2 || isDragging) {
+                    if (e.cancelable) e.preventDefault();
+                  }
+
                   if (e.touches.length === 2) {
                     const dist = Math.hypot(
                       e.touches[0].pageX - e.touches[1].pageX,

@@ -262,27 +262,42 @@
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: var(--white);
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--gray-200);
-  border-radius: 12px;
-  padding: 0.625rem 1.25rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border-radius: 14px;
+  padding: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   font-size: 0.875rem;
   font-weight: 700;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  /* 터치 시 브라우저 기본 동작 방지 */
+  touch-action: manipulation;
 }
 
 .map-controls button {
   color: var(--gray-700);
   display: flex;
   align-items: center;
-  padding: 2px;
-  transition: color 0.1s;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-controls button:active {
+  background: var(--gray-100);
+  transform: scale(0.92);
 }
 
 .map-controls button:hover {
   color: var(--blue);
+  background: var(--blue-bg);
 }
 
 .control-divider {
@@ -300,6 +315,7 @@
   padding: 40px;
   cursor: grab;
   user-select: none;
+  touch-action: none;
 }
 
 .map-viewport.dragging {
@@ -503,14 +519,26 @@
   .tab-bar { gap: 0.5rem; padding: 0 1rem; }
   
   .map-controls {
-    bottom: 1rem;
-    right: 1rem;
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
-    border-radius: 8px;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    padding: 0.4rem;
+    gap: 0.25rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .map-controls button {
+    width: 44px; /* 모바일 권장 최소 터치 영역 */
+    height: 44px;
   }
   
-  .map-controls span { min-width: 3rem; text-align: center; }
+  .map-controls span { 
+    min-width: 3.5rem; 
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--gray-900);
+    font-weight: 800;
+  }
 
   .report-modal-box { padding: 1.5rem; border-radius: 1rem; width: 95%; max-height: 90vh; }
   .report-modal-header { margin-bottom: 1rem; }
@@ -519,11 +547,15 @@
 @media (max-width: 480px) {
   .map-viewport { height: 80vh; }
   .map-controls {
-    bottom: 0.75rem;
-    right: 0.75rem;
-    flex-wrap: wrap;
+    bottom: 25px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: fit-content;
+    transform: none;
+    max-width: 90%;
     justify-content: center;
-    width: auto;
+    z-index: 200; /* Ensure it's very much on top */
   }
   .info-title { font-size: 1.25rem; }
 }
