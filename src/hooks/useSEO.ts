@@ -7,7 +7,7 @@ interface SEOProps {
   image?: string;
 }
 
-export function useSEO({ title, description, url }: SEOProps) {
+export function useSEO({ title, description, url, image }: SEOProps) {
   useEffect(() => {
     // 1. Title
     document.title = title;
@@ -26,7 +26,6 @@ export function useSEO({ title, description, url }: SEOProps) {
       }
       el.setAttribute('content', content);
     };
-
     setMetaTag('meta[name="description"]', 'description', description);
     setMetaTag('meta[property="og:title"]', 'og:title', title);
     setMetaTag('meta[property="og:description"]', 'og:description', description);
@@ -51,5 +50,5 @@ export function useSEO({ title, description, url }: SEOProps) {
     // 4. OG URL
     setMetaTag('meta[property="og:url"]', 'og:url', targetUrl);
 
-  }, [title, description, url]);
+  }, [title, description, url, image]);
 }
