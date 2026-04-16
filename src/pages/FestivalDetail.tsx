@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
-  AlertCircle, X
+  AlertCircle, X, RefreshCcw
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
@@ -260,16 +260,6 @@ export default function FestivalDetail() {
                 return null
               })()}
 
-              {/* 하단 컨트롤 */}
-              <div className="map-controls">
-                <button type="button" onClick={() => setMapScale(s => Math.max(0.5, s - 0.25))} title="축소"><Minus size={16} /></button>
-                <span>{Math.round(mapScale * 100)}%</span>
-                <button type="button" onClick={() => setMapScale(s => Math.min(3, s + 0.25))} title="확대"><Plus size={16} /></button>
-                <div className="control-divider" />
-                <button type="button" onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
-                  {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
-                </button>
-              </div>
 
               {/* 지도 뷰포트 */}
               <div
@@ -329,9 +319,12 @@ export default function FestivalDetail() {
                     )
                     const lastDist = (mapRef.current as any)._lastDist || dist
                     const delta = dist / lastDist
-                    const newScale = Math.max(0.5, Math.min(3, mapScale * delta))
-                    if (Math.abs(newScale - mapScale) > 0.01) {
-                      setMapScale(newScale)
+                    
+                    if (Math.abs(dist - lastDist) > 1) { // 유의미한 움직임이 있을 때만 업데이트
+                      setMapScale(prev => {
+                        const newScale = prev * delta
+                        return Math.max(0.2, Math.min(5, newScale)) // 범위 확장
+                      })
                       ;(mapRef.current as any)._lastDist = dist
                     }
                   } else if (isDragging) {
@@ -429,6 +422,60 @@ export default function FestivalDetail() {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* 하단 컨트롤 - 뷰포트 다음에 위치하여 터치 이벤트 우선순위 확보 */}
+              <div className="map-controls">
+                <button 
+                  type="button" 
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setMapScale(s => Math.max(0.1, s - 0.1));
+                  }} 
+                  title="축소"
+                >
+                  <Minus size={18} />
+                </button>
+                
+                <button 
+                  type="button" 
+                  className="reset-zoom-btn"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    if (mapRef.current) {
+                      const img = mapRef.current.querySelector('.map-img') as HTMLImageElement;
+                      if (img) {
+                        const scaleX = (mapRef.current.clientWidth - 40) / img.naturalWidth;
+                        const scaleY = (mapRef.current.clientHeight - 40) / img.naturalHeight;
+                        const fitScale = Math.min(scaleX, scaleY, 1);
+                        setMapScale(fitScale);
+                        mapRef.current.scrollLeft = 0;
+                        mapRef.current.scrollTop = 0;
+                      }
+                    }
+                  }}
+                  title="화면에 맞춤"
+                >
+                  <RefreshCcw size={16} />
+                </button>
+
+                <span>{Math.round(mapScale * 100)}%</span>
+
+                <button 
+                  type="button" 
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setMapScale(s => Math.min(5, s + 0.1));
+                  }} 
+                  title="확대"
+                >
+                  <Plus size={18} />
+                </button>
+
+                <div className="control-divider" />
+                <button type="button" onPointerDown={(e) => { e.stopPropagation(); toggleFullScreen(); }} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
+                  {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
+                </button>
               </div>
 
               {/* 모달: map-area 안에 배치해야 전체화면에서도 보임 */}
