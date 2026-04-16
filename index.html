@@ -38,12 +38,12 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://naeilmap.com/" />
     <meta property="og:title" content="무장애지도 내일 | 모두가 함께 즐기는 전국 무장애 축제 지도" />
-    <meta property="og:description" content="무장애지도 전문 플랫폼 '내일'은 장애인, 노인, 휠체어 사용자 모두가 즐길 수 있는 전국 축제 배리어프리 접근성 정보를 제공합니다." />
+    <meta property="og:description" content="배리어프리 무장애지도를 통해 휠체어 사용자, 노인 모두가 즐길 수 있는 전국 무장애 축제 정보를 확인하세요." />
     <meta property="og:image" content="https://naeilmap.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:site_name" content="내일 - 무장애지도" />
+    <meta property="og:site_name" content="내일 - 무장애 축제 지도" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -59,8 +59,27 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "내일 - 무장애 축제 지도",
+      "url": "https://naeilmap.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://naeilmap.com/maps?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "무장애지도 내일은 어떤 서비스인가요?",
+          "acceptedAnswer": {
             "@type": "Answer",
-            "text": "내일은 모두가 축제를 함께 즐길 수 있는 무장애 축제 지도 서비스입니다. naeilmap.com에서 전국 축제의 배리어프리 접근성 정보를 무료로 확인하고 공유할 수 있습니다."
+            "text": "내일은 휠체어 사용자, 노인 등 교통약자를 위해 전국 축제장의 단차, 경사로, 장애인 화장실 등 배리어프리 정보를 무장애지도로 제공하는 전문 플랫폼입니다."
           }
         },
         {
@@ -68,7 +87,7 @@
           "name": "무료로 이용할 수 있나요?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "네, 내일 무장애 축제 지도 서비스는 누구나 무료로 이용할 수 있습니다."
+            "text": "네, 내일 무장애 축제 지도 서비스는 모든 사용자에게 무료로 제공됩니다."
           }
         }
       ]

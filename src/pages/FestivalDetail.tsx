@@ -99,9 +99,10 @@ export default function FestivalDetail() {
   }, [id, navigate])
 
   useSEO({
-    title: festival ? `${festival.name} | 무장애지도 전문 플랫폼 '내일'` : '무장애 축제 정보 불러오는 중 | 내일',
-    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실, 경사로 정보를 상세한 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 데이터입니다.` : '로딩 중...',
-    url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps'
+    title: festival ? `${festival.name} 무장애 축제 지도 | 내일` : '무장애 축제 정보 불러오는 중 | 내일',
+    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실 정보를 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 배리어프리 데이터입니다.` : '로딩 중...',
+    url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps',
+    image: festival?.thumbnail || festival?.mapImage
   })
 
   if (!festival) return <div className="loading">불러오는 중...</div>

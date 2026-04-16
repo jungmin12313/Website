@@ -4,6 +4,7 @@ interface SEOProps {
   title: string;
   description: string;
   url?: string;
+  image?: string;
 }
 
 export function useSEO({ title, description, url }: SEOProps) {
@@ -31,6 +32,11 @@ export function useSEO({ title, description, url }: SEOProps) {
     setMetaTag('meta[property="og:description"]', 'og:description', description);
     setMetaTag('meta[name="twitter:title"]', 'twitter:title', title);
     setMetaTag('meta[name="twitter:description"]', 'twitter:description', description);
+
+    if (image) {
+      setMetaTag('meta[property="og:image"]', 'og:image', image);
+      setMetaTag('meta[name="twitter:image"]', 'twitter:image', image);
+    }
 
     // 3. Canonical Link
     const targetUrl = url || window.location.href.split('?')[0]; // Query string 제거
