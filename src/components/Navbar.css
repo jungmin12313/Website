@@ -207,3 +207,67 @@
     padding: 0 1rem;
   }
 }
+
+/* 고대비 모드 */
+[data-theme='high-contrast'] .logo-img,
+[data-theme='high-contrast'] .sidebar-logo {
+  filter: invert(1) brightness(2) contrast(1.5) !important;
+  mix-blend-mode: screen !important;
+}
+
+[data-theme='high-contrast'] .navbar {
+  background: #000 !important;
+  border-bottom: 3px solid #fff !important;
+  box-shadow: none !important;
+}
+
+[data-theme='high-contrast'] .nav-link {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .nav-link:hover,
+[data-theme='high-contrast'] .nav-link.active {
+  color: #ffff00 !important;
+  border-bottom-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .hcm-toggle {
+  background: #000 !important;
+  border: 1px solid #fff !important;
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .hcm-toggle.active {
+  background: #ffff00 !important;
+  color: #000 !important;
+  border-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .menu-btn {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .sidebar {
+  background: #000 !important;
+  border-right: 2px solid #fff !important;
+}
+
+[data-theme='high-contrast'] .sidebar-header {
+  border-bottom-color: #fff !important;
+}
+
+[data-theme='high-contrast'] .sidebar-link {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .sidebar-link:hover,
+[data-theme='high-contrast'] .sidebar-link.active {
+  background: #000 !important;
+  color: #ffff00 !important;
+  border: 1px solid #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .sidebar-footer {
+  border-top-color: #fff !important;
+}
+

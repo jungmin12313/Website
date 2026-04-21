@@ -8,9 +8,9 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-brand">
           <Link to="/" className="f-logo-link">
-            <img src="/logo_transparent.png" alt="내일 - 무장애지도" className="footer-logo" loading="lazy" width="120" height="40" style={{ filter: 'none' }} />
+            <img src="/logo_transparent.png" alt="내일 - 무장애지도" className="footer-logo" loading="lazy" width="120" height="40" />
           </Link>
-          <p className="footer-desc">장애인, 노인, 휠체어 사용자 모두가 함께 즐기는<br/>전국 **무장애 축제 지도** 전문 플랫폼 '내일'</p>
+          <p className="footer-desc">장애인, 노인, 휠체어 사용자 모두가 함께 즐기는<br/>전국 무장애 축제 지도 전문 플랫폼 '내일'</p>
           <div className="footer-contact">
             <a href="mailto:jm56s@naver.com" className="contact-item">
               <Mail size={18} />

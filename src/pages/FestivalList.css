@@ -133,3 +133,56 @@
 @media (max-width: 600px) {
   .card-grid { grid-template-columns: 1fr; }
 }
+
+/* 고대비 모드 */
+[data-theme='high-contrast'] .festival-list-page {
+  background: #000;
+}
+
+[data-theme='high-contrast'] .filters {
+  background: #000;
+  border-color: #fff;
+}
+
+[data-theme='high-contrast'] .filter-select {
+  background: #000;
+  border-color: #fff;
+}
+
+[data-theme='high-contrast'] .filter-select select {
+  color: #fff;
+}
+
+[data-theme='high-contrast'] .filter-select select option {
+  background: #000;
+  color: #fff;
+}
+
+[data-theme='high-contrast'] .festival-card {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+[data-theme='high-contrast'] .festival-card:hover {
+  border-color: #ffff00;
+}
+
+[data-theme='high-contrast'] .card-info h3 {
+  color: #ffff00;
+}
+
+[data-theme='high-contrast'] .card-date,
+[data-theme='high-contrast'] .card-location {
+  color: #fff;
+}
+
+[data-theme='high-contrast'] .card-thumb {
+  background: #111;
+  border-bottom: 2px solid #fff;
+}
+
+[data-theme='high-contrast'] .badge {
+  border: 2px solid #fff;
+  font-weight: 900;
+}
+

@@ -1,0 +1,289 @@
+.report-page {
+  max-width: 45rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  min-height: calc(100vh - var(--nav-height));
+}
+
+.report-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.report-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -1px;
+  margin-bottom: 0.75rem;
+}
+
+.report-subtitle {
+  color: #666;
+  font-size: 1.0625rem;
+}
+
+.report-form {
+  background: white;
+  border: 1px solid #E9ECEF;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+}
+
+.input-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.required-dot {
+  color: #fa5252;
+}
+
+.optional-text {
+  color: #888;
+  font-weight: 400;
+}
+
+.form-control {
+  border: 1px solid #dee2e6;
+  border-radius: 0.625rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  background: white;
+}
+
+.form-control:focus {
+  border-color: #1a1a1a;
+}
+
+.map-helper-text {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.map-tab-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.map-tab-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.map-tab-btn.active {
+  background: #1a1a1a;
+  color: white;
+}
+
+.map-tab-btn:not(.active) {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.map-interactive-area {
+  position: relative;
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  cursor: crosshair;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #dee2e6;
+}
+
+.btn-cancel-coords {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.image-upload-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.image-preview {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #fa5252;
+  color: white;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  padding: 0;
+  cursor: pointer;
+}
+
+.image-upload-label {
+  width: 5.5rem;
+  height: 5.5rem;
+  border: 2px dashed #dee2e6;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #adb5bd;
+  font-size: 0.75rem;
+  cursor: pointer;
+  gap: 0.25rem;
+  transition: all 0.2s;
+}
+
+.btn-submit {
+  background: #1a1a1a;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  marginTop: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  transition: all 0.2s;
+}
+
+.btn-submit:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* 고대비 모드 */
+[data-theme='high-contrast'] .report-page {
+  background: #000;
+}
+
+[data-theme='high-contrast'] .report-title {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .report-subtitle {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .report-form {
+  background: #000 !important;
+  border: 2px solid #fff !important;
+  box-shadow: none !important;
+}
+
+[data-theme='high-contrast'] .form-label {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .required-dot {
+  color: #ffff00;
+}
+
+[data-theme='high-contrast'] .form-control {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+[data-theme='high-contrast'] .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme='high-contrast'] .form-control:focus {
+  border-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .map-helper-text {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .map-tab-btn {
+  border-color: #fff !important;
+}
+
+[data-theme='high-contrast'] .map-tab-btn.active {
+  background: #ffff00 !important;
+  color: #000 !important;
+}
+
+[data-theme='high-contrast'] .map-tab-btn:not(.active) {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .map-interactive-area {
+  border-color: #fff !important;
+}
+
+[data-theme='high-contrast'] .image-upload-label {
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .btn-submit {
+  background: #ffff00 !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+}
+
+[data-theme='high-contrast'] .btn-submit:disabled {
+  background: #333 !important;
+  color: #888 !important;
+  border: 1px solid #888;
+}

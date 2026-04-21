@@ -32,6 +32,10 @@
 
 /* High Contrast Mode (WCAG compliant accessibility mode) */
 [data-theme='high-contrast'] {
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --text-primary: #FFFFFF;
+  --text-secondary: #FFFF00;
   --white: #000000;
   --white-real: #FFFFFF;
   --gray-900: #FFFFFF;
@@ -47,9 +51,18 @@
   --gray-600: #FFFFFF;
   --gray-700: #FFFFFF;
   --gray-800: #FFFFFF;
-  --gray-900: #FFFFFF;
   --glass-bg: #000000;
   --glass-border: 2px solid #FFFFFF;
+}
+
+[data-theme='high-contrast'] * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+[data-theme='high-contrast'] input::placeholder,
+[data-theme='high-contrast'] textarea::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 [data-theme='high-contrast'] .about-page,
@@ -74,7 +87,6 @@
   background-color: #000000 !important;
   color: #FFFFFF !important;
   border: 3px solid #FFFFFF !important;
-  box-shadow: none !important;
 }
 
 [data-theme='high-contrast'] .mini-map-container,
@@ -118,7 +130,6 @@
 
 [data-theme='high-contrast'] .hero-title {
   color: #FFFF00 !important;
-  text-shadow: none !important;
 }
 
 [data-theme='high-contrast'] .search-bar {
@@ -129,10 +140,6 @@
 
 [data-theme='high-contrast'] .search-bar input {
   color: #FFFFFF !important;
-}
-
-[data-theme='high-contrast'] .search-bar input::placeholder {
-  color: rgba(255,255,255,0.7) !important;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

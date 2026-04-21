@@ -33,9 +33,29 @@
   font-weight: 500;
 }
 
+[data-theme='high-contrast'] .footer {
+  background: #000 !important;
+  border-top: 2px solid #fff !important;
+}
+
 [data-theme='high-contrast'] .footer-logo {
-  filter: invert(1) brightness(1.2);
-  mix-blend-mode: screen; 
+  filter: invert(1) brightness(2) contrast(1.5) !important;
+  mix-blend-mode: screen !important;
+}
+
+[data-theme='high-contrast'] .footer-desc,
+[data-theme='high-contrast'] .footer-tagline,
+[data-theme='high-contrast'] .copyright {
+  color: #fff !important;
+}
+
+[data-theme='high-contrast'] .contact-item,
+[data-theme='high-contrast'] .f-col a {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .f-col h4 {
+  color: #fff !important;
 }
 
 .footer-contact {
