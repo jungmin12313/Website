@@ -18,6 +18,7 @@ export default function ReportPage() {
   const [coords, setCoords] = useState<{ x: number, y: number } | null>(null)
   const [selectedMapIndex, setSelectedMapIndex] = useState(0)
   const [images, setImages] = useState<string[]>([])
+  const [privacyAgreed, setPrivacyAgreed] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -102,6 +103,11 @@ export default function ReportPage() {
       return
     }
 
+    if (!privacyAgreed) {
+      alert('개인정보 수집 및 처리 방침에 동의해주세요.')
+      return
+    }
+
     setLoading(true)
     const newReport: Report = {
       id: `report-${Date.now()}`,
@@ -127,6 +133,7 @@ export default function ReportPage() {
       setFormData({ name: '', contact: '', festivalId: '', locationDetail: '', content: '' })
       setImages([])
       setCoords(null)
+      setPrivacyAgreed(false)
     } catch (err) {
       alert('신고 접수 중 오류가 발생했습니다.')
     } finally {
@@ -255,6 +262,20 @@ export default function ReportPage() {
               <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: 'none' }} />
             </label>
           </div>
+        </div>
+
+        <div className="input-block privacy-consent-block">
+          <label className="privacy-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={privacyAgreed}
+              onChange={e => setPrivacyAgreed(e.target.checked)}
+            />
+            <span>[필수] 개인정보 수집 및 처리 방침에 동의합니다.</span>
+          </label>
+          <p className="privacy-desc">
+            신고 내역 확인 및 결과 안내를 위해 이름과 연락처를 수집하며, 해당 정보는 처리 완료 후 지체 없이 파기됩니다.
+          </p>
         </div>
 
         <button 
