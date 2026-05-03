@@ -82,11 +82,21 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
           {hotspot.photos && hotspot.photos.length > 0 && (
             <div className="modal-right">
               <div className="photo-slider">
-                <img
-                  src={hotspot.photos[photoIdx]}
-                  alt={`${hotspot.label} 사진 ${photoIdx + 1}`}
-                  onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
-                />
+                {(() => {
+                  const p = hotspot.photos[photoIdx];
+                  const url = typeof p === 'string' ? p : p.url;
+                  const label = typeof p === 'object' ? p.label : '';
+                  return (
+                    <>
+                      <img
+                        src={url}
+                        alt={`${hotspot.label} 사진 ${photoIdx + 1}`}
+                        onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
+                      />
+                      {label && <div className="photo-label-overlay">{label}</div>}
+                    </>
+                  );
+                })()}
                 {hotspot.photos.length > 1 && (
                   <>
                     <button

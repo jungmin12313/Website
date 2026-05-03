@@ -23,9 +23,15 @@ const parseGPS = (gpsStr: any): { lat: number; lng: number } | undefined => {
 const convertDrivePathToUrl = async (path: string): Promise<string> => {
   if (!path) return '';
   // 이미 URL 형태거나 id가 포함된 경우
-  if (path.includes('drive.google.com') || path.includes('id=')) {
-    const match = path.match(/id=([a-zA-Z0-9_-]+)/);
-    if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  if (path.includes('drive.google.com') || path.includes('docs.google.com') || path.includes('id=')) {
+    // 1. /file/d/ID/view 형식
+    const fileDMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileDMatch) return `https://drive.google.com/uc?export=view&id=${fileDMatch[1]}`;
+    
+    // 2. id=ID 형식
+    const idMatch = path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idMatch) return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
+    
     return path;
   }
   
@@ -36,19 +42,21 @@ const convertDrivePathToUrl = async (path: string): Promise<string> => {
   return path;
 };
 
-const getPhotosForId = async (id: string, mainPhotoPath: string, photoSheet: any[]): Promise<string[]> => {
-  const paths = new Set<string>();
-  if (mainPhotoPath) paths.add(mainPhotoPath);
+const getPhotosForId = async (id: string, mainPhoto: { url: string; label: string } | null, photoSheet: any[]): Promise<{ url: string; label: string }[]> => {
+  const photoList: { url: string; label: string }[] = [];
+  if (mainPhoto && mainPhoto.url) photoList.push(mainPhoto);
   
   if (photoSheet && Array.isArray(photoSheet)) {
     const related = photoSheet.filter(row => String(row['부모ID']) === id);
-    related.forEach(row => {
-      if (row['사진파일']) paths.add(String(row['사진파일']));
-    });
+    for (const row of related) {
+      if (row['사진파일']) {
+        const url = await convertDrivePathToUrl(String(row['사진파일']));
+        if (url) photoList.push({ url, label: String(row['사진설명'] || '추가 사진') });
+      }
+    }
   }
 
-  const urls = await Promise.all(Array.from(paths).map(convertDrivePathToUrl));
-  return urls.filter(url => url !== '');
+  return photoList;
 };
 
 // --- 변환 규칙 ---
@@ -87,7 +95,7 @@ const processBuilding = async (row: any, photoSheet: any[]): Promise<ParsedExcel
     description: desc,
     note: String(row['기타'] || ''),
     gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['출입문_정면사진'], photoSheet)
+    photos: await getPhotosForId(id, { url: await convertDrivePathToUrl(row['출입문_정면사진']), label: '출입구 정면' }, photoSheet)
   };
 };
 
@@ -131,7 +139,7 @@ const processPathway = async (row: any, photoSheet: any[]): Promise<ParsedExcelI
     description: desc,
     note: String(row['기타'] || ''),
     gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['보행로_사진'], photoSheet)
+    photos: await getPhotosForId(id, { url: await convertDrivePathToUrl(row['보행로_사진']), label: '보행로' }, photoSheet)
   };
 };
 
@@ -164,7 +172,7 @@ const processElevator = async (row: any, photoSheet: any[]): Promise<ParsedExcel
     description: desc,
     note: String(row['기타'] || ''),
     gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['엘리베이터_사진'], photoSheet)
+    photos: await getPhotosForId(id, { url: await convertDrivePathToUrl(row['엘리베이터_사진']), label: '엘리베이터' }, photoSheet)
   };
 };
 
@@ -195,7 +203,7 @@ const processRestroom = async (row: any, photoSheet: any[]): Promise<ParsedExcel
     description: desc,
     note: String(row['기타'] || ''),
     gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['화장실_사진'], photoSheet)
+    photos: await getPhotosForId(id, { url: await convertDrivePathToUrl(row['화장실_사진']), label: '화장실' }, photoSheet)
   };
 };
 
@@ -224,10 +232,59 @@ export const parseExcelFile = async (file: File): Promise<ParsedExcelItem[]> => 
 
         const results: ParsedExcelItem[] = [];
 
+        // 건물, 보행로, 엘리베이터는 기존대로 추가
         for (const row of bldgs) results.push(await processBuilding(row, bldgPhotos));
         for (const row of paths) results.push(await processPathway(row, pathPhotos));
         for (const row of elevs) results.push(await processElevator(row, elevPhotos));
-        for (const row of rests) results.push(await processRestroom(row, restPhotos));
+
+        // 화장실은 이름 기반으로 통합 처리
+        const restroomMap = new Map<string, ParsedExcelItem>();
+
+        for (const row of rests) {
+          const item = await processRestroom(row, restPhotos);
+          // 이름에서 (남), (여), 남, 여, (남/녀) 등 성별 구분 제거하여 키 생성
+          const cleanTitle = item.title.replace(/\s*\(?(남|여|M|F|Male|Female)\)?\s*$/g, '').trim();
+          const key = `${cleanTitle}_restroom`;
+
+          if (restroomMap.has(key)) {
+            const existing = restroomMap.get(key)!;
+            // 설명 병합 (중복 제거)
+            existing.description = Array.from(new Set([...(existing.description || []), ...(item.description || [])]));
+            // 사진 병합 (중복 제거)
+            if (item.photos && Array.isArray(item.photos)) {
+              const currentPhotos = Array.isArray(existing.photos) ? (existing.photos as any[]) : [];
+              const allPhotos = [...(currentPhotos as any[]), ...(item.photos as any[])];
+              
+              // URL 기반 중복 제거
+              const seenUrls = new Set<string>();
+              existing.photos = allPhotos.filter(p => {
+                const url = typeof p === 'string' ? p : p.url;
+                if (!url || seenUrls.has(url)) return false;
+                seenUrls.add(url);
+                return true;
+              });
+            }
+            // 등급은 더 좋은 등급(G)을 우선하거나, 하나라도 주의(Y/R)가 있으면 병합 노출 고려
+            // 여기서는 하나라도 G가 있으면 접근 가능으로 보되, 설명에 차이를 유지
+            if (item.accessibilityGrade === 'G') existing.accessibilityGrade = 'G';
+            // 노트 병합
+            if (item.note && existing.note && !existing.note.includes(item.note)) {
+              existing.note = `${existing.note} / ${item.note}`;
+            }
+            // 원본 ID 보존 (콤마로 연결)
+            if (!existing.sourceExcelId.includes(item.sourceExcelId)) {
+              existing.sourceExcelId = `${existing.sourceExcelId},${item.sourceExcelId}`;
+            }
+          } else {
+            // 새로운 화장실이면 키를 정규화된 이름으로 업데이트하여 저장
+            item.title = cleanTitle;
+            item.label = cleanTitle;
+            restroomMap.set(key, item);
+          }
+        }
+
+        // 통합된 화장실 추가
+        results.push(...Array.from(restroomMap.values()));
 
         resolve(results);
       } catch (err) {

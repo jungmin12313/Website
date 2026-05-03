@@ -1327,8 +1327,32 @@
   padding: 0.4rem;
   font-size: 0.75rem;
   border: 1px solid #dee2e6;
-  border-radius: 0.25rem;
   outline: none;
+}
+
+.hs-photos-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.photo-edit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.photo-label-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.35rem;
+  outline: none;
+}
+.photo-label-input:focus {
+  border-color: #5BA4CF;
 }
 
 .excel-list {

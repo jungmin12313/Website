@@ -190,6 +190,19 @@
   object-fit: cover;
 }
 
+.photo-label-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
 .slider-btn {
   position: absolute;
   top: 50%;

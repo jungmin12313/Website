@@ -7,7 +7,7 @@ export interface Hotspot {
   label: string
   description: string[]
   pictogramIds: string[]
-  photos: string[]
+  photos: (string | { url: string; label: string })[]
   pictogramImages: string[]
   note?: string
   isReportBased?: boolean // 신고센터 제보 기반 핫스팟 여부

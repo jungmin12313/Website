@@ -1182,7 +1182,10 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
       const reader = new FileReader()
       reader.onloadend = async () => {
         const compressed = await compressImage(reader.result as string, 800, 0.3)
-        setHs(prev => ({ ...prev, photos: [...prev.photos, compressed] }))
+        setHs(prev => ({ 
+          ...prev, 
+          photos: [...prev.photos, { url: compressed, label: file.name.split('.')[0] }] 
+        }))
       }
       reader.readAsDataURL(file)
     })
@@ -1295,7 +1298,11 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
                     <div className="mock-modal-right">
                       {hs.photos.length > 0 ? (
                         <div className="mock-slider">
-                          <img src={hs.photos[0]} className="mock-main-img" />
+                          {(() => {
+                            const p = hs.photos[0];
+                            const url = typeof p === 'string' ? p : p?.url;
+                            return <img src={url} className="mock-main-img" alt="preview" />;
+                          })()}
                         </div>
                       ) : (
                         <div className="mock-img-placeholder">업로드된 사진이 없습니다</div>
@@ -1337,13 +1344,29 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
             <div className="image-sections">
               <div className="img-section">
                 <label>장소 사진 ({hs.photos.length})</label>
-                <div className="hs-photos-preview">
-                  {hs.photos.map((p, i) => (
-                    <div key={i} className="photo-wrapper">
-                      <img src={p} alt="hs" />
-                      <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
-                    </div>
-                  ))}
+                <div className="hs-photos-preview-grid">
+                  {hs.photos.map((p, i) => {
+                    const url = typeof p === 'string' ? p : p.url;
+                    const label = typeof p === 'object' ? p.label : '';
+                    return (
+                      <div key={i} className="photo-edit-card">
+                        <div className="photo-wrapper">
+                          <img src={url} alt="hs" />
+                          <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
+                        </div>
+                        <input 
+                          className="photo-label-input"
+                          value={label} 
+                          onChange={e => {
+                            const newPhotos = [...hs.photos];
+                            newPhotos[i] = { url, label: e.target.value };
+                            setHs({ ...hs, photos: newPhotos });
+                          }}
+                          placeholder="사진 이름"
+                        />
+                      </div>
+                    );
+                  })}
                   <label className="add-photo-box mini"><Plus size={18} /><input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} /></label>
                 </div>
               </div>
