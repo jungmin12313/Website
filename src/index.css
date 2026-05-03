@@ -251,7 +251,8 @@ p, h1, h2, h3, h4, h5, h6, span {
 
 /* Performance Optimization: Content Visibility */
 .main-content {
-  contain: content;
+  flex: 1;
+  /* contain: content; removed because it breaks position: fixed */
 }
 
 section {
