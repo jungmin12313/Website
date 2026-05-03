@@ -259,7 +259,7 @@ export const parseExcelFile = async (file: File): Promise<ParsedExcelItem[]> => 
           let merged = false;
           for (const [bName, parent] of buildingMap.entries()) {
             if (cleanTitle.includes(bName) || bName.includes(cleanTitle)) {
-              parent.description = [...(parent.description || []), `[엘리베이터] ${item.title}: ${item.description.join(', ')}`].filter(Boolean);
+              parent.description = [...(parent.description || []), `[엘리베이터] ${item.title}: ${(item.description || []).join(', ')}`].filter(Boolean);
               if (item.photos) parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
               merged = true;
               break;
@@ -280,7 +280,7 @@ export const parseExcelFile = async (file: File): Promise<ParsedExcelItem[]> => 
           for (const [bName, parent] of buildingMap.entries()) {
             // 화장실 이름에 건물명이 포함되어 있는지 확인 (예: "YMCA 1층 화장실" 에 "YMCA" 포함)
             if (cleanTitle.includes(bName)) {
-              parent.description = [...(parent.description || []), `[내부 화장실] ${item.title}: ${item.description.join(', ')}`].filter(Boolean);
+              parent.description = [...(parent.description || []), `[내부 화장실] ${item.title}: ${(item.description || []).join(', ')}`].filter(Boolean);
               if (item.photos) parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
               mergedToBuilding = true;
               break;
