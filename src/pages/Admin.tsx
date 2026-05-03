@@ -4,7 +4,7 @@ import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
-import { parseExcelFile } from '../utils/excelParser'
+import { parseExcelHotspots } from '../utils/excelParser'
 import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
 
@@ -50,7 +50,7 @@ export default function Admin() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const items = await parseExcelFile(file);
+      const items = await parseExcelHotspots(file);
       setParsedExcelItems(items);
       setSelectedExcelItem(null);
     } catch (err) {
