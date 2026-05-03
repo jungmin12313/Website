@@ -24,13 +24,20 @@ const convertDrivePathToUrl = async (path: string): Promise<string> => {
   if (!path) return '';
   // 이미 URL 형태거나 id가 포함된 경우
   if (path.includes('drive.google.com') || path.includes('docs.google.com') || path.includes('id=')) {
-    // 1. /file/d/ID/view 형식
-    const fileDMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (fileDMatch) return `https://drive.google.com/uc?export=view&id=${fileDMatch[1]}`;
+    let fileId = '';
     
-    // 2. id=ID 형식
-    const idMatch = path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (idMatch) return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
+    // 1. /file/d/ID/view 형식에서 ID 추출
+    const fileDMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileDMatch) fileId = fileDMatch[1];
+    
+    // 2. id=ID 형식에서 ID 추출
+    if (!fileId) {
+      const idMatch = path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (idMatch) fileId = idMatch[1];
+    }
+    
+    // ID를 찾았다면 더 안정적인 thumbnail 엔드포인트 사용 (sz=w1000으로 고화질 요청)
+    if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     
     return path;
   }
@@ -224,66 +231,89 @@ export const parseExcelFile = async (file: File): Promise<ParsedExcelItem[]> => 
         const paths = getSheet('보행로');
         const elevs = getSheet('엘리베이터');
         const rests = getSheet('화장실');
-
         const bldgPhotos = getSheet('건물_사진');
         const pathPhotos = getSheet('보행로_사진');
         const elevPhotos = getSheet('엘리베이터_사진');
         const restPhotos = getSheet('화장실_사진');
 
         const results: ParsedExcelItem[] = [];
-
-        // 건물, 보행로, 엘리베이터는 기존대로 추가
-        for (const row of bldgs) results.push(await processBuilding(row, bldgPhotos));
-        for (const row of paths) results.push(await processPathway(row, pathPhotos));
-        for (const row of elevs) results.push(await processElevator(row, elevPhotos));
-
-        // 화장실은 이름 기반으로 통합 처리
         const restroomMap = new Map<string, ParsedExcelItem>();
+        const buildingMap = new Map<string, ParsedExcelItem>();
 
+        // 1. 건물 먼저 처리하여 맵에 저장
+        for (const row of bldgs) {
+          const item = await processBuilding(row, bldgPhotos);
+          // 건물명에서 공백 제거하여 비교용 키 생성
+          const searchKey = item.title.replace(/\s+/g, '').trim();
+          buildingMap.set(searchKey, item);
+        }
+
+        // 2. 보행로 처리
+        for (const row of paths) results.push(await processPathway(row, pathPhotos));
+
+        // 3. 엘리베이터 처리 (이름 기반 병합)
+        for (const row of elevs) {
+          const item = await processElevator(row, elevPhotos);
+          const cleanTitle = item.title.replace(/\s+/g, '').trim();
+          
+          let merged = false;
+          for (const [bName, parent] of buildingMap.entries()) {
+            if (cleanTitle.includes(bName) || bName.includes(cleanTitle)) {
+              parent.description = [...(parent.description || []), `[엘리베이터] ${item.title}: ${item.description.join(', ')}`].filter(Boolean);
+              if (item.photos) parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) results.push(item);
+        }
+
+        // 4. 화장실 처리 (이름 기반 병합 + 성별 통합)
         for (const row of rests) {
           const item = await processRestroom(row, restPhotos);
-          // 이름에서 (남), (여), 남, 여, (남/녀) 등 성별 구분 제거하여 키 생성
-          const cleanTitle = item.title.replace(/\s*\(?(남|여|M|F|Male|Female)\)?\s*$/g, '').trim();
-          const key = `${cleanTitle}_restroom`;
+          const cleanTitle = item.title
+            .replace(/\s*\(?(남|여|남여|M|F|Male|Female|남성용|여성용|장애인용|비장애인용)\)?\s*/g, '')
+            .replace(/\s+/g, '')
+            .trim();
 
-          if (restroomMap.has(key)) {
-            const existing = restroomMap.get(key)!;
-            // 설명 병합 (중복 제거)
-            existing.description = Array.from(new Set([...(existing.description || []), ...(item.description || [])]));
-            // 사진 병합 (중복 제거)
-            if (item.photos && Array.isArray(item.photos)) {
-              const currentPhotos = Array.isArray(existing.photos) ? (existing.photos as any[]) : [];
-              const allPhotos = [...(currentPhotos as any[]), ...(item.photos as any[])];
-              
-              // URL 기반 중복 제거
-              const seenUrls = new Set<string>();
-              existing.photos = allPhotos.filter(p => {
-                const url = typeof p === 'string' ? p : p.url;
-                if (!url || seenUrls.has(url)) return false;
-                seenUrls.add(url);
-                return true;
-              });
+          let mergedToBuilding = false;
+          for (const [bName, parent] of buildingMap.entries()) {
+            // 화장실 이름에 건물명이 포함되어 있는지 확인 (예: "YMCA 1층 화장실" 에 "YMCA" 포함)
+            if (cleanTitle.includes(bName)) {
+              parent.description = [...(parent.description || []), `[내부 화장실] ${item.title}: ${item.description.join(', ')}`].filter(Boolean);
+              if (item.photos) parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
+              mergedToBuilding = true;
+              break;
             }
-            // 등급은 더 좋은 등급(G)을 우선하거나, 하나라도 주의(Y/R)가 있으면 병합 노출 고려
-            // 여기서는 하나라도 G가 있으면 접근 가능으로 보되, 설명에 차이를 유지
-            if (item.accessibilityGrade === 'G') existing.accessibilityGrade = 'G';
-            // 노트 병합
-            if (item.note && existing.note && !existing.note.includes(item.note)) {
-              existing.note = `${existing.note} / ${item.note}`;
+          }
+
+          if (!mergedToBuilding) {
+            const key = `${cleanTitle}_restroom`;
+            if (restroomMap.has(key)) {
+              const existing = restroomMap.get(key)!;
+              existing.description = Array.from(new Set([...(existing.description || []), ...(item.description || [])]));
+              if (item.photos && Array.isArray(item.photos)) {
+                const currentPhotos = Array.isArray(existing.photos) ? (existing.photos as any[]) : [];
+                const allPhotos = [...currentPhotos, ...(item.photos as any[])];
+                const seenUrls = new Set<string>();
+                existing.photos = allPhotos.filter(p => {
+                  const url = typeof p === 'string' ? p : p.url;
+                  if (!url || seenUrls.has(url)) return false;
+                  seenUrls.add(url);
+                  return true;
+                });
+              }
+              if (item.accessibilityGrade === 'G') existing.accessibilityGrade = 'G';
+            } else {
+              item.title = cleanTitle;
+              item.label = cleanTitle;
+              restroomMap.set(key, item);
             }
-            // 원본 ID 보존 (콤마로 연결)
-            if (!existing.sourceExcelId.includes(item.sourceExcelId)) {
-              existing.sourceExcelId = `${existing.sourceExcelId},${item.sourceExcelId}`;
-            }
-          } else {
-            // 새로운 화장실이면 키를 정규화된 이름으로 업데이트하여 저장
-            item.title = cleanTitle;
-            item.label = cleanTitle;
-            restroomMap.set(key, item);
           }
         }
 
-        // 통합된 화장실 추가
+        // 5. 결과 합치기
+        results.push(...Array.from(buildingMap.values()));
         results.push(...Array.from(restroomMap.values()));
 
         resolve(results);
