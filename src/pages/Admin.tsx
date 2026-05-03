@@ -41,12 +41,13 @@ export default function Admin() {
   useEffect(() => {
     // Firebase Auth State Listener
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // 프론트엔드에서도 admin 이메일인지 한번 더 이중 검증
-      if (user && user.email === 'admin@naeil.app') {
+      // 프론트엔드에서도 admin 이메일인지 한번 더 이중 검증 (대소문자 무시)
+      if (user && user.email?.toLowerCase() === 'admin@naeil.app') {
         setIsAuthorized(true)
       } else {
         setIsAuthorized(false)
         if (user) {
+          alert(`접근 권한이 없습니다.\n(현재 로그인 시도 계정: ${user.email})`);
           signOut(auth); // 관리자가 아니면 강제 로그아웃
         }
       }
