@@ -1281,3 +1281,144 @@
 .admin-report-pin.resolved {
   opacity: 0.6;
 }
+
+/* Excel Import Section */
+.excel-import-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.excel-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 1px dashed #adb5bd;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #495057;
+  transition: all 0.2s;
+}
+.excel-upload-btn:hover {
+  background: #e9ecef;
+  border-color: #868e96;
+}
+
+.excel-stats {
+  font-size: 0.8125rem;
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.excel-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.excel-filters select {
+  flex: 1;
+  padding: 0.4rem;
+  font-size: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  outline: none;
+}
+
+.excel-list {
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-right: 0.25rem;
+}
+.excel-list::-webkit-scrollbar { width: 4px; }
+.excel-list::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 2px; }
+
+.excel-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.excel-card:hover {
+  border-color: #adb5bd;
+}
+.excel-card.selected {
+  border-color: #5BA4CF;
+  background: #eef6fc;
+}
+.excel-card.placed {
+  opacity: 0.5;
+}
+
+.ec-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.ec-grade {
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  color: white;
+}
+.ec-grade-G { background: #2b8a3e; }
+.ec-grade-Y { background: #f59f00; }
+.ec-grade-R { background: #e03131; }
+
+.ec-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ec-subtitle {
+  font-size: 0.75rem;
+  color: #868e96;
+}
+
+.excel-import-badge {
+  background: #eef6fc;
+  color: #1864ab;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-bottom: 1px solid #d0ebff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* High Contrast Mode for Excel Section */
+[data-theme='high-contrast'] .excel-upload-btn,
+[data-theme='high-contrast'] .excel-filters select,
+[data-theme='high-contrast'] .excel-card {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+[data-theme='high-contrast'] .excel-card.selected {
+  border-color: #ff0 !important;
+}
+[data-theme='high-contrast'] .ec-grade-G { background: #0f0 !important; color: #000 !important; }
+[data-theme='high-contrast'] .ec-grade-Y { background: #ff0 !important; color: #000 !important; }
+[data-theme='high-contrast'] .ec-grade-R { background: #f00 !important; color: #000 !important; }
+[data-theme='high-contrast'] .excel-import-badge {
+  background: #000 !important;
+  color: #ff0 !important;
+  border-bottom: 2px solid #ff0 !important;
+}

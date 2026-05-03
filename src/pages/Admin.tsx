@@ -4,6 +4,8 @@ import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
+import { parseExcelFile } from '../utils/excelParser'
+import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
 
 const HERO_BG_STORAGE_KEY = 'naeil_hero_bg'
@@ -37,6 +39,26 @@ export default function Admin() {
   const [isLocked, setIsLocked] = useState(true)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapAreaRef = useRef<HTMLDivElement>(null)
+
+  // Excel state
+  const [parsedExcelItems, setParsedExcelItems] = useState<ParsedExcelItem[]>([])
+  const [selectedExcelItem, setSelectedExcelItem] = useState<ParsedExcelItem | null>(null)
+  const [excelCategoryFilter, setExcelCategoryFilter] = useState<'all' | 'building' | 'pathway' | 'elevator' | 'restroom'>('all')
+  const [excelGradeFilter, setExcelGradeFilter] = useState<'all' | 'G' | 'Y/R'>('all')
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const items = await parseExcelFile(file);
+      setParsedExcelItems(items);
+      setSelectedExcelItem(null);
+    } catch (err) {
+      console.error(err);
+      alert('엑셀 파일 파싱에 실패했습니다.');
+    }
+  };
+
 
   useEffect(() => {
     // Firebase Auth State Listener
@@ -244,18 +266,28 @@ export default function Admin() {
       })
     } else {
       // Create new one
+      const initLabel = selectedExcelItem?.label || ''
+      const initDesc = selectedExcelItem?.description ? [...selectedExcelItem.description] : []
+      const initPhotos = selectedExcelItem?.photos ? [...selectedExcelItem.photos] : []
+      const initNote = selectedExcelItem?.note || ''
+
       const newHs: Hotspot = {
         id: `hs-${Date.now()}`,
         x: Math.round(x * 1000) / 1000,
         y: Math.round(y * 1000) / 1000,
         w: Math.round(w * 100) / 100,
         h: Math.round(h * 100) / 100,
-        label: '',
-        description: [],
+        label: initLabel,
+        description: initDesc,
         pictogramIds: [],
-        photos: [],
+        photos: initPhotos,
         pictogramImages: [],
-        mapIndex: selectedMapIndex
+        note: initNote,
+        mapIndex: selectedMapIndex,
+        category: selectedExcelItem?.category,
+        accessibilityGrade: selectedExcelItem?.accessibilityGrade,
+        sourceExcelId: selectedExcelItem?.sourceExcelId,
+        gps: selectedExcelItem?.gps,
       }
       setEditHs(newHs)
     }
@@ -457,6 +489,61 @@ export default function Admin() {
                     <button className={`tool-btn ${!isLocked ? 'warn' : ''}`} onClick={() => setIsLocked(!isLocked)}>
                       {isLocked ? '🔒 위치 잠금 (안전)' : '🔓 위치 수정 모드 (드래그 가능)'}
                     </button>
+                  </div>
+
+                  <div className="excel-import-section">
+                    <span className="sidebar-label">현장 데이터 불러오기</span>
+                    <label className="excel-upload-btn">
+                      📂 엑셀 업로드
+                      <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} style={{ display: 'none' }} />
+                    </label>
+                    {parsedExcelItems.length > 0 && (
+                      <div className="excel-import-data">
+                        <div className="excel-stats">
+                          {parsedExcelItems.length}개 항목 로드됨
+                        </div>
+                        <div className="excel-filters">
+                          <select value={excelCategoryFilter} onChange={e => setExcelCategoryFilter(e.target.value as any)}>
+                            <option value="all">전체 (카테고리)</option>
+                            <option value="building">건물</option>
+                            <option value="pathway">보행로</option>
+                            <option value="elevator">엘리베이터</option>
+                            <option value="restroom">화장실</option>
+                          </select>
+                          <select value={excelGradeFilter} onChange={e => setExcelGradeFilter(e.target.value as any)}>
+                            <option value="all">전체 (등급)</option>
+                            <option value="G">접근 용이 (G)</option>
+                            <option value="Y/R">주의/어려움 (Y,R)</option>
+                          </select>
+                        </div>
+                        <div className="excel-list">
+                          {parsedExcelItems.filter(item => {
+                            if (excelCategoryFilter !== 'all' && item.category !== excelCategoryFilter) return false;
+                            if (excelGradeFilter === 'G' && item.accessibilityGrade !== 'G') return false;
+                            if (excelGradeFilter === 'Y/R' && item.accessibilityGrade === 'G') return false;
+                            return true;
+                          }).map(item => {
+                            const isPlaced = hotspots.some(h => h.sourceExcelId === item.sourceExcelId);
+                            const isSelected = selectedExcelItem?.sourceExcelId === item.sourceExcelId;
+                            return (
+                              <div 
+                                key={item.sourceExcelId} 
+                                className={`excel-card ${isSelected ? 'selected' : ''} ${isPlaced ? 'placed' : ''}`}
+                                onClick={() => setSelectedExcelItem(item)}
+                              >
+                                <div className="ec-header">
+                                  <span className={`ec-grade ec-grade-${item.accessibilityGrade}`}>{item.accessibilityGrade}</span>
+                                  <span className="ec-title">{item.title}</span>
+                                </div>
+                                <div className="ec-subtitle">
+                                  {item.subtitle} {isPlaced ? '· ✓ 배치 완료' : ''}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="hs-list">
@@ -1121,6 +1208,11 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
           <h3>장소 상세 편집 ({hs.label || '새 장소'})</h3>
           <button onClick={onClose} className="close-btn"><X size={20} /></button>
         </div>
+        {hs.sourceExcelId && (
+          <div className="excel-import-badge">
+            📋 엑셀에서 불러온 데이터 · [{hs.label}] · 수정 가능
+          </div>
+        )}
         <div className="editor-body split-view">
           <div className="editor-preview-container">
             <div className="preview-tabs">

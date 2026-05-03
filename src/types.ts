@@ -13,6 +13,12 @@ export interface Hotspot {
   isReportBased?: boolean // 신고센터 제보 기반 핫스팟 여부
   modalType?: 'default' | 'enhanced' // 모달 종류 구분
   mapIndex?: number // 0: 앞면, 1: 뒷면
+  
+  // 엑셀 파싱 기반 필드
+  category?: 'building' | 'pathway' | 'elevator' | 'restroom'
+  accessibilityGrade?: 'G' | 'Y' | 'R'
+  sourceExcelId?: string
+  gps?: { lat: number; lng: number }
 }
 
 export interface TransportService {
