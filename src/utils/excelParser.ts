@@ -91,6 +91,8 @@ export const parseExcelHotspots = (file: File): Promise<ParsedExcelItem[]> => {
         '보행로': 'pathway',
         '엘리베이터': 'elevator'
       };
+      
+      const allItems: ParsedExcelItem[] = [];
 
       for (const [sheetName, cat] of Object.entries(sheetToCategory)) {
         const rows = getSheet(sheetName);

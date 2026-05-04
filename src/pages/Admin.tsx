@@ -4,7 +4,7 @@ import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report } from '../types'
 import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
-import { parseExcelHotspots } from '../utils/excelParser'
+import { parseExcelHotspots, formatAccessibilityInfo } from '../utils/excelParser'
 import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
 
@@ -45,6 +45,18 @@ export default function Admin() {
   const [selectedExcelItem, setSelectedExcelItem] = useState<ParsedExcelItem | null>(null)
   const [excelCategoryFilter, setExcelCategoryFilter] = useState<'all' | 'building' | 'pathway' | 'elevator' | 'restroom'>('all')
   const [excelGradeFilter, setExcelGradeFilter] = useState<'all' | 'G' | 'Y/R'>('all')
+  const [imageLibrary, setImageLibrary] = useState<{ url: string; file?: File; name: string }[]>([]);
+
+  const handleImageLibraryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newImages = Array.from(files).map(file => ({
+      url: URL.createObjectURL(file),
+      file,
+      name: file.name
+    }));
+    setImageLibrary(prev => [...prev, ...newImages]);
+  };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -748,6 +760,8 @@ export default function Admin() {
           hotspot={editHs} 
           mapSrc={mapSrc}
           allHotspots={hotspots}
+          imageLibrary={imageLibrary}
+          parsedExcelItems={parsedExcelItems}
           onSave={saveHotspot} 
           onClose={closeEditor} 
           onChange={setEditHs}
@@ -1125,19 +1139,22 @@ interface HotspotEditorProps {
   hotspot: Hotspot
   mapSrc: string
   allHotspots: Hotspot[]
+  imageLibrary: { url: string; name: string }[]
+  parsedExcelItems: ParsedExcelItem[]
   onSave: (h: Hotspot) => void
   onClose: () => void
   onChange: (h: Hotspot) => void
   compressImage: any
 }
 
-function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
+function HotspotEditor({ hotspot, mapSrc, allHotspots, imageLibrary, parsedExcelItems, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
   const [hs, setHs] = useState(hotspot)
   const [descText, setDescText] = useState(hotspot.description.join('\n'))
   const [previewTab, setPreviewTab] = useState<'map' | 'modal' | 'info'>('map')
   const [isMiniDragging, setIsMiniDragging] = useState(false)
   const [miniSelection, setMiniSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
   const [miniZoom, setMiniZoom] = useState(1)
+  const [searchFacility, setSearchFacility] = useState('')
   const miniMapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -1148,6 +1165,23 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
   useEffect(() => {
     onChange(hs)
   }, [hs])
+
+  // --- 추가된 통합 로직 ---
+
+  const handleAddFacilityInfo = (excelItem: ParsedExcelItem) => {
+    const info = formatAccessibilityInfo(excelItem.category, excelItem.rawData);
+    const newDesc = [...hs.description, `--- ${excelItem.title} 정보 ---`, ...info];
+    setHs({ ...hs, description: newDesc });
+    setDescText(newDesc.join('\n'));
+  };
+
+  const handleSelectFromLibrary = (imgUrl: string, imgName: string) => {
+    setHs(prev => ({
+      ...prev,
+      photos: [...prev.photos, { url: imgUrl, label: imgName.split('.')[0] }]
+    }));
+  };
+  // -----------------------
 
   const handleMiniMapStart = (e: React.MouseEvent) => {
     if (!miniMapRef.current) return
@@ -1216,198 +1250,115 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, onSave, onClose, onChange
   }
 
   return (
-    <div className="editor-overlay">
-      <div className="editor-panel extra-wide">
-        <div className="editor-header">
-          <h3>장소 상세 편집 ({hs.label || '새 장소'})</h3>
-          <button onClick={onClose} className="close-btn"><X size={20} /></button>
-        </div>
-        {hs.sourceExcelId && (
-          <div className="excel-import-badge">
-            📋 엑셀에서 불러온 데이터 · [{hs.label}] · 수정 가능
+    <div className="hotspot-editor-overlay">
+      <div className="hotspot-editor-container">
+        <div className="editor-main">
+          <div className="editor-header">
+            <h3>장소 상세 편집 ({hs.label || '새 장소'})</h3>
+            <button onClick={onClose} className="close-btn"><X size={20} /></button>
           </div>
-        )}
-        <div className="editor-body split-view">
+          
           <div className="editor-preview-container">
             <div className="preview-tabs">
-              <button className={previewTab === 'map' ? 'active' : ''} onClick={() => setPreviewTab('map')}>지도 미리보기</button>
+              <button className={previewTab === 'map' ? 'active' : ''} onClick={() => setPreviewTab('map')}>지도 위치</button>
               <button className={previewTab === 'modal' ? 'active' : ''} onClick={() => setPreviewTab('modal')}>팝업 미리보기</button>
-              <button className={previewTab === 'info' ? 'active' : ''} onClick={() => setPreviewTab('info')}>상세 정보</button>
             </div>
 
             {previewTab === 'map' && (
-              <>
-                <div className="mini-map-header">
-                  <div className="mini-zoom-header">
-                    <span>지도 확대: {Math.round(miniZoom * 100)}%</span>
-                    <input 
-                      type="range" min="1" max="4" step="0.25" 
-                      value={miniZoom} onChange={e => setMiniZoom(parseFloat(e.target.value))} 
-                    />
-                  </div>
-                </div>
-
-                <div className="mini-map-container" onMouseUp={handleMiniMapEnd} onMouseLeave={handleMiniMapEnd}>
-                  <div 
-                    className="mini-map interactive" 
-                    ref={miniMapRef} 
-                    onMouseDown={handleMiniMapStart} 
-                    onMouseMove={handleMiniMapMove}
-                    style={{
-                      width: `${miniZoom * 100}%`
-                    }}
-                  >
-                    <img src={mapSrc} className="mini-map-img" draggable={false} />
-                    
-                    {allHotspots.filter(h => h.id !== hs.id).map(oh => (
-                      <div key={oh.id} className="mini-hotspot other" style={{ left: `${oh.x}%`, top: `${oh.y}%`, width: `${oh.w || 6}%`, height: `${oh.h || 6}%` }} />
-                    ))}
-
-                    <div className={`mini-hotspot current ${!isMiniDragging ? 'pulse' : ''}`} style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}>
-                      <span className="mini-hs-label">{hs.label || '편집 중'}</span>
-                    </div>
-
-                    {miniSelection && (
-                      <div className="selection-box" style={{
-                        position: 'absolute',
-                        left: `${Math.min(miniSelection.x1, miniSelection.x2)}%`,
-                        top: `${Math.min(miniSelection.y1, miniSelection.y2)}%`,
-                        width: `${Math.abs(miniSelection.x1 - miniSelection.x2)}%`,
-                        height: `${Math.abs(miniSelection.y1 - miniSelection.y2)}%`,
-                        border: '1px dashed #5BA4CF',
-                        background: 'rgba(91, 164, 207, 0.2)',
-                        pointerEvents: 'none'
-                      }} />
-                    )}
-                  </div>
-                </div>
-
-                <div className="mini-map-hint-box">
-                  <ShieldAlert size={16} />
-                  <span>지도 위를 드래그하여 위치와 크기를 잡으세요 (현재 설정이 즉시 반영됩니다)</span>
-                </div>
-              </>
-            )}
-
-            {previewTab === 'modal' && (
-              <div className="modal-preview-area">
-                <div className="mock-modal">
-                  <div className={`mock-modal-content ${hs.photos.length >= 2 ? 'is-enhanced' : 'is-default'}`}>
-                    <div className="mock-modal-left">
-                      <h4 className="mock-title">{hs.label || '장소 이름'}</h4>
-                      <div className="mock-pictograms">
-                        {hs.pictogramImages?.map((p, i) => <img key={i} src={p} className="mock-pic-img" alt="icon" />)}
-                      </div>
-                      <ul className="mock-desc-list">
-                        {descText.split('\n').filter(Boolean).length > 0 
-                          ? descText.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line}</li>)
-                          : <li className="placeholder">설명 문구를 입력하면 여기에 노출됩니다.</li>
-                        }
-                      </ul>
-                      <p className="mock-footer-note">{hs.note || '축제 전용 상세 노트를 입력하세요.'}</p>
-                    </div>
-                    <div className="mock-modal-right">
-                      {hs.photos.length > 0 ? (
-                        <div className="mock-slider">
-                          {(() => {
-                            const p = hs.photos[0];
-                            const url = typeof p === 'string' ? p : p?.url;
-                            return <img src={url} className="mock-main-img" alt="preview" />;
-                          })()}
-                        </div>
-                      ) : (
-                        <div className="mock-img-placeholder">업로드된 사진이 없습니다</div>
-                      )}
-                    </div>
+              <div className="mini-map-container" onMouseUp={handleMiniMapEnd} onMouseLeave={handleMiniMapEnd}>
+                <div className="mini-map interactive" ref={miniMapRef} onMouseDown={handleMiniMapStart} onMouseMove={handleMiniMapMove} style={{ width: `${miniZoom * 100}%` }}>
+                  <img src={mapSrc} className="mini-map-img" draggable={false} />
+                  <div className={`mini-hotspot current ${!isMiniDragging ? 'pulse' : ''}`} style={{ left: `${hs.x}%`, top: `${hs.y}%`, width: `${hs.w || 6}%`, height: `${hs.h || 6}%` }}>
+                    <span className="mini-hs-label">{hs.label || '편집 중'}</span>
                   </div>
                 </div>
               </div>
             )}
-
-            {previewTab === 'info' && (
-              <div className="info-guide-preview">
-                <div className="guide-card">
-                  <h5>💡 팁 / 가이드</h5>
-                  <p>• 장소 사진은 최대 10장까지 권장합니다.</p>
-                  <p>• 픽토그램은 1:1 정사각 비율 이미지를 권장합니다 (PNG 투명 배경).</p>
-                  <p>• 드래그를 통해 영역을 보정하면 메인 지도에도 즉시 반영됩니다.</p>
+            
+            {previewTab === 'modal' && (
+              <div className="modal-preview-area">
+                <div className="mock-modal">
+                  <h4 className="mock-title">{hs.label}</h4>
+                  <ul className="mock-desc-list">
+                    {hs.description.map((line, i) => <li key={i}>{line}</li>)}
+                  </ul>
                 </div>
               </div>
             )}
           </div>
 
           <div className="editor-form">
-            <label className="required">장소 이름 (Label)</label>
-            <input value={hs.label} onChange={e => setHs({ ...hs, label: e.target.value })} placeholder="예: 무대 뒤 화장실" />
+            <label className="required">장소 이름</label>
+            <input value={hs.label} onChange={e => setHs({ ...hs, label: e.target.value })} />
 
-            <label>설명 목록 (한 줄에 하나씩)</label>
+            <label>설명 (한 줄씩 입력)</label>
             <textarea 
               value={descText} 
               onChange={e => {
                 setDescText(e.target.value)
                 setHs({ ...hs, description: e.target.value.split('\n').filter(Boolean) })
               }} 
-              placeholder="안내사항 입력" 
-              rows={4} 
+              rows={6} 
             />
 
-
-            <div className="image-sections">
-              <div className="img-section">
-                <label>장소 사진 ({hs.photos.length})</label>
-                <div className="hs-photos-preview-grid">
-                  {hs.photos.map((p, i) => {
-                    const url = typeof p === 'string' ? p : p.url;
-                    const label = typeof p === 'object' ? p.label : '';
-                    return (
-                      <div key={i} className="photo-edit-card">
-                        <div className="photo-wrapper">
-                          <img src={url} alt="hs" />
-                          <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
-                        </div>
-                        <input 
-                          className="photo-label-input"
-                          value={label} 
-                          onChange={e => {
-                            const newPhotos = [...hs.photos];
-                            newPhotos[i] = { url, label: e.target.value };
-                            setHs({ ...hs, photos: newPhotos });
-                          }}
-                          placeholder="사진 이름"
-                        />
-                      </div>
-                    );
-                  })}
-                  <label className="add-photo-box mini"><Plus size={18} /><input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} /></label>
-                </div>
-              </div>
-
-              <div className="img-section">
-                <label>픽토그램 ({hs.pictogramImages?.length || 0})</label>
-                <div className="hs-photos-preview">
-                  {hs.pictogramImages?.map((p, i) => (
-                    <div key={i} className="photo-wrapper pic-wrap">
-                      <img src={p} alt="pic" />
-                      <button className="photo-remove-btn" onClick={() => setHs({ ...hs, pictogramImages: hs.pictogramImages?.filter((_, idx) => idx !== i) })}><X size={10} /></button>
-                    </div>
-                  ))}
-                  <label className="add-photo-box mini"><Plus size={14} /><input type="file" multiple onChange={handlePictogramUpload} style={{ display: 'none' }} /></label>
-                </div>
-              </div>
+            <label>장소 사진 ({hs.photos.length})</label>
+            <div className="hs-photos-preview-grid">
+              {hs.photos.map((p, i) => {
+                const url = typeof p === 'string' ? p : p.url;
+                const label = typeof p === 'object' ? p.label : '';
+                return (
+                  <div key={i} className="photo-edit-card">
+                    <img src={url} alt="hs" />
+                    <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
+                    <input value={label} onChange={e => {
+                      const newPhotos = [...hs.photos];
+                      newPhotos[i] = { url, label: e.target.value };
+                      setHs({ ...hs, photos: newPhotos });
+                    }} />
+                  </div>
+                );
+              })}
+              <label className="add-photo-box mini"><Plus size={18} /><input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} /></label>
             </div>
+          </div>
 
-            <label>추가 노트</label>
-            <input value={hs.note || ''} onChange={e => setHs({ ...hs, note: e.target.value })} placeholder="주의사항 등" />
+          <div className="editor-footer">
+            <button className="editor-save" onClick={() => onSave(hs)}>클라우드 저장</button>
+            <button className="cancel-btn" onClick={onClose}>취소</button>
           </div>
         </div>
-        <div className="editor-footer">
-          <button className="editor-save" onClick={() => onSave(hs)}>저장</button>
-          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>취소</button>
+
+        <div className="editor-sidebar">
+          <div className="sidebar-section">
+            <h4>🔗 시설 정보 가져오기</h4>
+            <input placeholder="시설명 검색" value={searchFacility} onChange={e => setSearchFacility(e.target.value)} className="search-input" />
+            <div className="facility-list">
+              {parsedExcelItems.filter(ex => ex.title.includes(searchFacility)).slice(0, 8).map(ex => (
+                <div key={ex.sourceExcelId} className="facility-item" onClick={() => handleAddFacilityInfo(ex)}>
+                  <span>[{ex.category === 'restroom' ? '🚻' : '🏢'}] {ex.title}</span>
+                  <button>추가</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="sidebar-section">
+            <h4>🖼️ 서버 사진 보관함</h4>
+            <div className="library-grid">
+              {imageLibrary.map((img, i) => (
+                <div key={i} className="library-item" onClick={() => handleSelectFromLibrary(img.url, img.name)}>
+                  <img src={img.url} alt={img.name} />
+                  <span>{img.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
 
 interface ReportDetailModalProps {
   report: Report
