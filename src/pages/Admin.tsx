@@ -759,7 +759,6 @@ export default function Admin() {
         <HotspotEditor 
           hotspot={editHs} 
           mapSrc={mapSrc}
-          allHotspots={hotspots}
           imageLibrary={imageLibrary}
           parsedExcelItems={parsedExcelItems}
           onSave={saveHotspot} 
@@ -1138,7 +1137,6 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
 interface HotspotEditorProps {
   hotspot: Hotspot
   mapSrc: string
-  allHotspots: Hotspot[]
   imageLibrary: { url: string; name: string }[]
   parsedExcelItems: ParsedExcelItem[]
   onSave: (h: Hotspot) => void
@@ -1147,13 +1145,13 @@ interface HotspotEditorProps {
   compressImage: any
 }
 
-function HotspotEditor({ hotspot, mapSrc, allHotspots, imageLibrary, parsedExcelItems, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
+function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
   const [hs, setHs] = useState(hotspot)
   const [descText, setDescText] = useState(hotspot.description.join('\n'))
   const [previewTab, setPreviewTab] = useState<'map' | 'modal' | 'info'>('map')
   const [isMiniDragging, setIsMiniDragging] = useState(false)
   const [miniSelection, setMiniSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
-  const [miniZoom, setMiniZoom] = useState(1)
+  const [miniZoom] = useState(1)
   const [searchFacility, setSearchFacility] = useState('')
   const miniMapRef = useRef<HTMLDivElement>(null)
 
@@ -1236,6 +1234,7 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, imageLibrary, parsedExcel
     })
   }
 
+/*
   const handlePictogramUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
@@ -1248,6 +1247,7 @@ function HotspotEditor({ hotspot, mapSrc, allHotspots, imageLibrary, parsedExcel
       reader.readAsDataURL(file)
     })
   }
+*/
 
   return (
     <div className="hotspot-editor-overlay">

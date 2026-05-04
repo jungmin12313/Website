@@ -70,12 +70,14 @@ export const formatAccessibilityInfo = (category: string, row: any): string[] =>
 };
 
 // 구글 드라이브 주소 변환 (임시 유지, 향후 서버 업로드로 대체 권장)
+/*
 const convertDrivePathToUrl = async (path: string): Promise<string> => {
   if (!path) return '';
   const idMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (idMatch) return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
   return path;
 };
+*/
 
 export const parseExcelHotspots = (file: File): Promise<ParsedExcelItem[]> => {
   return new Promise((resolve) => {
