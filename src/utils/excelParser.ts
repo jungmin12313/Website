@@ -7,6 +7,23 @@ export type ParsedExcelItem = Partial<Hotspot> & {
   accessibilityGrade: 'G' | 'Y' | 'R';
   title: string;
   subtitle: string;
+  rawData?: any; // 원본 행 데이터 보존 (수동 통합 시 필요)
+};
+
+// --- 교통약자이동편의증진법 법적 기준 상수 ---
+export const ACCESSIBILITY_STANDARDS = {
+  DOOR_WIDTH_MIN: 90,    // cm (승강기/주출입구 문 너비)
+  RAMP_SLOPE_MAX: 4.76,  // 도 (1/12 이하)
+  STEP_HEIGHT_MAX: 2,    // cm (단차)
+  RESTROOM_WIDTH_MIN: 140, // cm
+  RESTROOM_DEPTH_MIN: 180, // cm
+};
+
+// 기준 충족 여부 판단 유틸리티
+const checkCompliance = (value: number | undefined, standard: number, type: 'min' | 'max'): string => {
+  if (value === undefined || isNaN(value)) return '';
+  const isCompliant = type === 'min' ? value >= standard : value <= standard;
+  return isCompliant ? ' (기준 충족)' : ' (기준 미달)';
 };
 
 const parseGPS = (gpsStr: any) => {
@@ -16,98 +33,48 @@ const parseGPS = (gpsStr: any) => {
   return undefined;
 };
 
+// 엑셀 행을 서술형 문구 리스트로 변환 (법적 기준 반영)
+export const formatAccessibilityInfo = (category: string, row: any): string[] => {
+  const desc: string[] = [];
+  
+  if (category === 'building') {
+    const width = Number(row['출입문_유효_너비'] || row['문_너비(cm)']);
+    if (width) desc.push(`🏢 [건물] 주출입구 유효폭 ${width}cm${checkCompliance(width, ACCESSIBILITY_STANDARDS.DOOR_WIDTH_MIN, 'min')}`);
+    
+    const step = Number(row['단차_높이'] || row['단차_높이(cm)']);
+    if (step !== undefined) desc.push(`🏢 [건물] 주출입구 단차 ${step}cm${checkCompliance(step, ACCESSIBILITY_STANDARDS.STEP_HEIGHT_MAX, 'max')}`);
+    
+    const slope = Number(row['경사로_기울기']);
+    if (slope) desc.push(`🏢 [건물] 경사로 기울기 ${slope}도${checkCompliance(slope, ACCESSIBILITY_STANDARDS.RAMP_SLOPE_MAX, 'max')}`);
+  } 
+  else if (category === 'restroom') {
+    const width = Number(row['출입문_너비']);
+    if (width) desc.push(`🚻 [화장실] 입구 유효폭 ${width}cm${checkCompliance(width, ACCESSIBILITY_STANDARDS.DOOR_WIDTH_MIN, 'min')}`);
+    
+    const spaceX = Number(row['가로_유효_크기']);
+    const spaceY = Number(row['세로_유효_크기']);
+    if (spaceX && spaceY) {
+      const isOk = spaceX >= ACCESSIBILITY_STANDARDS.RESTROOM_WIDTH_MIN && spaceY >= ACCESSIBILITY_STANDARDS.RESTROOM_DEPTH_MIN;
+      desc.push(`🚻 [화장실] 내부 공간 ${spaceX}x${spaceY}cm${isOk ? ' (기준 충족)' : ' (기준 미달)'}`);
+    }
+  }
+  else if (category === 'elevator') {
+    const width = Number(row['출입문_너비']);
+    if (width) desc.push(`♿ [엘리베이터] 문 너비 ${width}cm${checkCompliance(width, ACCESSIBILITY_STANDARDS.DOOR_WIDTH_MIN, 'min')}`);
+    
+    const internal = String(row['내부_크기'] || '');
+    if (internal) desc.push(`♿ [엘리베이터] 내부 크기: ${internal}`);
+  }
+
+  return desc.filter(Boolean);
+};
+
+// 구글 드라이브 주소 변환 (임시 유지, 향후 서버 업로드로 대체 권장)
 const convertDrivePathToUrl = async (path: string): Promise<string> => {
   if (!path) return '';
-  if (path.includes('drive.google.com') || path.includes('id=')) {
-    let fileId = '';
-    const fileDMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (fileDMatch) fileId = fileDMatch[1];
-    else {
-      const idMatch = path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (idMatch) fileId = idMatch[1];
-    }
-    if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
-  }
+  const idMatch = path.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || path.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (idMatch) return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
   return path;
-};
-
-const getPhotosForId = async (id: string, rawPath: string, photoSheet: any[]): Promise<{ url: string; label: string }[]> => {
-  const photoList: { url: string; label: string }[] = [];
-  if (rawPath && photoSheet && Array.isArray(photoSheet)) {
-    const fileName = String(rawPath).split('/').pop() || String(rawPath);
-    const mainRow = photoSheet.find(row => 
-      String(row['사진파일'] || '').includes(fileName) || String(row['부모ID'] || '') === id
-    );
-    if (mainRow && mainRow['사진파일']) {
-      const url = await convertDrivePathToUrl(String(mainRow['사진파일']));
-      if (url) photoList.push({ url, label: '정면 사진' });
-    }
-  }
-  if (photoSheet && Array.isArray(photoSheet)) {
-    const related = photoSheet.filter(row => String(row['부모ID'] || '') === id);
-    for (const row of related) {
-      const url = await convertDrivePathToUrl(String(row['사진파일'] || ''));
-      if (url && !photoList.some(p => p.url === url)) {
-        photoList.push({ url, label: String(row['사진설명'] || '추가 사진') });
-      }
-    }
-  }
-  return photoList;
-};
-
-const processBuilding = async (row: any, photoSheet: any[]) => {
-  const id = String(row['ID'] || '');
-  const title = String(row['조사지 건물명'] || row['건물명'] || '건물');
-  const desc = [
-    row['출입문_형태'] && `주출입구 ${row['출입문_형태']} 설치`,
-    row['출입문_유효_너비'] && `출입문 유효폭 ${row['출입문_유효_너비']}cm`,
-    row['단차_높이'] !== undefined && `단차 ${row['단차_높이']}cm`,
-    row['경사로_유무'] === 'TRUE' && `경사로 설치 (기울기 ${row['경사로_기울기']}°)`,
-  ].filter(Boolean) as string[];
-  return {
-    sourceExcelId: id, category: 'building', accessibilityGrade: row['색_구분'] || 'Y',
-    title, label: title, description: desc, note: String(row['기타'] || ''),
-    gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['출입문_정면사진'] || '', photoSheet)
-  } as ParsedExcelItem;
-};
-
-const processRestroom = async (row: any, photoSheet: any[]) => {
-  const id = String(row['ID'] || '');
-  const title = String(row['화장실명'] || '화장실');
-  const desc = [
-    row['카테고리'] && `${row['카테고리']}`,
-    row['출입문_너비'] && `출입문 유효폭 ${row['출입문_너비']}cm`,
-    row['가로_유효_크기'] && `내부 크기: ${row['가로_유효_크기']}x${row['세로_유효_크기']}cm`,
-  ].filter(Boolean) as string[];
-  return {
-    sourceExcelId: id, category: 'restroom', accessibilityGrade: row['색_구분'] || 'Y',
-    title, label: title, description: desc, note: String(row['기타'] || ''),
-    gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['화장실_사진'] || '', photoSheet)
-  } as ParsedExcelItem;
-};
-
-const processPathway = async (row: any, photoSheet: any[]) => {
-  const id = String(row['ID'] || '');
-  return {
-    sourceExcelId: id, category: 'pathway', accessibilityGrade: row['색_구분'] || 'Y',
-    title: String(row['보행로_이름'] || '보행로'), label: '보행로',
-    description: [row['보행로_너비'] && `보행로 유효폭 ${row['보행로_너비']}cm`].filter(Boolean),
-    gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['보행로_사진'] || '', photoSheet)
-  } as ParsedExcelItem;
-};
-
-const processElevator = async (row: any, photoSheet: any[]) => {
-  const id = String(row['ID'] || '');
-  return {
-    sourceExcelId: id, category: 'elevator', accessibilityGrade: row['색_구분'] || 'Y',
-    title: String(row['엘리베이터명'] || '엘리베이터'), label: '엘리베이터',
-    description: [row['내부_크기'] && `내부 크기: ${row['내부_크기']}`].filter(Boolean),
-    gps: parseGPS(row['위치_GPS']),
-    photos: await getPhotosForId(id, row['엘리베이터_사진'] || '', photoSheet)
-  } as ParsedExcelItem;
 };
 
 export const parseExcelHotspots = (file: File): Promise<ParsedExcelItem[]> => {
@@ -117,55 +84,29 @@ export const parseExcelHotspots = (file: File): Promise<ParsedExcelItem[]> => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: 'array' });
       const getSheet = (n: string) => workbook.Sheets[n] ? XLSX.utils.sheet_to_json(workbook.Sheets[n]) : [];
-      const bldgPhotos = getSheet('건물_사진');
-      const restPhotos = getSheet('화장실_사진');
-      const pathPhotos = getSheet('보행로_사진');
-      const elevPhotos = getSheet('엘리베이터_사진');
-      const buildingItems = await Promise.all(getSheet('건물').map(r => processBuilding(r, bldgPhotos)));
-      const restroomItems = await Promise.all(getSheet('화장실').map(r => processRestroom(r, restPhotos)));
-      const pathwayItems = await Promise.all(getSheet('보행로').map(r => processPathway(r, pathPhotos)));
-      const elevatorItems = await Promise.all(getSheet('엘리베이터').map(r => processElevator(r, elevPhotos)));
-      const buildingMap = new Map<string, ParsedExcelItem>();
-      buildingItems.forEach(item => {
-        const key = item.title.replace(/[^a-zA-Z0-9가-힣]/g, '').trim();
-        buildingMap.set(key, item);
-      });
-      const finalRestrooms = new Map<string, ParsedExcelItem>();
-      const results: ParsedExcelItem[] = [...pathwayItems];
-      elevatorItems.forEach(item => {
-        const clean = item.title.replace(/[^a-zA-Z0-9가-힣]/g, '').trim();
-        let merged = false;
-        for (const [bKey, parent] of buildingMap) {
-          if (clean.includes(bKey) || bKey.includes(clean)) {
-            parent.description = [...(parent.description || []), `[엘리베이터] ${item.title}: ${(item.description || []).join(', ')}`].filter(Boolean);
-            parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
-            merged = true; break;
-          }
+
+      const categories: ('building' | 'restroom' | 'pathway' | 'elevator')[] = ['건물', '화장실', '보행로', '엘리베이터'] as any;
+      const allItems: ParsedExcelItem[] = [];
+
+      for (const cat of categories) {
+        const rows = getSheet(cat);
+        const sheetName = cat === '건물' ? 'building' : cat === '화장실' ? 'restroom' : cat === '보행로' ? 'pathway' : 'elevator';
+        
+        for (const row of rows as any[]) {
+          allItems.push({
+            sourceExcelId: String(row['ID'] || ''),
+            category: sheetName as any,
+            accessibilityGrade: row['색_구분'] || 'Y',
+            title: String(row['건물명'] || row['화장실명'] || row['엘리베이터명'] || row['보행로_이름'] || '이름 없음'),
+            label: String(row['건물명'] || row['화장실명'] || row['엘리베이터명'] || row['보행로_이름'] || '이름 없음'),
+            description: formatAccessibilityInfo(sheetName, row),
+            note: String(row['기타'] || ''),
+            gps: parseGPS(row['위치_GPS']),
+            rawData: row // 나중에 수동 통합 시 참조하기 위해 저장
+          });
         }
-        if (!merged) results.push(item);
-      });
-      restroomItems.forEach(item => {
-        const clean = item.title.replace(/\s*\(?(남|여|남여|M|F|남성용|여성용|장애인용)\)?\s*/g, '').replace(/[^a-zA-Z0-9가-힣]/g, '').trim();
-        let mergedToBuilding = false;
-        for (const [bKey, parent] of buildingMap) {
-          if (clean.includes(bKey)) {
-            parent.description = [...(parent.description || []), `[내부 화장실] ${item.title}: ${(item.description || []).join(', ')}`].filter(Boolean);
-            parent.photos = Array.from(new Set([...(parent.photos as any[]), ...(item.photos as any[])]));
-            mergedToBuilding = true; break;
-          }
-        }
-        if (!mergedToBuilding) {
-          if (finalRestrooms.has(clean)) {
-            const ex = finalRestrooms.get(clean)!;
-            ex.description = Array.from(new Set([...(ex.description || []), ...(item.description || [])]));
-            ex.photos = Array.from(new Set([...(ex.photos as any[]), ...(item.photos as any[])]));
-          } else {
-            item.title = clean; item.label = clean;
-            finalRestrooms.set(clean, item);
-          }
-        }
-      });
-      resolve([...Array.from(buildingMap.values()), ...Array.from(finalRestrooms.values()), ...results]);
+      }
+      resolve(allItems);
     };
     reader.readAsArrayBuffer(file);
   });

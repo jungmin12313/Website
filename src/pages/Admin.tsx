@@ -493,6 +493,17 @@ export default function Admin() {
 
                   <div className="excel-import-section">
                     <span className="sidebar-label">현장 데이터 불러오기</span>
+                    <div className="admin-sidebar-section">
+                      <h3>🖼️ 사진 번들 업로드</h3>
+                      <p className="section-desc">ZIP 또는 여러 사진 파일을 한꺼번에 올려 '보관함'을 채우세요.</p>
+                      <label className="bundle-upload-label">
+                        사진 선택...
+                        <input type="file" multiple accept="image/*" onChange={handleImageLibraryUpload} style={{ display: 'none' }} />
+                      </label>
+                      <div className="library-status">
+                        현재 보관함: <strong>{imageLibrary.length}장</strong>
+                      </div>
+                    </div>
                     <label className="excel-upload-btn">
                       📂 엑셀 업로드
                       <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} style={{ display: 'none' }} />
