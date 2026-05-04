@@ -85,24 +85,27 @@ export const parseExcelHotspots = (file: File): Promise<ParsedExcelItem[]> => {
       const workbook = XLSX.read(data, { type: 'array' });
       const getSheet = (n: string) => workbook.Sheets[n] ? XLSX.utils.sheet_to_json(workbook.Sheets[n]) : [];
 
-      const categories: ('building' | 'restroom' | 'pathway' | 'elevator')[] = ['건물', '화장실', '보행로', '엘리베이터'] as any;
-      const allItems: ParsedExcelItem[] = [];
+      const sheetToCategory: Record<string, 'building' | 'restroom' | 'pathway' | 'elevator'> = {
+        '건물': 'building',
+        '화장실': 'restroom',
+        '보행로': 'pathway',
+        '엘리베이터': 'elevator'
+      };
 
-      for (const cat of categories) {
-        const rows = getSheet(cat);
-        const sheetName = cat === '건물' ? 'building' : cat === '화장실' ? 'restroom' : cat === '보행로' ? 'pathway' : 'elevator';
-        
+      for (const [sheetName, cat] of Object.entries(sheetToCategory)) {
+        const rows = getSheet(sheetName);
         for (const row of rows as any[]) {
           allItems.push({
             sourceExcelId: String(row['ID'] || ''),
-            category: sheetName as any,
+            category: cat,
             accessibilityGrade: row['색_구분'] || 'Y',
             title: String(row['건물명'] || row['화장실명'] || row['엘리베이터명'] || row['보행로_이름'] || '이름 없음'),
+            subtitle: String(row['카테고리'] || sheetName),
             label: String(row['건물명'] || row['화장실명'] || row['엘리베이터명'] || row['보행로_이름'] || '이름 없음'),
-            description: formatAccessibilityInfo(sheetName, row),
+            description: formatAccessibilityInfo(cat, row),
             note: String(row['기타'] || ''),
             gps: parseGPS(row['위치_GPS']),
-            rawData: row // 나중에 수동 통합 시 참조하기 위해 저장
+            rawData: row
           });
         }
       }
