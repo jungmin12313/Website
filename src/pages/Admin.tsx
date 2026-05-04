@@ -909,15 +909,15 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
             <label>카테고리</label>
             <input value={festival.category} onChange={e => update('category', e.target.value)} placeholder="꽃, 음식, 체험 등" />
 
-            <div className="row" style={{ marginTop: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: '#f8f9fa', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e9ecef', fontWeight: 600 }}>
-                <input type="checkbox" checked={!!festival.showOnMain} onChange={e => update('showOnMain', e.target.checked)} style={{ width: 'auto', margin: 0, transform: 'scale(1.2)' }} />
+            <div className="editor-checkbox-row">
+              <label className="checkbox-label">
+                <input type="checkbox" checked={!!festival.showOnMain} onChange={e => update('showOnMain', e.target.checked)} />
                 🎯 메인 화면 최상단 위젯으로 노출하기 (최대 3개 권장)
               </label>
             </div>
 
-            <div className="transport-section" style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid #e9ecef', borderRadius: '0.75rem', background: '#fcfcfc' }}>
-              <h4 style={{ margin: '0 0 1rem 0', color: '#343a40' }}>무장애 편의정보 (교통/접근성)</h4>
+            <div className="transport-section">
+              <h4>무장애 편의정보 (교통/접근성)</h4>
               <label>전반적인 안내 설명</label>
               <textarea
                 value={festival.transport?.description || ''}
@@ -928,8 +928,8 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                 placeholder="예: 행사장까지 저상버스가 15분 간격으로 운행됩니다."
                 rows={3}
               />
-              <div style={{ marginTop: '1.5rem' }}>
-                <label style={{ marginBottom: '0.5rem', display: 'block' }}>교통/편의 서비스 항목</label>
+              <div className="services-container">
+                <label>교통/편의 서비스 항목</label>
                 {(festival.transport?.services || []).map((service, idx) => (
                   <div key={idx} style={{ background: '#fff', border: '1px solid #dee2e6', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', position: 'relative' }}>
                     <button 
@@ -999,8 +999,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                   </div>
                 ))}
                 <button 
-                  className="add-main-btn" 
-                  style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', background: '#339af0', color: 'white', borderRadius: '0.5rem', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  className="add-service-btn" 
                   onClick={() => {
                     const currentTransport = festival.transport || { description: '', services: [] }
                     update('transport', {
