@@ -314,19 +314,31 @@ export default function Admin() {
   const saveHotspot = async (hsWithDesc: Hotspot) => {
     if (!selectedFestivalId) return
     if (!hsWithDesc.label.trim()) return alert('장소 이름은 필수 입력 항목입니다.')
-    const festival = festivals.find(f => f.id === selectedFestivalId)
-    if (!festival) return
-    const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
-    const newHotspots = hotspotExists
-      ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
-      : [...(festival.hotspots || []), hsWithDesc]
-    const updatedFestival = { ...festival, hotspots: newHotspots }
-    const success = await updateAndSave(updatedFestival, '핫스팟이 클라우드에 연동되었습니다.')
-    if (success) {
-      const { logAction } = await import('../firebaseUtils')
-      await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
-      setHotspots(newHotspots)
-      closeEditor()
+    
+    try {
+      const festival = festivals.find(f => f.id === selectedFestivalId)
+      if (!festival) throw new Error('축제 정보를 찾을 수 없습니다.')
+
+      const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
+      const newHotspots = hotspotExists
+        ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
+        : [...(festival.hotspots || []), hsWithDesc]
+
+      const updatedFestival = { ...festival, hotspots: newHotspots }
+      const success = await updateAndSave(updatedFestival)
+      
+      if (success) {
+        const { logAction } = await import('../firebaseUtils')
+        await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
+        setHotspots(newHotspots)
+        closeEditor()
+        alert('핫스팟이 클라우드에 성공적으로 저장되었습니다.')
+      } else {
+        throw new Error('데이터베이스 업데이트에 실패했습니다.')
+      }
+    } catch (err: any) {
+      console.error('Save error:', err)
+      alert(`저장 중 오류가 발생했습니다: ${err.message || '알 수 없는 오류'}`)
     }
   }
 
@@ -1151,7 +1163,11 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
   const [isMiniDragging, setIsMiniDragging] = useState(false)
   const [miniSelection, setMiniSelection] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null)
   const [searchFacility, setSearchFacility] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
   const miniMapRef = useRef<HTMLDivElement>(null)
+
+  // Check if it's a new registration based on a heuristic (can be improved if needed)
+  const isNew = hotspot.label === '' || hotspot.label === '새 장소' || hotspot.isReportBased;
 
   useEffect(() => {
     setHs(hotspot)
@@ -1235,8 +1251,8 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
         <div className="editor-main">
           <div className="editor-header">
             <div className="header-title-group">
-              <span className="editor-badge">장소 편집</span>
-              <h3>{hs.label || '새 장소 등록'}</h3>
+              <span className={`editor-badge ${isNew ? 'new' : 'edit'}`}>{isNew ? '신규 등록' : '정보 수정'}</span>
+              <h3>{isNew ? '새 장소 등록' : hs.label}</h3>
             </div>
             <div className="header-tabs">
               <button className={activeTab === 'edit' ? 'active' : ''} onClick={() => setActiveTab('edit')}>📝 정보 편집</button>
@@ -1281,47 +1297,55 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
             {activeTab === 'edit' && (
               <div className="edit-tab-view split-layout animate-in">
                 <div className="editor-column form-side">
-                  <label className="required">장소 이름</label>
-                  <input 
-                    className="main-input"
-                    value={hs.label} 
-                    onChange={e => setHs({ ...hs, label: e.target.value })} 
-                    placeholder="예: 제1주차장 무장애 화장실" 
-                  />
+                  <div className="editor-form">
+                    <div className="form-section">
+                      <label className="required">장소 이름</label>
+                      <input 
+                        className="main-input"
+                        value={hs.label} 
+                        onChange={e => setHs({ ...hs, label: e.target.value })} 
+                        placeholder="예: 제1주차장 무장애 화장실" 
+                      />
+                    </div>
 
-                  <label>상세 설명 (실시간 반영)</label>
-                  <textarea 
-                    value={descText} 
-                    onChange={e => {
-                      setDescText(e.target.value)
-                      setHs({ ...hs, description: e.target.value.split('\n').filter(Boolean) })
-                    }} 
-                    rows={8} 
-                    placeholder="접근성 정보를 입력하세요..."
-                  />
+                    <div className="form-section">
+                      <label>상세 설명 (실시간 반영)</label>
+                      <textarea 
+                        value={descText} 
+                        onChange={e => {
+                          setDescText(e.target.value)
+                          setHs({ ...hs, description: e.target.value.split('\n').filter(Boolean) })
+                        }} 
+                        rows={6} 
+                        placeholder="접근성 정보를 입력하세요..."
+                      />
+                    </div>
 
-                  <label>현장 사진 관리 ({hs.photos.length})</label>
-                  <div className="hs-photos-preview-grid">
-                    {hs.photos.map((p, i) => {
-                      const url = typeof p === 'string' ? p : p.url;
-                      const label = typeof p === 'object' ? p.label : '';
-                      return (
-                        <div key={i} className="photo-edit-card">
-                          <div className="img-holder"><img src={url} alt="hs" /></div>
-                          <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
-                          <input value={label} onChange={e => {
-                            const newPhotos = [...hs.photos];
-                            newPhotos[i] = { url, label: e.target.value };
-                            setHs({ ...hs, photos: newPhotos });
-                          }} placeholder="사진 이름" />
-                        </div>
-                      );
-                    })}
-                    <label className="add-photo-box mini">
-                      <Plus size={24} />
-                      <span>추가</span>
-                      <input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} />
-                    </label>
+                    <div className="form-section">
+                      <label>현장 사진 관리 ({hs.photos.length})</label>
+                      <div className="hs-photos-preview-grid">
+                        {hs.photos.map((p, i) => {
+                          const url = typeof p === 'string' ? p : p.url;
+                          const label = typeof p === 'object' ? p.label : '';
+                          return (
+                            <div key={i} className="photo-edit-card">
+                              <div className="img-holder"><img src={url} alt="hs" /></div>
+                              <button className="photo-remove-btn" onClick={() => setHs({ ...hs, photos: hs.photos.filter((_, idx) => idx !== i) })}><X size={10} /></button>
+                              <input value={label} onChange={e => {
+                                const newPhotos = [...hs.photos];
+                                newPhotos[i] = { url, label: e.target.value };
+                                setHs({ ...hs, photos: newPhotos });
+                              }} placeholder="사진 이름" />
+                            </div>
+                          );
+                        })}
+                        <label className="add-photo-box mini">
+                          <Plus size={24} />
+                          <span>추가</span>
+                          <input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} />
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1330,22 +1354,27 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
                     <span className="preview-label">실시간 미리보기</span>
                     <div className="mock-modal-wrapper">
                       <div className="mock-modal">
-                        <h4 className="mock-title">{hs.label || '장소명 없음'}</h4>
-                        <ul className="mock-desc-list">
-                          {hs.description.length > 0 ? hs.description.map((line, i) => <li key={i}>{line}</li>) : <li className="empty-desc">설명을 입력해 주세요.</li>}
-                        </ul>
-                        {hs.photos.length > 0 && (
-                          <div className="mock-photos">
-                            {hs.photos.slice(0, 3).map((p, i) => (
-                              <div key={i} className="mock-photo-item">
-                                <img src={typeof p === 'string' ? p : p.url} alt="mock" />
-                                {typeof p === 'object' && p.label && <span className="mock-photo-label">{p.label}</span>}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <div className="mock-header">
+                          <h4 className="mock-title">{hs.label || '장소명 없음'}</h4>
+                        </div>
+                        <div className="mock-body">
+                          <ul className="mock-desc-list">
+                            {hs.description.length > 0 ? hs.description.map((line, i) => <li key={i}>{line}</li>) : <li className="empty-desc">설명을 입력해 주세요.</li>}
+                          </ul>
+                          {hs.photos.length > 0 && (
+                            <div className="mock-photos">
+                              {hs.photos.slice(0, 3).map((p, i) => (
+                                <div key={i} className="mock-photo-item">
+                                  <img src={typeof p === 'string' ? p : p.url} alt="mock" />
+                                  {typeof p === 'object' && p.label && <span className="mock-photo-label">{p.label}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <p className="preview-hint">※ 앱에서 사용자에게 보여지는 실제 화면입니다.</p>
                   </div>
                 </div>
               </div>
@@ -1353,34 +1382,68 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
           </div>
 
           <div className="editor-footer">
-            <button className="editor-save" onClick={() => onSave(hs)}>클라우드 저장</button>
-            <button className="cancel-btn" onClick={onClose}>취소</button>
+            <div className="footer-left">
+              <span className="status-indicator">📍 현재 좌표: {hs.x.toFixed(1)}%, {hs.y.toFixed(1)}% (영역: {hs.w}x{hs.h})</span>
+            </div>
+            <div className="footer-right">
+              <button className="cancel-btn" onClick={onClose} disabled={isSaving}>취소</button>
+              <button 
+                className={`editor-save ${isSaving ? 'loading' : ''}`} 
+                onClick={async () => {
+                  setIsSaving(true)
+                  try {
+                    await onSave(hs)
+                  } finally {
+                    setIsSaving(false)
+                  }
+                }}
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 className="animate-spin" size={18} /> : '클라우드 저장'}
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="editor-sidebar">
-          <div className="sidebar-section">
-            <h4>🔗 시설 정보 가져오기</h4>
-            <input placeholder="시설명 검색" value={searchFacility} onChange={e => setSearchFacility(e.target.value)} className="search-input" />
-            <div className="facility-list">
-              {parsedExcelItems.filter(ex => ex.title.includes(searchFacility)).slice(0, 8).map(ex => (
-                <div key={ex.sourceExcelId} className="facility-item" onClick={() => handleAddFacilityInfo(ex)}>
-                  <span>[{ex.category === 'restroom' ? '🚻' : '🏢'}] {ex.title}</span>
-                  <button>추가</button>
-                </div>
-              ))}
-            </div>
+          <div className="sidebar-header">
+            <h4>🔗 퀵 도구 모음</h4>
           </div>
+          <div className="sidebar-scrollable">
+            <div className="sidebar-card">
+              <div className="card-header">
+                <Search size={14} />
+                <h5>시설 정보 라이브러리</h5>
+              </div>
+              <div className="search-box">
+                <input placeholder="시설명 검색..." value={searchFacility} onChange={e => setSearchFacility(e.target.value)} />
+              </div>
+              <div className="facility-list mini-list">
+                {parsedExcelItems.filter(ex => ex.title.includes(searchFacility)).slice(0, 10).map(ex => (
+                  <div key={ex.sourceExcelId} className="facility-item mini" onClick={() => handleAddFacilityInfo(ex)}>
+                    <div className="f-icon">{ex.category === 'restroom' ? '🚻' : '🏢'}</div>
+                    <div className="f-info">
+                      <span className="f-title">{ex.title}</span>
+                    </div>
+                    <Plus size={12} className="add-icon" />
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          <div className="sidebar-section">
-            <h4>🖼️ 서버 사진 보관함</h4>
-            <div className="library-grid">
-              {imageLibrary.map((img, i) => (
-                <div key={i} className="library-item" onClick={() => handleSelectFromLibrary(img.url, img.name)}>
-                  <img src={img.url} alt={img.name} />
-                  <span>{img.name}</span>
-                </div>
-              ))}
+            <div className="sidebar-card">
+              <div className="card-header">
+                <Upload size={14} />
+                <h5>서버 사진 보관함</h5>
+              </div>
+              <div className="library-grid mini">
+                {imageLibrary.map((img, i) => (
+                  <div key={i} className="library-item" onClick={() => handleSelectFromLibrary(img.url, img.name)}>
+                    <img src={img.url} alt={img.name} />
+                    <div className="lib-hover"><Plus size={16} /></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
