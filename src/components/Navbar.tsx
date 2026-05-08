@@ -17,12 +17,7 @@ export default function Navbar() {
     localStorage.setItem('naeil_hcm', String(isHighContrast))
   }, [isHighContrast])
 
-  const navLinks = [
-    { to: '/about', label: '소개' },
-    { to: '/maps', label: '무장애지도' },
-    { to: '/calendar', label: '축제 캘린더' },
-    { to: '/report', label: '신고센터' },
-  ]
+
 
   return (
     <>
