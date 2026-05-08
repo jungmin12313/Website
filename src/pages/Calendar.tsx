@@ -53,6 +53,13 @@ export default function Calendar() {
     return date.getMonth() === month && date.getFullYear() === year
   }
 
+  const isHoliday = (date: Date) => {
+    // 7월 17일 (제헌절)
+    if (date.getMonth() === 6 && date.getDate() === 17) return true
+    // 추가 공휴일이 있다면 여기에 추가
+    return false
+  }
+
   // Parse YYYY-MM-DD
   const parseDate = (str: string) => {
     if (!str) return null
@@ -128,7 +135,7 @@ export default function Calendar() {
               {calendarDays.slice(weekIdx * 7, weekIdx * 7 + 7).map((date, dayIdx) => (
                 <div 
                   key={dayIdx} 
-                  className={`day-cell ${!isCurrentMonth(date) ? 'outside' : ''} ${dayIdx === 0 ? 'sun' : dayIdx === 6 ? 'sat' : ''} ${isToday(date) ? 'today' : ''}`}
+                  className={`day-cell ${!isCurrentMonth(date) ? 'outside' : ''} ${(dayIdx === 0 || isHoliday(date)) ? 'sun' : dayIdx === 6 ? 'sat' : ''} ${isToday(date) ? 'today' : ''}`}
                 >
                   <span className="day-number">{date.getDate()}</span>
                 </div>

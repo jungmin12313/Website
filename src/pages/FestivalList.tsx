@@ -51,11 +51,11 @@ export default function FestivalList() {
       result = result.filter(f => f.location.includes(regionFilter) || (regionFilter === '광주광역시' && f.location.includes('광주')))
     }
     
-    // Sort by Category Alphabetically
+    // Sort by Date
     result.sort((a, b) => {
-      const catA = a.category || ''
-      const catB = b.category || ''
-      return catA.localeCompare(catB, 'ko') || a.name.localeCompare(b.name, 'ko')
+      const dateA = a.startDate || ''
+      const dateB = b.startDate || ''
+      return dateB.localeCompare(dateA) // Latest date first
     })
     
     return result
@@ -76,19 +76,19 @@ export default function FestivalList() {
             <Calendar size={18} />
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               <option value="all">시기 전체</option>
-              <option value="active">진행중</option>
               <option value="soon">예정</option>
               <option value="ended">종료</option>
+              <option value="active">진행중</option>
             </select>
           </div>
           <div className="filter-select half-width">
             <MapPin size={18} />
             <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)}>
               <option value="all">지역 전체</option>
-              <option value="충청남도">충청남도</option>
-              <option value="전라남도">전라남도</option>
               <option value="광주광역시">광주광역시</option>
+              <option value="전라남도">전라남도</option>
               <option value="전라북도">전라북도</option>
+              <option value="충청남도">충청남도</option>
             </select>
           </div>
         </div>

@@ -22,12 +22,15 @@ export interface Hotspot {
 }
 
 export interface TransportService {
-  name: string
-  target: string
-  phone: string
-  fee: string
-  operator: string
-  inquiry: string
+  title: string
+  content: string
+  // Legacy fields
+  name?: string
+  target?: string
+  phone?: string
+  fee?: string
+  operator?: string
+  inquiry?: string
 }
 
 export interface Transport {
@@ -84,4 +87,20 @@ export interface Report {
   createdAt: number
   status: 'pending' | 'resolved'
   isApproved?: boolean    // 관리자가 공개 지도에 표시하도록 승인했는지 여부
+}
+
+export interface PressArticle {
+  id: string
+  title: string
+  date: string
+  publisher: string
+  link: string
+  createdAt: number
+}
+
+export interface GalleryImage {
+  id: string
+  url: string
+  caption: string
+  createdAt: number
 }

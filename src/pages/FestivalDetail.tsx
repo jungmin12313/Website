@@ -352,7 +352,7 @@ export default function FestivalDetail() {
                     className="map-image-wrap"
                     style={{
                       transform: `scale(${mapScale})`,
-                      transformOrigin: '0 0'
+                      transformOrigin: 'center center'
                     }}
                   >
                     {(() => {
@@ -363,6 +363,8 @@ export default function FestivalDetail() {
                           src={currentMap}
                           alt="축제 무장애지도"
                           className="map-img"
+                          loading="lazy"
+                          decoding="async"
                           onLoad={(e) => {
                             const img = e.currentTarget
                             const viewport = mapRef.current
@@ -531,14 +533,18 @@ export default function FestivalDetail() {
               <p className="transport-route">{festival.transport.description}</p>
               {festival.transport.services.map((s, i) => (
                 <div key={i} className="transport-service">
-                  <h3>{s.name}</h3>
-                  <ul>
-                    <li><strong>이용대상</strong>: {s.target}</li>
-                    <li><strong>이용방법</strong>: {s.phone}</li>
-                    <li><strong>이용요금</strong>: {s.fee}</li>
-                    <li><strong>운행</strong>: {s.operator}</li>
-                    <li><strong>기타문의</strong>: {s.inquiry}</li>
-                  </ul>
+                  <h3>{s.title || s.name}</h3>
+                  {s.content ? (
+                    <p style={{ whiteSpace: 'pre-line', lineHeight: '1.6', color: 'var(--gray-700)', marginTop: '0.5rem' }}>{s.content}</p>
+                  ) : (
+                    <ul>
+                      {s.target && <li><strong>이용대상</strong>: {s.target}</li>}
+                      {s.phone && <li><strong>이용방법</strong>: {s.phone}</li>}
+                      {s.fee && <li><strong>이용요금</strong>: {s.fee}</li>}
+                      {s.operator && <li><strong>운행</strong>: {s.operator}</li>}
+                      {s.inquiry && <li><strong>기타문의</strong>: {s.inquiry}</li>}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>

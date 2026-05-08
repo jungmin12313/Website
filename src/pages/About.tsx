@@ -191,7 +191,7 @@ export default function About() {
           <div className="reveal story-body" style={{ transitionDelay: '0.1s' }}>
             <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 내일은 직접 들었습니다.</p>
             <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
-            <p style={{ marginTop: 16 }}>그래서 <span style={{ fontWeight: 700 }}>'내일'</span>은 책상이 아닌 현장에서 시작했습니다. 당사자와 함께, 휠체어 바퀴가 닿는 모든 곳의 배리어프리 접근성을 직접 확인하면서.</p>
+            <p style={{ marginTop: 16 }}>그래서 <span style={{ fontWeight: 700 }}>'내일'</span>은 당사자와 함께, 휠체어 바퀴가 닿는 모든 곳의 배리어프리 접근성을 직접 확인하며 책상이 아닌 현장에서 시작했습니다.</p>
           </div>
         </div>
       </section>

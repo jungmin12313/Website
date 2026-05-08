@@ -1,6 +1,6 @@
 import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore'
 import { db } from './firebase'
-import type { Festival, Report } from './types'
+import type { Festival, Report, PressArticle, GalleryImage } from './types'
 
 // 축제 데이터 가져오기
 export async function getFestivals(): Promise<Festival[]> {
@@ -57,6 +57,42 @@ export async function saveReport(report: Report): Promise<void> {
 
 export async function deleteReport(reportId: string): Promise<void> {
   await deleteDoc(doc(db, 'reports', reportId))
+}
+
+// --- 보도자료(Press) 관련 ---
+export async function getPress(): Promise<PressArticle[]> {
+  const q = query(collection(db, 'press'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return []
+  const reqs: PressArticle[] = []
+  snapshot.forEach(d => reqs.push(d.data() as PressArticle))
+  return reqs
+}
+
+export async function savePress(article: PressArticle): Promise<void> {
+  await setDoc(doc(db, 'press', article.id), article)
+}
+
+export async function deletePress(articleId: string): Promise<void> {
+  await deleteDoc(doc(db, 'press', articleId))
+}
+
+// --- 갤러리(Gallery) 관련 ---
+export async function getGallery(): Promise<GalleryImage[]> {
+  const q = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return []
+  const reqs: GalleryImage[] = []
+  snapshot.forEach(d => reqs.push(d.data() as GalleryImage))
+  return reqs
+}
+
+export async function saveGallery(image: GalleryImage): Promise<void> {
+  await setDoc(doc(db, 'gallery', image.id), image)
+}
+
+export async function deleteGallery(imageId: string): Promise<void> {
+  await deleteDoc(doc(db, 'gallery', imageId))
 }
 
 // --- Audit Logs (행위 추적) ---

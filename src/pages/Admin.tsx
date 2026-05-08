@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Upload, MapPin, Home, Calendar, ShieldAlert, Loader2, LogOut, X, Search } from 'lucide-react'
 import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import type { Hotspot, Festival, Report } from '../types'
-import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport } from '../firebaseUtils'
+import type { Hotspot, Festival, Report, PressArticle, GalleryImage } from '../types'
+import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport, getPress, savePress, deletePress, getGallery, saveGallery, deleteGallery } from '../firebaseUtils'
 import { parseExcelHotspots, formatAccessibilityInfo } from '../utils/excelParser'
 import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
@@ -11,9 +11,11 @@ import './Admin.css'
 const HERO_BG_STORAGE_KEY = 'naeil_hero_bg'
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<'festivals' | 'hotspots' | 'hero' | 'reports'>('festivals')
+  const [activeTab, setActiveTab] = useState<'festivals' | 'hotspots' | 'hero' | 'reports' | 'press' | 'gallery'>('festivals')
   const [festivals, setFestivals] = useState<Festival[]>([])
   const [reports, setReports] = useState<Report[]>([])
+  const [pressList, setPressList] = useState<PressArticle[]>([])
+  const [galleryList, setGalleryList] = useState<GalleryImage[]>([])
   const [heroBg, setHeroBg] = useState<string>('')
   
   // Festival state
@@ -50,12 +52,14 @@ export default function Admin() {
   const handleImageLibraryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newImages = Array.from(files).map(file => ({
-      url: URL.createObjectURL(file),
-      file,
-      name: file.name
-    }));
-    setImageLibrary(prev => [...prev, ...newImages]);
+    Array.from(files).forEach(file => {
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string, 800, 0.4)
+        setImageLibrary(prev => [...prev, { url: compressed, file, name: file.name }])
+      }
+      reader.readAsDataURL(file)
+    })
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +101,12 @@ export default function Admin() {
 
     // Load reports
     getReports().then(setReports).catch(err => console.error('Failed to load reports:', err))
+
+    // Load press
+    getPress().then(setPressList).catch(console.error)
+    
+    // Load gallery
+    getGallery().then(setGalleryList).catch(console.error)
 
     getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
@@ -324,7 +334,9 @@ export default function Admin() {
         ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
         : [...(festival.hotspots || []), hsWithDesc]
 
-      const updatedFestival = { ...festival, hotspots: newHotspots }
+      const rawUpdatedFestival = { ...festival, hotspots: newHotspots }
+      // Firestore does not allow undefined fields, so we serialize and parse to strip them
+      const updatedFestival = JSON.parse(JSON.stringify(rawUpdatedFestival))
       const success = await updateAndSave(updatedFestival)
       
       if (success) {
@@ -443,6 +455,8 @@ export default function Admin() {
             <button className={`tab-btn ${activeTab === 'festivals' ? 'active' : ''}`} onClick={() => setActiveTab('festivals')}><Calendar size={18} /> 축제</button>
             <button className={`tab-btn ${activeTab === 'hotspots' ? 'active' : ''}`} onClick={() => setActiveTab('hotspots')}><MapPin size={18} /> 핫스팟</button>
             <button className={`tab-btn ${activeTab === 'hero' ? 'active' : ''}`} onClick={() => setActiveTab('hero')}><Home size={18} /> 배경</button>
+            <button className={`tab-btn ${activeTab === 'press' ? 'active' : ''}`} onClick={() => setActiveTab('press')}><Search size={18} /> 보도자료</button>
+            <button className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}><Upload size={18} /> 갤러리</button>
             <button className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
               <ShieldAlert size={18} /> 제보 
               {reports.filter(r => r.status === 'pending').length > 0 && (
@@ -758,6 +772,93 @@ export default function Admin() {
         )}
       </div>
 
+      {activeTab === 'press' && (
+        <div className="admin-management">
+          <div className="admin-list-header">
+            <h3>보도자료 관리</h3>
+            <button className="add-main-btn" onClick={() => {
+              const title = prompt('보도자료 제목:')
+              if (!title) return
+              const publisher = prompt('언론사명 (예: 연합뉴스):')
+              const link = prompt('뉴스 기사 URL:')
+              const date = prompt('작성일 (예: 2026. 05. 08):')
+              if (title && publisher && link && date) {
+                const article: PressArticle = { id: `press-${Date.now()}`, title, publisher, link, date, createdAt: Date.now() }
+                savePress(article).then(() => setPressList(p => [article, ...p]))
+              } else {
+                alert('모든 항목을 입력해야 합니다.')
+              }
+            }}><Plus size={18} /> 새 보도자료 추가</button>
+          </div>
+          <div className="reports-grid">
+            {pressList.length === 0 && <div className="empty-text" style={{ gridColumn: '1/-1' }}>등록된 보도자료가 없습니다.</div>}
+            {pressList.map(p => (
+              <div key={p.id} className="report-card">
+                <div className="report-card-header">
+                  <div className="report-meta">
+                    <span className="status-tag resolved">{p.publisher}</span>
+                    <span className="report-date">{p.date}</span>
+                  </div>
+                  <button className="del-report-btn" onClick={() => {
+                    if(confirm('삭제하시겠습니까?')) {
+                      deletePress(p.id).then(() => setPressList(l => l.filter(i => i.id !== p.id)))
+                    }
+                  }}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <div className="report-subject">
+                  <strong>{p.title}</strong>
+                  <p><a href={p.link} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-color)' }}>{p.link}</a></p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'gallery' && (
+        <div className="admin-management">
+          <div className="admin-list-header">
+            <h3>갤러리 관리</h3>
+            <label className="add-main-btn" style={{ cursor: 'pointer' }}>
+              <Upload size={18} /> 사진 업로드 (자동 압축)
+              <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => {
+                const files = e.target.files
+                if (!files) return
+                Array.from(files).forEach(file => {
+                  const reader = new FileReader()
+                  reader.onloadend = async () => {
+                    // compress image using existing function (e.g., 1000px, quality 0.6)
+                    const compressed = await compressImage(reader.result as string, 1000, 0.6)
+                    const caption = prompt(`[${file.name}] 사진에 대한 캡션을 입력하세요 (선택):`) || ''
+                    const item: GalleryImage = { id: `gallery-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, url: compressed, caption, createdAt: Date.now() }
+                    saveGallery(item).then(() => setGalleryList(p => [item, ...p]))
+                  }
+                  reader.readAsDataURL(file)
+                })
+              }} />
+            </label>
+          </div>
+          <div className="hs-photos-preview-grid" style={{ padding: '1rem' }}>
+            {galleryList.length === 0 && <div className="empty-text">등록된 사진이 없습니다.</div>}
+            {galleryList.map(g => (
+              <div key={g.id} className="photo-edit-card" style={{ width: '100%', maxWidth: '200px' }}>
+                <div className="img-holder"><img src={g.url} alt="gallery" /></div>
+                <button className="photo-remove-btn" onClick={() => {
+                  if(confirm('이 사진을 삭제하시겠습니까?')) {
+                    deleteGallery(g.id).then(() => setGalleryList(l => l.filter(i => i.id !== g.id)))
+                  }
+                }}><X size={10} /></button>
+                <div style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {g.caption || '캡션 없음'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {editingFestival && (
         <FestivalEditor 
           festival={editingFestival} 
@@ -956,56 +1057,22 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                     </button>
                     <div className="row">
                       <div className="col">
-                        <label>서비스명</label>
-                        <input value={service.name} onChange={e => {
+                        <label>항목명 (제목)</label>
+                        <input value={service.title || service.name || ''} onChange={e => {
                           const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, name: e.target.value }
+                          newServices[idx] = { ...service, title: e.target.value }
                           update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 무장애 셔틀버스" />
-                      </div>
-                      <div className="col">
-                        <label>이용대상</label>
-                        <input value={service.target} onChange={e => {
-                          const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, target: e.target.value }
-                          update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 휠체어 이용자 및 동반 1인" />
+                        }} placeholder="예: 무장애 셔틀버스, 이용 대상, 이용 요금 등" />
                       </div>
                     </div>
                     <div className="row">
                       <div className="col">
-                        <label>이용방법 및 수단</label>
-                        <input value={service.phone} onChange={e => {
+                        <label>상세 내용</label>
+                        <textarea value={service.content || service.target || ''} onChange={e => {
                           const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, phone: e.target.value }
+                          newServices[idx] = { ...service, content: e.target.value }
                           update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 사전 예약 (010-0000-0000)" />
-                      </div>
-                      <div className="col">
-                        <label>이용요금</label>
-                        <input value={service.fee} onChange={e => {
-                          const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, fee: e.target.value }
-                          update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 무료" />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col">
-                        <label>운행 정보 / 시간</label>
-                        <input value={service.operator} onChange={e => {
-                          const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, operator: e.target.value }
-                          update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 09:00 ~ 18:00 순환" />
-                      </div>
-                      <div className="col">
-                        <label>기타 문의</label>
-                        <input value={service.inquiry} onChange={e => {
-                          const newServices = [...festival.transport!.services]
-                          newServices[idx] = { ...service, inquiry: e.target.value }
-                          update('transport', { ...festival.transport, services: newServices })
-                        }} placeholder="예: 다산콜센터 120" />
+                        }} placeholder="상세 내용을 자유롭게 입력하세요." rows={3} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ced4da' }} />
                       </div>
                     </div>
                   </div>
@@ -1016,7 +1083,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                     const currentTransport = festival.transport || { description: '', services: [] }
                     update('transport', {
                       ...currentTransport,
-                      services: [...currentTransport.services, { name: '', target: '', phone: '', fee: '', operator: '', inquiry: '' }]
+                      services: [...currentTransport.services, { title: '', content: '' }]
                     })
                   }}
                 >
@@ -1120,7 +1187,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                           if (!file) return
                           const reader = new FileReader()
                           reader.onloadend = async () => {
-                            const compressed = await compressImage(reader.result as string, 1600, 0.5)
+                            const compressed = await compressImage(reader.result as string, 3500, 0.85)
                             const newMaps = [...maps]
                             newMaps[idx] = compressed
                             update('mapImages', newMaps)
