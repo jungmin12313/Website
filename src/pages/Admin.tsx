@@ -21,6 +21,10 @@ export default function Admin() {
   // Festival state
   const [editingFestival, setEditingFestival] = useState<Festival | null>(null)
   
+  // Press & Gallery state
+  const [editingPress, setEditingPress] = useState<PressArticle | null>(null)
+  const [editingGallery, setEditingGallery] = useState<GalleryImage | null>(null)
+  
   // Hotspot state
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('')
   const [selectedMapIndex, setSelectedMapIndex] = useState<number>(0)
@@ -777,29 +781,29 @@ export default function Admin() {
           <div className="admin-list-header">
             <h3>보도자료 관리</h3>
             <button className="add-main-btn" onClick={() => {
-              const title = prompt('보도자료 제목:')
-              if (!title) return
-              const publisher = prompt('언론사명 (예: 연합뉴스):')
-              const link = prompt('뉴스 기사 URL:')
-              const date = prompt('작성일 (예: 2026. 05. 08):')
-              if (title && publisher && link && date) {
-                const article: PressArticle = { id: `press-${Date.now()}`, title, publisher, link, date, createdAt: Date.now() }
-                savePress(article).then(() => setPressList(p => [article, ...p]))
-              } else {
-                alert('모든 항목을 입력해야 합니다.')
-              }
+              setEditingPress({
+                id: `press-${Date.now()}`,
+                title: '',
+                publisher: '',
+                link: '',
+                date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\./g, '.').replace(/ /g, ' '),
+                content: '',
+                image: '',
+                createdAt: Date.now()
+              })
             }}><Plus size={18} /> 새 보도자료 추가</button>
           </div>
           <div className="reports-grid">
             {pressList.length === 0 && <div className="empty-text" style={{ gridColumn: '1/-1' }}>등록된 보도자료가 없습니다.</div>}
             {pressList.map(p => (
-              <div key={p.id} className="report-card">
+              <div key={p.id} className="report-card" onClick={() => setEditingPress(p)} style={{ cursor: 'pointer' }}>
                 <div className="report-card-header">
                   <div className="report-meta">
                     <span className="status-tag resolved">{p.publisher}</span>
                     <span className="report-date">{p.date}</span>
                   </div>
-                  <button className="del-report-btn" onClick={() => {
+                  <button className="del-report-btn" onClick={(e) => {
+                    e.stopPropagation()
                     if(confirm('삭제하시겠습니까?')) {
                       deletePress(p.id).then(() => setPressList(l => l.filter(i => i.id !== p.id)))
                     }
@@ -809,7 +813,8 @@ export default function Admin() {
                 </div>
                 <div className="report-subject">
                   <strong>{p.title}</strong>
-                  <p><a href={p.link} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-color)' }}>{p.link}</a></p>
+                  {p.image && <p style={{ fontSize: '0.8rem', color: '#868e96', marginTop: '0.25rem' }}>📸 썸네일 포함</p>}
+                  <p><a href={p.link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color: 'var(--primary-color)' }}>{p.link}</a></p>
                 </div>
               </div>
             ))}
@@ -821,31 +826,24 @@ export default function Admin() {
         <div className="admin-management">
           <div className="admin-list-header">
             <h3>갤러리 관리</h3>
-            <label className="add-main-btn" style={{ cursor: 'pointer' }}>
-              <Upload size={18} /> 사진 업로드 (자동 압축)
-              <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => {
-                const files = e.target.files
-                if (!files) return
-                Array.from(files).forEach(file => {
-                  const reader = new FileReader()
-                  reader.onloadend = async () => {
-                    // compress image using existing function (e.g., 1000px, quality 0.6)
-                    const compressed = await compressImage(reader.result as string, 1000, 0.6)
-                    const caption = prompt(`[${file.name}] 사진에 대한 캡션을 입력하세요 (선택):`) || ''
-                    const item: GalleryImage = { id: `gallery-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, url: compressed, caption, createdAt: Date.now() }
-                    saveGallery(item).then(() => setGalleryList(p => [item, ...p]))
-                  }
-                  reader.readAsDataURL(file)
-                })
-              }} />
-            </label>
+            <button className="add-main-btn" onClick={() => {
+              setEditingGallery({
+                id: `gallery-${Date.now()}`,
+                url: '',
+                caption: '',
+                createdAt: Date.now()
+              })
+            }}>
+              <Plus size={18} /> 새 갤러리 추가
+            </button>
           </div>
           <div className="hs-photos-preview-grid" style={{ padding: '1rem' }}>
             {galleryList.length === 0 && <div className="empty-text">등록된 사진이 없습니다.</div>}
             {galleryList.map(g => (
-              <div key={g.id} className="photo-edit-card" style={{ width: '100%', maxWidth: '200px' }}>
+              <div key={g.id} className="photo-edit-card" onClick={() => setEditingGallery(g)} style={{ width: '100%', maxWidth: '200px', cursor: 'pointer' }}>
                 <div className="img-holder"><img src={g.url} alt="gallery" /></div>
-                <button className="photo-remove-btn" onClick={() => {
+                <button className="photo-remove-btn" onClick={(e) => {
+                  e.stopPropagation()
                   if(confirm('이 사진을 삭제하시겠습니까?')) {
                     deleteGallery(g.id).then(() => setGalleryList(l => l.filter(i => i.id !== g.id)))
                   }
@@ -901,6 +899,49 @@ export default function Admin() {
           onConvertToHotspot={() => convertReportToHotspot(selectedReport)} 
         />
       )}
+    {editingPress && (
+      <PressEditor
+        press={editingPress}
+        onClose={() => setEditingPress(null)}
+        setPress={setEditingPress}
+        onSave={async () => {
+          if (!editingPress.title || !editingPress.publisher || !editingPress.date || !editingPress.link) {
+            return alert('필수 항목을 모두 입력해주세요.')
+          }
+          await savePress(editingPress)
+          setPressList(p => {
+            const exists = p.find(item => item.id === editingPress.id)
+            if (exists) return p.map(item => item.id === editingPress.id ? editingPress : item)
+            return [editingPress, ...p]
+          })
+          setEditingPress(null)
+          alert('보도자료가 저장되었습니다.')
+        }}
+        compressImage={compressImage}
+      />
+    )}
+
+    {editingGallery && (
+      <GalleryEditor
+        gallery={editingGallery}
+        onClose={() => setEditingGallery(null)}
+        setGallery={setEditingGallery}
+        onSave={async () => {
+          if (!editingGallery.url) {
+            return alert('사진을 먼저 업로드해주세요.')
+          }
+          await saveGallery(editingGallery)
+          setGalleryList(p => {
+            const exists = p.find(item => item.id === editingGallery.id)
+            if (exists) return p.map(item => item.id === editingGallery.id ? editingGallery : item)
+            return [editingGallery, ...p]
+          })
+          setEditingGallery(null)
+          alert('갤러리가 저장되었습니다.')
+        }}
+        compressImage={compressImage}
+      />
+    )}
     </div>
   )
 }
@@ -1588,6 +1629,153 @@ function ReportDetailModal({ report, onClose, onDelete, onStatusChange, onConver
         <div className="editor-footer">
           <button className="editor-save" onClick={onConvertToHotspot}>📍 이 내용을 바탕으로 핫스팟 생성</button>
           <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>닫기</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+interface PressEditorProps {
+  press: PressArticle
+  onClose: () => void
+  setPress: React.Dispatch<React.SetStateAction<PressArticle | null>>
+  onSave: () => void
+  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+}
+
+function PressEditor({ press, onClose, setPress, onSave, compressImage }: PressEditorProps) {
+  const update = (field: string, val: any) => setPress(prev => prev ? { ...prev, [field]: val } : null)
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string, 1200, 0.7)
+      update('image', compressed)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className="editor-overlay">
+      <div className="editor-panel wide">
+        <div className="editor-header">
+          <h3>보도자료 상세 정보</h3>
+          <button onClick={onClose} className="close-btn"><X size={20} /></button>
+        </div>
+        <div className="editor-body">
+          <div className="row">
+            <div className="col">
+              <label className="required">보도자료 제목</label>
+              <input value={press.title} onChange={e => update('title', e.target.value)} placeholder="제목 입력" />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <label className="required">언론사명</label>
+              <input value={press.publisher} onChange={e => update('publisher', e.target.value)} placeholder="예: 연합뉴스" />
+            </div>
+            <div className="col">
+              <label className="required">작성일 (보도일)</label>
+              <input value={press.date} onChange={e => update('date', e.target.value)} placeholder="예: 2026. 05. 08" />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <label className="required">기사 링크 URL</label>
+              <input value={press.link} onChange={e => update('link', e.target.value)} placeholder="https://..." />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <label>핵심 내용 (선택)</label>
+              <textarea value={press.content || ''} onChange={e => update('content', e.target.value)} placeholder="보도자료 요약 내용 입력" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ced4da', fontFamily: 'inherit' }} />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <label>대표 사진 (썸네일)</label>
+              {press.image ? (
+                <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                  <img src={press.image} alt="썸네일" style={{ width: '100%', borderRadius: '0.5rem', maxHeight: '200px', objectFit: 'cover' }} />
+                  <button className="upload-inline-btn" onClick={() => update('image', '')} style={{ marginTop: '0.5rem' }}>사진 삭제</button>
+                </div>
+              ) : (
+                <label className="add-photo-box" style={{ width: '100%', height: 'auto', padding: '2rem' }}>
+                  <Upload size={18} /> 사진 업로드
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="editor-footer">
+          <button className="editor-save" onClick={onSave}><Upload size={18} /> 저장</button>
+          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>취소</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface GalleryEditorProps {
+  gallery: GalleryImage
+  onClose: () => void
+  setGallery: React.Dispatch<React.SetStateAction<GalleryImage | null>>
+  onSave: () => void
+  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+}
+
+function GalleryEditor({ gallery, onClose, setGallery, onSave, compressImage }: GalleryEditorProps) {
+  const update = (field: string, val: any) => setGallery(prev => prev ? { ...prev, [field]: val } : null)
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string, 1200, 0.7)
+      update('url', compressed)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className="editor-overlay">
+      <div className="editor-panel wide">
+        <div className="editor-header">
+          <h3>갤러리 사진 정보</h3>
+          <button onClick={onClose} className="close-btn"><X size={20} /></button>
+        </div>
+        <div className="editor-body">
+          <div className="row">
+            <div className="col">
+              <label className="required">사진 등록</label>
+              {gallery.url ? (
+                <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                  <img src={gallery.url} alt="갤러리 사진" style={{ width: '100%', borderRadius: '0.5rem', maxHeight: '300px', objectFit: 'contain', background: '#f8f9fa' }} />
+                  <button className="upload-inline-btn" onClick={() => update('url', '')} style={{ marginTop: '0.5rem' }}>다른 사진으로 변경</button>
+                </div>
+              ) : (
+                <label className="add-photo-box" style={{ width: '100%', height: 'auto', padding: '3rem' }}>
+                  <Upload size={24} style={{ marginBottom: '0.5rem' }} /> 클릭하여 사진 업로드
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                </label>
+              )}
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <label>사진 설명 (캡션)</label>
+              <textarea value={gallery.caption || ''} onChange={e => update('caption', e.target.value)} placeholder="사진에 대한 설명을 자세히 작성해주세요." rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ced4da', fontFamily: 'inherit' }} />
+            </div>
+          </div>
+        </div>
+        <div className="editor-footer">
+          <button className="editor-save" onClick={onSave}><Upload size={18} /> 저장</button>
+          <button className="cancel-btn" onClick={onClose} style={{ padding: '0.875rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, background: '#f1f3f5' }}>취소</button>
         </div>
       </div>
     </div>

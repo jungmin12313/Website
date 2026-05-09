@@ -95,6 +95,8 @@ export interface PressArticle {
   date: string
   publisher: string
   link: string
+  image?: string
+  content?: string
   createdAt: number
 }
 

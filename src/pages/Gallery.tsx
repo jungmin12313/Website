@@ -30,18 +30,42 @@ export default function Gallery() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {galleryList.map(img => (
-              <div key={img.id} style={{ borderRadius: '12px', overflow: 'hidden', background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid var(--gray-200)' }}>
-                <div style={{ position: 'relative', width: '100%', paddingTop: '75%', overflow: 'hidden', background: '#f8f9fa' }}>
+              <div 
+                key={img.id} 
+                style={{ 
+                  borderRadius: '16px', 
+                  overflow: 'hidden', 
+                  background: '#fff', 
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                  border: '1px solid var(--gray-200)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)';
+                  const imgEl = e.currentTarget.querySelector('img');
+                  if(imgEl) imgEl.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                  const imgEl = e.currentTarget.querySelector('img');
+                  if(imgEl) imgEl.style.transform = 'scale(1)';
+                }}
+                onClick={() => window.open(img.url, '_blank')}
+              >
+                <div style={{ position: 'relative', width: '100%', paddingTop: '80%', overflow: 'hidden', background: '#f8f9fa' }}>
                   <img 
                     src={img.url} 
                     alt={img.caption || '갤러리 이미지'} 
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease-out' }}
                     loading="lazy"
                   />
                 </div>
                 {img.caption && (
-                  <div style={{ padding: '12px 16px' }}>
-                    <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--gray-800)' }}>{img.caption}</p>
+                  <div style={{ padding: '1.25rem' }}>
+                    <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--gray-800)', margin: 0, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{img.caption}</p>
                   </div>
                 )}
               </div>
