@@ -17,6 +17,7 @@ const Calendar = lazy(() => import('./pages/Calendar'))
 const Story = lazy(() => import('./pages/Story'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Press = lazy(() => import('./pages/Press'))
+const Newsletter = lazy(() => import('./pages/Newsletter'))
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/press" element={<Press />} />
+            <Route path="/newsletter" element={<Newsletter />} />
           </Routes>
         </Suspense>
       </main>

@@ -41,12 +41,13 @@ export default function Navbar() {
               <Link to="/report" className={`nav-link ${location.pathname.startsWith('/report') ? 'active' : ''}`}>신고센터</Link>
               
               <div className="dropdown">
-                <span className={`nav-link ${(location.pathname.startsWith('/press') || location.pathname.startsWith('/gallery')) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
+                <span className={`nav-link ${(location.pathname.startsWith('/press') || location.pathname.startsWith('/gallery') || location.pathname.startsWith('/newsletter')) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
                   소식
                 </span>
                 <div className="dropdown-content fade-in">
                   <Link to="/press" className="nav-link">보도자료</Link>
                   <Link to="/gallery" className="nav-link">갤러리</Link>
+                  <Link to="/newsletter" className="nav-link">뉴스레터 구독</Link>
                 </div>
               </div>
             </div>
@@ -79,6 +80,7 @@ export default function Navbar() {
             <Link to="/report" className={`sidebar-link ${location.pathname.startsWith('/report') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>신고센터</Link>
             <Link to="/press" className={`sidebar-link ${location.pathname.startsWith('/press') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>보도자료</Link>
             <Link to="/gallery" className={`sidebar-link ${location.pathname.startsWith('/gallery') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>갤러리</Link>
+            <Link to="/newsletter" className={`sidebar-link ${location.pathname.startsWith('/newsletter') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>뉴스레터 구독</Link>
           </div>
           <div className="sidebar-footer">
             <button 

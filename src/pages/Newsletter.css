@@ -1,0 +1,611 @@
+/* Newsletter Page Styling */
+
+.newsletter-page {
+  background: var(--gray-50, #f8fafc);
+  padding: 5rem 1.5rem;
+  min-height: calc(100vh - var(--nav-height, 70px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.newsletter-container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 1. SPLIT LAYOUT */
+.newsletter-split-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* Left Column: Intro copy */
+.newsletter-intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.newsletter-intro .badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(82, 165, 255, 0.1);
+  color: #258bf7;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.825rem;
+  font-weight: 700;
+  width: fit-content;
+  margin-bottom: 1.5rem;
+}
+
+.newsletter-intro h1 {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 2.25rem;
+  font-weight: 900;
+  line-height: 1.35;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.5px;
+}
+
+.newsletter-intro h1 strong {
+  color: #258bf7;
+  font-weight: 900;
+}
+
+.intro-desc {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #475569;
+  margin-bottom: 2.5rem;
+}
+
+/* Benefit Cards stack */
+.benefit-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.b-card {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.b-icon-wrap {
+  width: 44px;
+  height: 44px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.b-icon {
+  color: #258bf7;
+}
+
+.b-text h3 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 0.35rem;
+}
+
+.b-text p {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Right Column: Form card */
+.newsletter-form-container {
+  width: 100%;
+}
+
+.form-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-card h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+}
+
+.form-sub {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1.75rem;
+}
+
+/* Error banner */
+.error-message-box {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #991b1b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.error-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+/* Inputs */
+.actual-subscription-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-field-group label {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.form-input-text {
+  width: 100%;
+  padding: 0.875rem 1.15rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 0.925rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input-text:focus {
+  background: #ffffff;
+  border-color: #258bf7;
+  box-shadow: 0 0 0 4px rgba(37, 139, 247, 0.12);
+}
+
+/* Custom Checkbox */
+.consent-checkbox-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.native-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-checkmark {
+  height: 20px;
+  width: 20px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container:hover .custom-checkmark {
+  border-color: #94a3b8;
+}
+
+.native-checkbox:checked ~ .custom-checkmark {
+  background-color: #258bf7;
+  border-color: #258bf7;
+}
+
+.check-svg {
+  color: #ffffff;
+}
+
+.consent-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.consent-detail-box {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  padding: 0.875rem;
+  border-radius: 10px;
+  font-size: 0.775rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Submit */
+.form-submit-btn {
+  width: 100%;
+  background: #258bf7;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  margin-top: 0.75rem;
+  box-shadow: 0 4px 12px rgba(37, 139, 247, 0.15);
+}
+
+.form-submit-btn:hover {
+  background: #1d73cf;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 139, 247, 0.25);
+}
+
+.form-security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  font-size: 0.775rem;
+  color: #94a3b8;
+}
+
+/* 2. SUCCESS CARD */
+.newsletter-success-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 4rem 3rem;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.05);
+}
+
+.success-circle-pulse {
+  width: 80px;
+  height: 80px;
+  background: #ecfdf5;
+  border: 2px solid #a7f3d0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  animation: pulseGreen 2s infinite;
+}
+
+.success-icon-svg {
+  color: #10b981;
+}
+
+.newsletter-success-card h2 {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.5px;
+}
+
+.success-lead {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.65;
+  margin-bottom: 2rem;
+}
+
+.success-lead strong {
+  color: #0f172a;
+}
+
+.success-lead span {
+  color: #258bf7;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.success-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.benefit-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.success-note {
+  font-size: 0.775rem;
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.back-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #1e293b;
+  color: #ffffff;
+  padding: 0.875rem 1.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.back-home-btn:hover {
+  background: #0f172a;
+  transform: translateX(3px);
+}
+
+@keyframes pulseGreen {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 3. RESPONSIVE DESIGN */
+@media (max-width: 960px) {
+  .newsletter-split-layout {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+  .newsletter-page {
+    padding: 3.5rem 1.5rem;
+  }
+  .newsletter-intro h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-card {
+    padding: 1.75rem;
+  }
+  .newsletter-intro h1 {
+    font-size: 1.75rem;
+  }
+  .newsletter-success-card {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* 4. HIGH CONTRAST MODE */
+[data-theme='high-contrast'] .newsletter-page {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .newsletter-intro h1 {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .newsletter-intro h1 strong {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .newsletter-intro .badge-tag {
+  background: #000000 !important;
+  border: 1px solid #ffff00 !important;
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .intro-desc {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .b-card {
+  border: 1px dashed #ffffff !important;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+[data-theme='high-contrast'] .b-icon-wrap {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+[data-theme='high-contrast'] .b-icon {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .b-text h3 {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .b-text p {
+  color: #ffffff !important;
+}
+
+/* Form HC */
+[data-theme='high-contrast'] .form-card {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+}
+
+[data-theme='high-contrast'] .form-card h3 {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .form-sub {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .form-input-text {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .form-input-text:focus {
+  border-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .input-field-group label {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .custom-checkmark {
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+[data-theme='high-contrast'] .native-checkbox:checked ~ .custom-checkmark {
+  background-color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .check-svg {
+  color: #000000 !important;
+}
+
+[data-theme='high-contrast'] .consent-text {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .consent-detail-box {
+  background: #000000 !important;
+  border: 1px dashed #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .form-submit-btn {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .form-submit-btn:hover {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .form-security-badge {
+  color: #ffffff !important;
+}
+
+/* Success Card HC */
+[data-theme='high-contrast'] .newsletter-success-card {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+}
+
+[data-theme='high-contrast'] .success-circle-pulse {
+  background: #000000 !important;
+  border: 3px solid #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .success-icon-svg {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .newsletter-success-card h2 {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .success-lead {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .success-lead span {
+  color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .benefit-badge {
+  background: #000000 !important;
+  border: 1px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .success-note {
+  color: #ffffff !important;
+}
+
+[data-theme='high-contrast'] .back-home-btn {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .back-home-btn:hover {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
