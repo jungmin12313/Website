@@ -58,12 +58,14 @@
 
 .navbar-links {
   display: flex;
+  align-items: center;
   gap: 2rem;
 }
 
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-content {
@@ -72,13 +74,24 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  margin-top: 4px;
   background-color: var(--white);
-  min-width: 140px;
+  min-width: 120px;
   box-shadow: var(--shadow-md);
   border-radius: var(--radius-sm);
   z-index: 100;
   padding: 0.5rem 0;
   border: 1px solid var(--gray-200);
+}
+
+/* Hover bridge to keep dropdown open when moving mouse */
+.dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
 }
 
 .dropdown:hover .dropdown-content {
