@@ -72,8 +72,7 @@
   display: none;
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 0;
   margin-top: 4px;
   background-color: var(--white);
   min-width: 120px;

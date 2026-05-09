@@ -774,7 +774,6 @@ export default function Admin() {
             </div>
           </div>
         )}
-      </div>
 
       {activeTab === 'press' && (
         <div className="admin-management">
@@ -854,8 +853,9 @@ export default function Admin() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {editingFestival && (
         <FestivalEditor 
