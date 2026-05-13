@@ -1254,7 +1254,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                             if (!file) return
                             const reader = new FileReader()
                             reader.onloadend = async () => {
-                              const compressed = await compressImage(reader.result as string, 3500, 0.85)
+                              const compressed = await compressImage(reader.result as string, 2048, 0.6)
                               const newMaps = [maps[0] || '', maps[1] || '']
                               newMaps[idx] = compressed
                               
