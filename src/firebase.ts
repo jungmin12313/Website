@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
@@ -38,3 +39,4 @@ if (typeof window !== "undefined" && import.meta.env.VITE_RECAPTCHA_SITE_KEY) {
 // Initialize Services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);

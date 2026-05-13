@@ -1,6 +1,14 @@
 import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore'
-import { db } from './firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { db, storage } from './firebase'
 import type { Festival, Report, PressArticle, GalleryImage } from './types'
+
+// 클라우드 스토리지 파일 업로드
+export async function uploadToStorage(file: File | Blob, path: string): Promise<string> {
+  const storageRef = ref(storage, path)
+  const snapshot = await uploadBytes(storageRef, file)
+  return await getDownloadURL(snapshot.ref)
+}
 
 // 축제 데이터 가져오기
 export async function getFestivals(): Promise<Festival[]> {

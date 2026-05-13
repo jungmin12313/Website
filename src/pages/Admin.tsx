@@ -3,7 +3,7 @@ import { Plus, Trash2, Upload, MapPin, Home, Calendar, ShieldAlert, Loader2, Log
 import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report, PressArticle, GalleryImage } from '../types'
-import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport, getPress, savePress, deletePress, getGallery, saveGallery, deleteGallery } from '../firebaseUtils'
+import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport, getPress, savePress, deletePress, getGallery, saveGallery, deleteGallery, uploadToStorage } from '../firebaseUtils'
 import { parseExcelHotspots, formatAccessibilityInfo } from '../utils/excelParser'
 import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
@@ -1249,23 +1249,32 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                         <input 
                           type="file" 
                           accept="image/*" 
-                          onChange={e => {
+                          onChange={async e => {
                             const file = e.target.files?.[0]
                             if (!file) return
                             const reader = new FileReader()
                             reader.onloadend = async () => {
-                              const compressed = await compressImage(reader.result as string, 1600, 0.4)
-                              const newMaps = [maps[0] || '', maps[1] || '']
-                              newMaps[idx] = compressed
-                              
-                              // 우측(뒷면)의 비어 있는 요소를 완전히 제거
-                              const cleanedMaps = [...newMaps]
-                              while (cleanedMaps.length > 0 && !cleanedMaps[cleanedMaps.length - 1]) {
-                                cleanedMaps.pop()
+                              try {
+                                const compressed = await compressImage(reader.result as string, 3000, 0.85)
+                                const res = await fetch(compressed)
+                                const blob = await res.blob()
+                                const cloudUrl = await uploadToStorage(blob, `festivals/${festival.id || 'new'}/maps/map_${idx}_${Date.now()}.jpg`)
+                                
+                                const newMaps = [maps[0] || '', maps[1] || '']
+                                newMaps[idx] = cloudUrl
+                                
+                                // 우측(뒷면)의 비어 있는 요소를 완전히 제거
+                                const cleanedMaps = [...newMaps]
+                                while (cleanedMaps.length > 0 && !cleanedMaps[cleanedMaps.length - 1]) {
+                                  cleanedMaps.pop()
+                                }
+                                
+                                update('mapImages', cleanedMaps)
+                                if (idx === 0) update('mapImage', cloudUrl)
+                              } catch (err) {
+                                console.error('Storage upload failed:', err)
+                                alert('지도 이미지 클라우드 업로드에 실패했습니다. Storage 권한 및 설정을 확인해 주세요.')
                               }
-                              
-                              update('mapImages', cleanedMaps)
-                              if (idx === 0) update('mapImage', compressed)
                             }
                             reader.readAsDataURL(file)
                           }} 
