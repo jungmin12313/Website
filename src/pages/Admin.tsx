@@ -1211,31 +1211,65 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                   <div key={idx} style={{ flex: 1, minWidth: '200px' }}>
                     <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#495057', marginBottom: '0.5rem' }}>{idx === 0 ? '앞면 지도' : '뒷면 지도'}</div>
                     {mapUrl ? (
-                      <div className="map-img-preview" style={{ position: 'relative' }}>
-                        <img src={mapUrl} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef' }} />
-                        <button className="upload-inline-btn" onClick={() => {
-                          const newMaps = [...maps]
-                          newMaps[idx] = ''
-                          update('mapImages', newMaps)
-                          if(idx === 0) update('mapImage', '')
-                        }} style={{ marginTop: '0.5rem' }}>지도 삭제</button>
+                      <div className="map-img-preview" style={{ position: 'relative', height: 'auto', display: 'flex', flexDirection: 'column' }}>
+                        <img src={mapUrl} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef', objectFit: 'contain' }} />
+                        <button 
+                          type="button" 
+                          className="del-f-btn" 
+                          onClick={() => {
+                            const newMaps = [maps[0] || '', maps[1] || '']
+                            newMaps[idx] = ''
+                            
+                            // 우측(뒷면)의 비어 있는 요소를 완전히 제거하여 탭이 깔끔하게 정리되도록 함
+                            const cleanedMaps = [...newMaps]
+                            while (cleanedMaps.length > 0 && !cleanedMaps[cleanedMaps.length - 1]) {
+                              cleanedMaps.pop()
+                            }
+                            
+                            update('mapImages', cleanedMaps)
+                            if (idx === 0) update('mapImage', '')
+                          }} 
+                          style={{ 
+                            marginTop: '0.5rem', 
+                            width: '100%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '0.4rem', 
+                            padding: '0.6rem' 
+                          }}
+                        >
+                          <Trash2 size={16} /> 지도 삭제
+                        </button>
                       </div>
                     ) : (
                       <label className="add-photo-box" style={{ width: '100%', padding: '2rem', height: 'auto' }}>
                         <Upload size={18} /> {idx === 0 ? '앞면 추가' : '뒷면 추가'}
-                        <input type="file" onChange={e => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-                          const reader = new FileReader()
-                          reader.onloadend = async () => {
-                            const compressed = await compressImage(reader.result as string, 3500, 0.85)
-                            const newMaps = [...maps]
-                            newMaps[idx] = compressed
-                            update('mapImages', newMaps)
-                            if (idx === 0) update('mapImage', compressed)
-                          }
-                          reader.readAsDataURL(file)
-                        }} style={{ display: 'none' }} />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            const reader = new FileReader()
+                            reader.onloadend = async () => {
+                              const compressed = await compressImage(reader.result as string, 3500, 0.85)
+                              const newMaps = [maps[0] || '', maps[1] || '']
+                              newMaps[idx] = compressed
+                              
+                              // 우측(뒷면)의 비어 있는 요소를 완전히 제거
+                              const cleanedMaps = [...newMaps]
+                              while (cleanedMaps.length > 0 && !cleanedMaps[cleanedMaps.length - 1]) {
+                                cleanedMaps.pop()
+                              }
+                              
+                              update('mapImages', cleanedMaps)
+                              if (idx === 0) update('mapImage', compressed)
+                            }
+                            reader.readAsDataURL(file)
+                          }} 
+                          style={{ display: 'none' }} 
+                        />
                       </label>
                     )}
                   </div>
