@@ -1211,8 +1211,10 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                   <div key={idx} style={{ flex: 1, minWidth: '200px' }}>
                     <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#495057', marginBottom: '0.5rem' }}>{idx === 0 ? '앞면 지도' : '뒷면 지도'}</div>
                     {mapUrl ? (
-                      <div className="map-img-preview" style={{ position: 'relative', height: 'auto', display: 'flex', flexDirection: 'column' }}>
-                        <img src={mapUrl} style={{ width: '100%', borderRadius: '0.75rem', border: '1px solid #e9ecef', objectFit: 'contain' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <div className="map-img-preview" style={{ position: 'relative', marginBottom: '0.5rem', overflow: 'hidden' }}>
+                          <img src={mapUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0.75rem' }} />
+                        </div>
                         <button 
                           type="button" 
                           className="del-f-btn" 
@@ -1230,7 +1232,6 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                             if (idx === 0) update('mapImage', '')
                           }} 
                           style={{ 
-                            marginTop: '0.5rem', 
                             width: '100%', 
                             display: 'flex', 
                             alignItems: 'center', 
