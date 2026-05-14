@@ -30,6 +30,20 @@ export default function FestivalDetail() {
   const [isFullScreen, setIsFullScreen] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
+  const touchLastTimeRef = useRef<number>(0)
+
+  // 마우스 휠 스크롤 확대/축소 지원
+  useEffect(() => {
+    const el = mapRef.current
+    if (!el) return
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const delta = e.deltaY < 0 ? 1.1 : 0.9
+      setMapScale(prev => Math.max(0.1, Math.min(5, prev * delta)))
+    }
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [])
 
   // 전체화면 상태 변화 감지
   useEffect(() => {
@@ -295,7 +309,7 @@ export default function FestivalDetail() {
                       e.touches[0].pageY - e.touches[1].pageY
                     )
                     ;(mapRef.current as any)._lastDist = dist
-                  } else {
+                  } else if (e.touches.length === 1) {
                     setIsDragging(true)
                     const touch = e.touches[0]
                     setDragStart({
@@ -304,13 +318,19 @@ export default function FestivalDetail() {
                       scrollLeft: mapRef.current.scrollLeft,
                       scrollTop: mapRef.current.scrollTop
                     })
+                    
+                    const now = Date.now()
+                    if (now - touchLastTimeRef.current < 300) {
+                      // 더블 탭 시 확대/축소 토글
+                      setMapScale(prev => (prev < 1 ? 1.5 : 0.5))
+                    }
+                    touchLastTimeRef.current = now
                   }
                 }}
                 onTouchMove={(e) => {
                   if (!mapRef.current) return
-                  // 핀치 줌 또는 드래그 중에는 브라우저 스크롤 방지
                   if (e.touches.length === 2 || isDragging) {
-                    if (e.cancelable) e.preventDefault();
+                    if (e.cancelable) e.preventDefault()
                   }
 
                   if (e.touches.length === 2) {
@@ -321,14 +341,11 @@ export default function FestivalDetail() {
                     const lastDist = (mapRef.current as any)._lastDist || dist
                     const delta = dist / lastDist
                     
-                    if (Math.abs(dist - lastDist) > 1) { // 유의미한 움직임이 있을 때만 업데이트
-                      setMapScale(prev => {
-                        const newScale = prev * delta
-                        return Math.max(0.2, Math.min(5, newScale)) // 범위 확장
-                      })
+                    if (Math.abs(dist - lastDist) > 1) {
+                      setMapScale(prev => Math.max(0.1, Math.min(5, prev * delta)))
                       ;(mapRef.current as any)._lastDist = dist
                     }
-                  } else if (isDragging) {
+                  } else if (isDragging && e.touches.length === 1) {
                     const touch = e.touches[0]
                     const dx = touch.pageX - dragStart.x
                     const dy = touch.pageY - dragStart.y
