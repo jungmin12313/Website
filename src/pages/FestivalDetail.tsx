@@ -352,7 +352,7 @@ export default function FestivalDetail() {
                     className="map-image-wrap"
                     style={{
                       transform: `scale(${mapScale})`,
-                      transformOrigin: 'center center'
+                      transformOrigin: 'top left'
                     }}
                   >
                     {(() => {
