@@ -66,12 +66,18 @@ export default function Admin() {
 
   const handleImageLibraryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
     Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 800, 0.4)
-        setImageLibrary(prev => [...prev, { url: compressed, file, name: file.name }])
+        try {
+          const compressed = await compressImage(reader.result as string, 1200, 0.7)
+          const blob = dataURLtoBlob(compressed)
+          const cloudUrl = await uploadToStorage(blob, `library/${Date.now()}_${file.name}`)
+          setImageLibrary(prev => [...prev, { url: cloudUrl, file, name: file.name }])
+        } catch (err) {
+          console.error('Library upload failed:', err)
+        }
       }
       reader.readAsDataURL(file)
     })
@@ -178,13 +184,16 @@ export default function Admin() {
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1280, 0.6)
-      setHeroBg(compressed)
       try {
-        await saveSetting(HERO_BG_STORAGE_KEY, compressed)
+        const compressed = await compressImage(reader.result as string, 1600, 0.7)
+        const blob = dataURLtoBlob(compressed)
+        const cloudUrl = await uploadToStorage(blob, `settings/hero_bg_${Date.now()}.jpg`)
+        setHeroBg(cloudUrl)
+        await saveSetting(HERO_BG_STORAGE_KEY, cloudUrl)
         alert('배경사진이 클라우드에 변경되었습니다.')
       } catch (err) {
-        alert('이미지 용량이 너무 커서 클라우드에 저장할 수 없습니다. 더 작은 사진을 선택해주세요.')
+        console.error('Hero bg upload failed:', err)
+        alert('이미지 업로드에 실패했습니다. 네트워크 또는 권한 설정을 확인해주세요.')
       }
     }
     reader.readAsDataURL(file)
@@ -977,11 +986,19 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
     Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, field === 'mapImage' ? 1600 : 1200, 0.5)
-        if (field === 'images') {
-          update('images', [...(festival.images || []), compressed])
-        } else {
-          update(field, compressed)
+        try {
+          const compressed = await compressImage(reader.result as string, field === 'mapImage' ? 1600 : 1200, 0.7)
+          const blob = dataURLtoBlob(compressed)
+          const cloudUrl = await uploadToStorage(blob, `festivals/${festival.id || 'new'}/${field}_${Date.now()}_${file.name}`)
+          
+          if (field === 'images') {
+            update('images', [...(festival.images || []), cloudUrl])
+          } else {
+            update(field, cloudUrl)
+          }
+        } catch (err) {
+          console.error('Festival image upload failed:', err)
+          alert('이미지 클라우드 업로드에 실패했습니다.')
         }
       }
       reader.readAsDataURL(file)
@@ -1393,15 +1410,22 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files) return
+    if (!files || files.length === 0) return
     Array.from(files).forEach(file => {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string, 800, 0.3)
-        setHs(prev => ({ 
-          ...prev, 
-          photos: [...prev.photos, { url: compressed, label: file.name.split('.')[0] }] 
-        }))
+        try {
+          const compressed = await compressImage(reader.result as string, 1200, 0.7)
+          const blob = dataURLtoBlob(compressed)
+          const cloudUrl = await uploadToStorage(blob, `hotspots/${hotspot.id || 'new'}/${Date.now()}_${file.name}`)
+          setHs(prev => ({ 
+            ...prev, 
+            photos: [...prev.photos, { url: cloudUrl, label: file.name.split('.')[0] }] 
+          }))
+        } catch (err) {
+          console.error('Hotspot photo upload failed:', err)
+          alert('사진 클라우드 업로드에 실패했습니다.')
+        }
       }
       reader.readAsDataURL(file)
     })
@@ -1706,8 +1730,15 @@ function PressEditor({ press, onClose, setPress, onSave, compressImage }: PressE
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1200, 0.7)
-      update('image', compressed)
+      try {
+        const compressed = await compressImage(reader.result as string, 1200, 0.7)
+        const blob = dataURLtoBlob(compressed)
+        const cloudUrl = await uploadToStorage(blob, `press/${press.id || 'new'}_${Date.now()}.jpg`)
+        update('image', cloudUrl)
+      } catch (err) {
+        console.error('Press image upload failed:', err)
+        alert('보도자료 사진 업로드에 실패했습니다.')
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -1790,8 +1821,15 @@ function GalleryEditor({ gallery, onClose, setGallery, onSave, compressImage }: 
     if (!file) return
     const reader = new FileReader()
     reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string, 1200, 0.7)
-      update('url', compressed)
+      try {
+        const compressed = await compressImage(reader.result as string, 1200, 0.7)
+        const blob = dataURLtoBlob(compressed)
+        const cloudUrl = await uploadToStorage(blob, `gallery/${gallery.id || 'new'}_${Date.now()}.jpg`)
+        update('url', cloudUrl)
+      } catch (err) {
+        console.error('Gallery image upload failed:', err)
+        alert('갤러리 사진 업로드에 실패했습니다.')
+      }
     }
     reader.readAsDataURL(file)
   }
