@@ -10,6 +10,17 @@ import './Admin.css'
 
 const HERO_BG_STORAGE_KEY = 'naeil_hero_bg'
 
+// fetch(data:URL)은 CSP에서 차단될 수 있으므로 순수 JS로 Blob 변환
+const dataURLtoBlob = (dataURL: string): Blob => {
+  const arr = dataURL.split(',')
+  const mime = arr[0].match(/:(.*?);/)![1]
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  const u8arr = new Uint8Array(n)
+  while (n--) u8arr[n] = bstr.charCodeAt(n)
+  return new Blob([u8arr], { type: mime })
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<'festivals' | 'hotspots' | 'hero' | 'reports' | 'press' | 'gallery'>('festivals')
   const [festivals, setFestivals] = useState<Festival[]>([])
@@ -1256,8 +1267,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                             reader.onloadend = async () => {
                               try {
                                 const compressed = await compressImage(reader.result as string, 3000, 0.85)
-                                const res = await fetch(compressed)
-                                const blob = await res.blob()
+                                const blob = dataURLtoBlob(compressed)
                                 const cloudUrl = await uploadToStorage(blob, `festivals/${festival.id || 'new'}/maps/map_${idx}_${Date.now()}.jpg`)
                                 
                                 const newMaps = [maps[0] || '', maps[1] || '']
