@@ -136,12 +136,70 @@ export default function Admin() {
     return () => unsubscribe();
   }, [])
 
+  const sanitizeFestival = async (f: Festival): Promise<Festival> => {
+    const updatedF = { ...f }
+    const festivalId = f.id || 'unknown'
+
+    // 1. Sanitize festival main images
+    if (updatedF.images && updatedF.images.length > 0) {
+      updatedF.images = await Promise.all(updatedF.images.map(async (img, idx) => {
+        if (img.startsWith('data:')) {
+          try {
+            const blob = dataURLtoBlob(img)
+            return await uploadToStorage(blob, `festivals/${festivalId}/images/img_${idx}_${Date.now()}.jpg`)
+          } catch (e) { console.error('Sanitize main image failed:', e); return img; }
+        }
+        return img
+      }))
+    }
+
+    // 2. Sanitize hotspots
+    if (updatedF.hotspots && updatedF.hotspots.length > 0) {
+      updatedF.hotspots = await Promise.all(updatedF.hotspots.map(async (hs) => {
+        if (!hs.photos || hs.photos.length === 0) return hs
+        const updatedPhotos = await Promise.all(hs.photos.map(async (p, pIdx) => {
+          const url = typeof p === 'string' ? p : p.url
+          const label = typeof p === 'object' ? p.label : ''
+          
+          if (url.startsWith('data:')) {
+            try {
+              const blob = dataURLtoBlob(url)
+              const cloudUrl = await uploadToStorage(blob, `hotspots/${hs.id}/photo_${pIdx}_${Date.now()}.jpg`)
+              return { url: cloudUrl, label: label || `사진 ${pIdx + 1}` }
+            } catch (e) { console.error('Sanitize hotspot photo failed:', e); return p; }
+          }
+          return p
+        }))
+        return { ...hs, photos: updatedPhotos }
+      }))
+    }
+
+    return updatedF
+  }
+
+  const sanitizeReportData = async (r: Report): Promise<Report> => {
+    if (!r.images || r.images.length === 0) return r
+    const updatedImages = await Promise.all(r.images.map(async (img, idx) => {
+      if (img.startsWith('data:')) {
+        try {
+          const blob = dataURLtoBlob(img)
+          return await uploadToStorage(blob, `reports/${r.id}/sanitized_${idx}_${Date.now()}.jpg`)
+        } catch (e) { console.error('Sanitize report image failed:', e); return img; }
+      }
+      return img
+    }))
+    return { ...r, images: updatedImages }
+  }
+
   const updateAndSave = async (f: Festival, successMsg?: string) => {
     try {
-      await dbSave(f)
+      // 저장 전 데이터 최적화 (base64 이미지 클라우드 이관)
+      const sanitized = await sanitizeFestival(f)
+      await dbSave(sanitized)
+      
       setFestivals(prev => {
-        const exists = prev.find(pf => pf.id === f.id)
-        return exists ? prev.map(pf => pf.id === f.id ? f : pf) : [...prev, f]
+        const exists = prev.find(pf => pf.id === sanitized.id)
+        return exists ? prev.map(pf => pf.id === sanitized.id ? sanitized : pf) : [...prev, sanitized]
       })
       if (successMsg) alert(successMsg)
       return true
@@ -392,8 +450,24 @@ export default function Admin() {
     loadFestivalForHotspots(report.festivalId)
     
     const photosToConvert = (report.images || []).slice(0, 2);
-    const compressedPhotos = await Promise.all(
-      photosToConvert.map(img => compressImage(img, 500, 0.15))
+    const hsId = `hs-${Date.now()}`
+
+    const finalPhotos = await Promise.all(
+      photosToConvert.map(async (img, idx) => {
+        if (img.startsWith('http')) {
+          return { url: img, label: `제보사진 ${idx + 1}` }
+        }
+        // Base64인 경우 Storage 업로드 (하위 호환성)
+        try {
+          const compressed = await compressImage(img, 1000, 0.7)
+          const blob = dataURLtoBlob(compressed)
+          const url = await uploadToStorage(blob, `hotspots/${hsId}/report_img_${idx}_${Date.now()}.jpg`)
+          return { url, label: `제보사진 ${idx + 1}` }
+        } catch (e) {
+          console.error('Report image conversion failed:', e)
+          return null
+        }
+      })
     )
 
     const targetMapIdx = report.mapIndex || 0
@@ -404,8 +478,10 @@ export default function Admin() {
       setMapSrc(maps[targetMapIdx] || '')
     }
 
+    const filteredPhotos = finalPhotos.filter(p => p !== null) as { url: string; label: string }[]
+
     const newHs: Hotspot = {
-      id: `hs-${Date.now()}`,
+      id: hsId,
       x: report.x || 50,
       y: report.y || 50,
       w: 8,
@@ -413,7 +489,7 @@ export default function Admin() {
       label: `제보: ${report.locationDetail || '확인 필요'}`,
       description: [report.content],
       pictogramIds: [],
-      photos: compressedPhotos,
+      photos: filteredPhotos,
       pictogramImages: [],
       isReportBased: true,
       mapIndex: targetMapIdx
@@ -781,10 +857,11 @@ export default function Admin() {
                       <span>👤 {r.name}</span>
                       <span>📞 {r.contact}</span>
                     </div>
-                    <button className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`} onClick={(e) => {
+                    <button className={`status-toggle-btn ${r.status === 'resolved' ? 'resolved' : ''}`} onClick={async (e) => {
                       e.stopPropagation()
                       const newStatus = r.status === 'pending' ? 'resolved' : 'pending'
-                      saveReport({ ...r, status: newStatus }).then(() => setReports(p => p.map(v => v.id === r.id ? { ...r, status: newStatus } : v)))
+                      const sanitized = await sanitizeReportData({ ...r, status: newStatus })
+                      saveReport(sanitized).then(() => setReports(p => p.map(v => v.id === r.id ? sanitized : v)))
                     }}>
                       {r.status === 'pending' ? '해결 완료로 변경' : '진행 중으로 변경'}
                     </button>
@@ -912,9 +989,10 @@ export default function Admin() {
           }} 
           onStatusChange={async (s: 'pending' | 'resolved') => { 
             const u = { ...selectedReport, status: s }
-            await saveReport(u)
-            setReports(p => p.map(v => v.id === u.id ? u : v))
-            setSelectedReport(u)
+            const sanitized = await sanitizeReportData(u)
+            await saveReport(sanitized)
+            setReports(p => p.map(v => v.id === u.id ? sanitized : v))
+            setSelectedReport(sanitized)
           }} 
           onConvertToHotspot={() => convertReportToHotspot(selectedReport)} 
         />

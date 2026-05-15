@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Calendar, User, Phone, FileText, Camera, Send, MapPin, X, AlertTriangle } from 'lucide-react'
-import { getFestivals, saveReport } from '../firebaseUtils'
+import { getFestivals, saveReport, uploadToStorage } from '../firebaseUtils'
 import type { Festival, Report } from '../types'
 import './Report.css'
 
@@ -57,6 +57,16 @@ export default function ReportPage() {
     })
   }
 
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(',')
+    const mime = arr[0].match(/:(.*?);/)![1]
+    const bstr = atob(arr[1])
+    let n = bstr.length
+    const u8arr = new Uint8Array(n)
+    while (n--) u8arr[n] = bstr.charCodeAt(n)
+    return new Blob([u8arr], { type: mime })
+  }
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     files.forEach(file => {
@@ -108,25 +118,36 @@ export default function ReportPage() {
       return
     }
 
-    setLoading(true)
-    const newReport: Report = {
-      id: `report-${Date.now()}`,
-      name,
-      contact,
-      festivalId: formData.festivalId,
-      locationDetail: formData.locationDetail.trim().substring(0, 100),
-      content,
-      x: coords?.x,
-      y: coords?.y,
-      mapIndex: selectedMapIndex,
-      festivalName: selectedFestival?.name || '',
-      images,
-      createdAt: Date.now(),
-      status: 'pending',
-      isApproved: false
-    }
-
     try {
+      // 3. Upload images to Storage if they are base64
+      const reportId = `report-${Date.now()}`
+      const uploadedImageUrls = await Promise.all(
+        images.map(async (img, idx) => {
+          if (img.startsWith('data:')) {
+            const blob = dataURLtoBlob(img)
+            return await uploadToStorage(blob, `reports/${reportId}/img_${idx}_${Date.now()}.jpg`)
+          }
+          return img
+        })
+      )
+
+      const newReport: Report = {
+        id: reportId,
+        name,
+        contact,
+        festivalId: formData.festivalId,
+        locationDetail: formData.locationDetail.trim().substring(0, 100),
+        content,
+        x: coords?.x,
+        y: coords?.y,
+        mapIndex: selectedMapIndex,
+        festivalName: selectedFestival?.name || '',
+        images: uploadedImageUrls,
+        createdAt: Date.now(),
+        status: 'pending',
+        isApproved: false
+      }
+
       await saveReport(newReport)
       localStorage.setItem('naeil_last_report_submit', Date.now().toString())
       alert('신고가 접수되었습니다. 소중한 의견 감사합니다.')
@@ -135,6 +156,7 @@ export default function ReportPage() {
       setCoords(null)
       setPrivacyAgreed(false)
     } catch (err) {
+      console.error('Submit error:', err)
       alert('신고 접수 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
