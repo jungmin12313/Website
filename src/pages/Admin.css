@@ -504,11 +504,9 @@
   overflow: auto;
   position: relative;
   box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 3rem;
+  padding: 4rem; /* 여백을 조금 더 주어 끝부분 편집을 용이하게 함 */
   scrollbar-width: thin;
+  display: block; /* flex 대신 block을 사용하여 표준 스크롤 동작 보장 */
 }
 
 .admin-map {
@@ -517,6 +515,9 @@
   background: white;
   border-radius: 12px;
   transition: transform 0.2s ease-out;
+  margin: 0 auto; /* 지도가 작을 때는 중앙, 클 때는 왼쪽부터 정렬 */
+  width: max-content; /* 이미지 실제 크기에 맞춰 컨테이너 확장 */
+  min-width: fit-content;
 }
 
 .admin-map-img {
