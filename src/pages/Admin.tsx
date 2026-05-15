@@ -1137,19 +1137,23 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
       setUploadingCount(prev => prev + 1)
       const reader = new FileReader()
       reader.onloadend = async () => {
+        console.log(`Starting festival image upload: ${file.name}`)
         try {
           const compressed = await compressImage(reader.result as string, field === 'mapImage' ? 1600 : 1200, 0.7)
+          console.log(`Compression complete for ${file.name}`)
           const blob = dataURLtoBlob(compressed)
-          const cloudUrl = await uploadToStorage(blob, `festivals/${festival.id || 'new'}/${field}_${Date.now()}_${file.name}`)
+          const path = `festivals/${festival.id || 'new'}/${field}_${Date.now()}_${file.name}`
+          const cloudUrl = await uploadToStorage(blob, path)
+          console.log(`Upload successful: ${cloudUrl}`)
           
           if (field === 'images') {
             update('images', [...(festival.images || []), cloudUrl])
           } else {
             update(field, cloudUrl)
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error('Festival image upload failed:', err)
-          alert('이미지 클라우드 업로드에 실패했습니다.')
+          alert(`이미지 업로드 실패: ${err.message || '알 수 없는 오류'}`)
         } finally {
           setUploadingCount(prev => Math.max(0, prev - 1))
         }
@@ -1600,17 +1604,21 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
       setUploadingCount(prev => prev + 1)
       const reader = new FileReader()
       reader.onloadend = async () => {
+        console.log(`Starting upload for file: ${file.name}`)
         try {
           const compressed = await compressImage(reader.result as string, 1200, 0.7)
+          console.log(`Compression complete for ${file.name}`)
           const blob = dataURLtoBlob(compressed)
-          const cloudUrl = await uploadToStorage(blob, `hotspots/${hotspot.id || 'new'}/${Date.now()}_${file.name}`)
+          const path = `hotspots/${hotspot.id || 'new'}/${Date.now()}_${file.name}`
+          const cloudUrl = await uploadToStorage(blob, path)
+          console.log(`Upload successful: ${cloudUrl}`)
           setHs(prev => ({ 
             ...prev, 
             photos: [...prev.photos, { url: cloudUrl, label: file.name.split('.')[0] }] 
           }))
-        } catch (err) {
+        } catch (err: any) {
           console.error('Hotspot photo upload failed:', err)
-          alert('사진 클라우드 업로드에 실패했습니다.')
+          alert(`사진 업로드 실패: ${err.message || '알 수 없는 오류'}`)
         } finally {
           setUploadingCount(prev => Math.max(0, prev - 1))
         }
