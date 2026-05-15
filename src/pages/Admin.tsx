@@ -3,7 +3,19 @@ import { Plus, Trash2, Upload, MapPin, Home, Calendar, ShieldAlert, Loader2, Log
 import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report, PressArticle, GalleryImage } from '../types'
-import { getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, saveSetting, getSetting, getReports, deleteReport, saveReport, getPress, savePress, deletePress, getGallery, saveGallery, deleteGallery, uploadToStorage } from '../firebaseUtils'
+import { 
+  getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, 
+  saveSetting, getSetting, 
+  getReports, deleteReport, saveReport, 
+  getPress, savePress, deletePress, 
+  getGallery, saveGallery, deleteGallery, 
+  uploadToStorage,
+  subscribeToFestivals,
+  subscribeToReports,
+  updateFestivalMetadata,
+  updateHotspotInFestival,
+  deleteHotspotFromFestival
+} from '../firebaseUtils'
 import { parseExcelHotspots, formatAccessibilityInfo } from '../utils/excelParser'
 import type { ParsedExcelItem } from '../utils/excelParser'
 import './Admin.css'
@@ -36,10 +48,11 @@ export default function Admin() {
   const [editingPress, setEditingPress] = useState<PressArticle | null>(null)
   const [editingGallery, setEditingGallery] = useState<GalleryImage | null>(null)
   
-  // Hotspot state
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('')
   const [selectedMapIndex, setSelectedMapIndex] = useState<number>(0)
-  const [hotspots, setHotspots] = useState<Hotspot[]>([])
+  const festivalForHotspots = festivals.find(f => f.id === selectedFestivalId)
+  const hotspots = festivalForHotspots?.hotspots || []
+
   const [mapSrc, setMapSrc] = useState<string>('')
   const [adding, setAdding] = useState(false)
   const [editHs, setEditHs] = useState<Hotspot | null>(null)
@@ -99,41 +112,41 @@ export default function Admin() {
 
   useEffect(() => {
     // Firebase Auth State Listener
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // 프론트엔드에서도 admin 이메일인지 한번 더 이중 검증 (대소문자 무시)
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user && user.email?.toLowerCase() === 'admin@naeil.app') {
         setIsAuthorized(true)
       } else {
         setIsAuthorized(false)
         if (user) {
           alert(`접근 권한이 없습니다.\n(현재 로그인 시도 계정: ${user.email})`);
-          signOut(auth); // 관리자가 아니면 강제 로그아웃
+          signOut(auth);
         }
       }
       setAuthLoading(false)
     });
 
-    // Load festivals
-    getFestivals().then(data => {
+    // 실시간 축제 데이터 구독
+    const unsubscribeFests = subscribeToFestivals((data) => {
       setFestivals(data)
-    }).catch(err => {
-      console.error('Failed to load from Firebase', err)
     })
 
-    // Load reports
-    getReports().then(setReports).catch(err => console.error('Failed to load reports:', err))
+    // 실시간 제보 데이터 구독
+    const unsubscribeReports = subscribeToReports((data) => {
+      setReports(data)
+    })
 
-    // Load press
     getPress().then(setPressList).catch(console.error)
-    
-    // Load gallery
     getGallery().then(setGalleryList).catch(console.error)
 
     getSetting(HERO_BG_STORAGE_KEY).then(savedHero => {
       if (savedHero) setHeroBg(savedHero)
     }).catch(err => console.error('Failed to load hero settings:', err))
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth()
+      unsubscribeFests()
+      unsubscribeReports()
+    }
   }, [])
 
   const sanitizeFestival = async (f: Festival): Promise<Festival> => {
@@ -193,14 +206,8 @@ export default function Admin() {
 
   const updateAndSave = async (f: Festival, successMsg?: string) => {
     try {
-      // 저장 전 데이터 최적화 (base64 이미지 클라우드 이관)
       const sanitized = await sanitizeFestival(f)
-      await dbSave(sanitized)
-      
-      setFestivals(prev => {
-        const exists = prev.find(pf => pf.id === sanitized.id)
-        return exists ? prev.map(pf => pf.id === sanitized.id ? sanitized : pf) : [...prev, sanitized]
-      })
+      await updateFestivalMetadata(sanitized.id, sanitized)
       if (successMsg) alert(successMsg)
       return true
     } catch (e) {
@@ -287,11 +294,15 @@ export default function Admin() {
   const saveFestival = async () => {
     if (!editingFestival) return
     if (!editingFestival.name.trim()) return alert('축제 이름은 필수 입력 항목입니다.')
-    const success = await updateAndSave(editingFestival, '축제 정보가 클라우드에 저장되었습니다.')
-    if (success) {
+    const sanitized = await sanitizeFestival(editingFestival)
+    try {
+      await updateFestivalMetadata(sanitized.id, sanitized)
       const { logAction } = await import('../firebaseUtils')
-      await logAction('SAVE_FESTIVAL', editingFestival.id, { name: editingFestival.name })
+      await logAction('SAVE_FESTIVAL', sanitized.id, { name: sanitized.name })
       setEditingFestival(null)
+      alert('축제 정보가 클라우드에 저장되었습니다.')
+    } catch (e) {
+      alert('저장에 실패했습니다.')
     }
   }
 
@@ -304,7 +315,6 @@ export default function Admin() {
       setFestivals(prev => prev.filter(f => f.id !== id))
       if (selectedFestivalId === id) {
         setSelectedFestivalId('')
-        setHotspots([])
         setMapSrc('')
       }
       alert('축제가 삭제되었습니다.')
@@ -317,7 +327,6 @@ export default function Admin() {
     const f = festivals.find(f => f.id === id)
     if (!f) return
     setSelectedFestivalId(id)
-    setHotspots(f.hotspots || [])
     const maps = f.mapImages?.length ? f.mapImages : (f.mapImage ? [f.mapImage] : [])
     setMapSrc(maps[0] || '')
     setSelectedMapIndex(0)
@@ -404,32 +413,21 @@ export default function Admin() {
   }
 
   const saveHotspot = async (hsWithDesc: Hotspot) => {
-    if (!selectedFestivalId) return
     if (!hsWithDesc.label.trim()) return alert('장소 이름은 필수 입력 항목입니다.')
     
     try {
-      const festival = festivals.find(f => f.id === selectedFestivalId)
-      if (!festival) throw new Error('축제 정보를 찾을 수 없습니다.')
+      if (!selectedFestivalId) throw new Error('선택된 축제가 없습니다.')
 
-      const hotspotExists = festival.hotspots?.some(h => h.id === hsWithDesc.id)
-      const newHotspots = hotspotExists
-        ? festival.hotspots.map(h => h.id === hsWithDesc.id ? hsWithDesc : h)
-        : [...(festival.hotspots || []), hsWithDesc]
-
-      const rawUpdatedFestival = { ...festival, hotspots: newHotspots }
-      // Firestore does not allow undefined fields, so we serialize and parse to strip them
-      const updatedFestival = JSON.parse(JSON.stringify(rawUpdatedFestival))
-      const success = await updateAndSave(updatedFestival)
+      // 핫스팟 데이터 정리 (JSON 직렬화 가능하도록)
+      const sanitizedHs = JSON.parse(JSON.stringify(hsWithDesc))
       
-      if (success) {
-        const { logAction } = await import('../firebaseUtils')
-        await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
-        setHotspots(newHotspots)
-        closeEditor()
-        alert('핫스팟이 클라우드에 성공적으로 저장되었습니다.')
-      } else {
-        throw new Error('데이터베이스 업데이트에 실패했습니다.')
-      }
+      await updateHotspotInFestival(selectedFestivalId, sanitizedHs)
+      
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
+      
+      closeEditor()
+      alert('핫스팟이 클라우드에 성공적으로 저장되었습니다.')
     } catch (err: any) {
       console.error('Save error:', err)
       alert(`저장 중 오류가 발생했습니다: ${err.message || '알 수 없는 오류'}`)
@@ -438,11 +436,14 @@ export default function Admin() {
 
   const deleteHotspot = async (id: string) => {
     if (!confirm('핫스팟을 삭제하시겠습니까?')) return
-    const festival = festivals.find(f => f.id === selectedFestivalId)
-    if (!festival) return
-    const newHotspots = (festival.hotspots || []).filter(h => h.id !== id)
-    const updatedFestival = { ...festival, hotspots: newHotspots }
-    if (await updateAndSave(updatedFestival)) setHotspots(newHotspots)
+    if (!selectedFestivalId) return
+    try {
+      await deleteHotspotFromFestival(selectedFestivalId, id)
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('DELETE_HOTSPOT', id, { festivalId: selectedFestivalId })
+    } catch (err) {
+      alert('삭제에 실패했습니다.')
+    }
   }
 
   const convertReportToHotspot = async (report: Report) => {
@@ -738,8 +739,11 @@ export default function Admin() {
                   return
                 }
                 if (draggingHsId && selectedFestivalId) {
-                  const festival = festivals.find(f => f.id === selectedFestivalId)
-                  if (festival) await updateAndSave({ ...festival, hotspots })
+                  const draggedHs = hotspots.find(h => h.id === draggingHsId)
+                  if (draggedHs) {
+                    // 드래그가 끝난 하나의 핫스팟만 원자적으로 업데이트
+                    await updateHotspotInFestival(selectedFestivalId, draggedHs)
+                  }
                 }
                 setIsDragging(false)
                 setDraggingHsId(null)

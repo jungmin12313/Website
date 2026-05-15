@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy, onSnapshot, runTransaction } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from './firebase'
 import type { Festival, Report, PressArticle, GalleryImage } from './types'
@@ -30,6 +30,21 @@ export async function getFestivals(): Promise<Festival[]> {
   }
 }
 
+// 실시간 축제 데이터 구독
+export function subscribeToFestivals(callback: (festivals: Festival[]) => void) {
+  const q = query(collection(db, 'festivals'))
+  return onSnapshot(q, (snapshot) => {
+    const fests: Festival[] = []
+    snapshot.forEach(d => {
+      const data = d.data() as Festival
+      if (data && data.id) fests.push(data)
+    })
+    callback(fests.sort((a, b) => (a.id || '').localeCompare(b.id || '')))
+  }, (err) => {
+    console.error('Snapshot error (festivals):', err)
+  })
+}
+
 // 단일 축제 저장(업데이트)
 export async function saveFestival(festival: Festival): Promise<void> {
   await setDoc(doc(db, 'festivals', festival.id), festival)
@@ -38,6 +53,51 @@ export async function saveFestival(festival: Festival): Promise<void> {
 // 축제 삭제
 export async function deleteFestival(festivalId: string): Promise<void> {
   await deleteDoc(doc(db, 'festivals', festivalId))
+}
+
+// 축제 메타데이터만 원자적으로 업데이트 (트랜잭션 사용)
+export async function updateFestivalMetadata(festivalId: string, updates: Partial<Festival>): Promise<void> {
+  const festRef = doc(db, 'festivals', festivalId)
+  await runTransaction(db, async (transaction) => {
+    const festDoc = await transaction.get(festRef)
+    if (!festDoc.exists()) throw new Error('축제가 존재하지 않습니다.')
+    transaction.update(festRef, updates)
+  })
+}
+
+// 특정 핫스팟만 원자적으로 업데이트/추가 (트랜잭션 사용)
+export async function updateHotspotInFestival(festivalId: string, hotspot: Hotspot): Promise<void> {
+  const festRef = doc(db, 'festivals', festivalId)
+  await runTransaction(db, async (transaction) => {
+    const festDoc = await transaction.get(festRef)
+    if (!festDoc.exists()) throw new Error('축제가 존재하지 않습니다.')
+    
+    const data = festDoc.data() as Festival
+    const hotspots = [...(data.hotspots || [])]
+    const idx = hotspots.findIndex(h => h.id === hotspot.id)
+    
+    if (idx > -1) {
+      hotspots[idx] = hotspot // 업데이트
+    } else {
+      hotspots.push(hotspot) // 추가
+    }
+    
+    transaction.update(festRef, { hotspots })
+  })
+}
+
+// 특정 핫스팟만 원자적으로 삭제 (트랜잭션 사용)
+export async function deleteHotspotFromFestival(festivalId: string, hotspotId: string): Promise<void> {
+  const festRef = doc(db, 'festivals', festivalId)
+  await runTransaction(db, async (transaction) => {
+    const festDoc = await transaction.get(festRef)
+    if (!festDoc.exists()) throw new Error('축제가 존재하지 않습니다.')
+    
+    const data = festDoc.data() as Festival
+    const hotspots = (data.hotspots || []).filter(h => h.id !== hotspotId)
+    
+    transaction.update(festRef, { hotspots })
+  })
 }
 
 export async function getSetting(key: string): Promise<string | null> {
@@ -57,6 +117,18 @@ export async function getReports(): Promise<Report[]> {
   const reqs: Report[] = []
   snapshot.forEach(d => reqs.push(d.data() as Report))
   return reqs
+}
+
+// 실시간 제보 데이터 구독
+export function subscribeToReports(callback: (reports: Report[]) => void) {
+  const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'))
+  return onSnapshot(q, (snapshot) => {
+    const reports: Report[] = []
+    snapshot.forEach(d => reports.push(d.data() as Report))
+    callback(reports)
+  }, (err) => {
+    console.error('Snapshot error (reports):', err)
+  })
 }
 
 export async function saveReport(report: Report): Promise<void> {
