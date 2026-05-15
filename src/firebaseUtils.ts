@@ -1,7 +1,7 @@
 import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy, onSnapshot, runTransaction } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from './firebase'
-import type { Festival, Report, PressArticle, GalleryImage } from './types'
+import type { Festival, Report, PressArticle, GalleryImage, Hotspot } from './types'
 
 // 클라우드 스토리지 파일 업로드
 export async function uploadToStorage(file: File | Blob, path: string): Promise<string> {

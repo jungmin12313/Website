@@ -4,9 +4,9 @@ import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report, PressArticle, GalleryImage } from '../types'
 import { 
-  getFestivals, saveFestival as dbSave, deleteFestival as dbDelete, 
+  deleteFestival as dbDelete, 
   saveSetting, getSetting, 
-  getReports, deleteReport, saveReport, 
+  deleteReport, saveReport, 
   getPress, savePress, deletePress, 
   getGallery, saveGallery, deleteGallery, 
   uploadToStorage,
@@ -50,8 +50,8 @@ export default function Admin() {
   
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('')
   const [selectedMapIndex, setSelectedMapIndex] = useState<number>(0)
+  const [hotspots, setHotspots] = useState<Hotspot[]>([])
   const festivalForHotspots = festivals.find(f => f.id === selectedFestivalId)
-  const hotspots = festivalForHotspots?.hotspots || []
 
   const [mapSrc, setMapSrc] = useState<string>('')
   const [adding, setAdding] = useState(false)
@@ -149,6 +149,13 @@ export default function Admin() {
     }
   }, [])
 
+  // 실시간 페스티벌 데이터가 들어오면 핫스팟 상태 동기화
+  useEffect(() => {
+    if (festivalForHotspots) {
+      setHotspots(festivalForHotspots.hotspots || [])
+    }
+  }, [festivalForHotspots])
+
   const sanitizeFestival = async (f: Festival): Promise<Festival> => {
     const updatedF = { ...f }
     const festivalId = f.id || 'unknown'
@@ -202,19 +209,6 @@ export default function Admin() {
       return img
     }))
     return { ...r, images: updatedImages }
-  }
-
-  const updateAndSave = async (f: Festival, successMsg?: string) => {
-    try {
-      const sanitized = await sanitizeFestival(f)
-      await updateFestivalMetadata(sanitized.id, sanitized)
-      if (successMsg) alert(successMsg)
-      return true
-    } catch (e) {
-      console.error('Save error:', e)
-      alert('데이터베이스 저장 실패 (용량 과다 또는 네트워크 문제)')
-      return false
-    }
   }
 
   const compressImage = (base64: string, maxWidth = 800, quality = 0.4): Promise<string> => {
