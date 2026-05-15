@@ -156,6 +156,24 @@ export default function Admin() {
     }
   }, [festivalForHotspots])
 
+  const sanitizeHotspot = async (hs: Hotspot): Promise<Hotspot> => {
+    if (!hs.photos || hs.photos.length === 0) return hs
+    const updatedPhotos = await Promise.all(hs.photos.map(async (p, pIdx) => {
+      const url = typeof p === 'string' ? p : p.url
+      const label = typeof p === 'object' ? p.label : ''
+      
+      if (url.startsWith('data:')) {
+        try {
+          const blob = dataURLtoBlob(url)
+          const cloudUrl = await uploadToStorage(blob, `hotspots/${hs.id}/photo_${pIdx}_${Date.now()}.jpg`)
+          return { url: cloudUrl, label: label || `사진 ${pIdx + 1}` }
+        } catch (e) { console.error('Sanitize hotspot photo failed:', e); return p; }
+      }
+      return p
+    }))
+    return { ...hs, photos: updatedPhotos }
+  }
+
   const sanitizeFestival = async (f: Festival): Promise<Festival> => {
     const updatedF = { ...f }
     const festivalId = f.id || 'unknown'
@@ -175,23 +193,7 @@ export default function Admin() {
 
     // 2. Sanitize hotspots
     if (updatedF.hotspots && updatedF.hotspots.length > 0) {
-      updatedF.hotspots = await Promise.all(updatedF.hotspots.map(async (hs) => {
-        if (!hs.photos || hs.photos.length === 0) return hs
-        const updatedPhotos = await Promise.all(hs.photos.map(async (p, pIdx) => {
-          const url = typeof p === 'string' ? p : p.url
-          const label = typeof p === 'object' ? p.label : ''
-          
-          if (url.startsWith('data:')) {
-            try {
-              const blob = dataURLtoBlob(url)
-              const cloudUrl = await uploadToStorage(blob, `hotspots/${hs.id}/photo_${pIdx}_${Date.now()}.jpg`)
-              return { url: cloudUrl, label: label || `사진 ${pIdx + 1}` }
-            } catch (e) { console.error('Sanitize hotspot photo failed:', e); return p; }
-          }
-          return p
-        }))
-        return { ...hs, photos: updatedPhotos }
-      }))
+      updatedF.hotspots = await Promise.all(updatedF.hotspots.map(h => sanitizeHotspot(h)))
     }
 
     return updatedF
@@ -412,10 +414,11 @@ export default function Admin() {
     try {
       if (!selectedFestivalId) throw new Error('선택된 축제가 없습니다.')
 
-      // 핫스팟 데이터 정리 (JSON 직렬화 가능하도록)
-      const sanitizedHs = JSON.parse(JSON.stringify(hsWithDesc))
+      // 저장 전 이미지 클라우드 업로드 및 데이터 정리
+      const sanitizedHs = await sanitizeHotspot(hsWithDesc)
+      const finalHs = JSON.parse(JSON.stringify(sanitizedHs))
       
-      await updateHotspotInFestival(selectedFestivalId, sanitizedHs)
+      await updateHotspotInFestival(selectedFestivalId, finalHs)
       
       const { logAction } = await import('../firebaseUtils')
       await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
