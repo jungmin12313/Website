@@ -241,17 +241,20 @@ export default function Admin() {
     }
   }
 
-  const compressImage = (base64: string, maxWidth = 800, quality = 0.4): Promise<string> => {
+  const compressImage = (file: File | Blob, maxWidth = 800, quality = 0.4): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image()
+      const url = URL.createObjectURL(file)
+      
       const timeout = setTimeout(() => {
+        URL.revokeObjectURL(url)
         reject(new Error('이미지 처리 시간 초과 (30초)'))
       }, 30000)
 
-      img.src = base64
       img.onerror = () => {
         clearTimeout(timeout)
-        reject(new Error('이미지를 로드할 수 없습니다.'))
+        URL.revokeObjectURL(url)
+        reject(new Error(`이미지를 로드할 수 없습니다. (타입: ${file.type}, 크기: ${Math.round(file.size/1024)}KB)`))
       }
       img.onload = () => {
         clearTimeout(timeout)
@@ -273,11 +276,15 @@ export default function Admin() {
             ctx.imageSmoothingQuality = 'high'
             ctx.drawImage(img, 0, 0, width, height)
           }
-          resolve(canvas.toDataURL('image/jpeg', quality))
+          const result = canvas.toDataURL('image/jpeg', quality)
+          URL.revokeObjectURL(url)
+          resolve(result)
         } catch (err) {
+          URL.revokeObjectURL(url)
           reject(err)
         }
       }
+      img.src = url
     })
   }
 
@@ -1135,11 +1142,11 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
 
     Array.from(files).forEach(file => {
       setUploadingCount(prev => prev + 1)
-      const reader = new FileReader()
-      reader.onloadend = async () => {
-        console.log(`Starting festival image upload: ${file.name}`)
+      console.log(`Starting festival image upload: ${file.name}, type: ${file.type}, size: ${file.size}`)
+      
+      const process = async () => {
         try {
-          const compressed = await compressImage(reader.result as string, field === 'mapImage' ? 1600 : 1200, 0.7)
+          const compressed = await compressImage(file, field === 'mapImage' ? 1600 : 1200, 0.7)
           console.log(`Compression complete for ${file.name}`)
           const blob = dataURLtoBlob(compressed)
           const path = `festivals/${festival.id || 'new'}/${field}_${Date.now()}_${file.name}`
@@ -1158,7 +1165,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
           setUploadingCount(prev => Math.max(0, prev - 1))
         }
       }
-      reader.readAsDataURL(file)
+      process()
     })
   }
 
@@ -1602,11 +1609,11 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
     if (!files || files.length === 0) return
     Array.from(files).forEach(file => {
       setUploadingCount(prev => prev + 1)
-      const reader = new FileReader()
-      reader.onloadend = async () => {
-        console.log(`Starting upload for file: ${file.name}`)
+      console.log(`Starting hotspot photo upload: ${file.name}, type: ${file.type}, size: ${file.size}`)
+      
+      const process = async () => {
         try {
-          const compressed = await compressImage(reader.result as string, 1200, 0.7)
+          const compressed = await compressImage(file, 1200, 0.7)
           console.log(`Compression complete for ${file.name}`)
           const blob = dataURLtoBlob(compressed)
           const path = `hotspots/${hotspot.id || 'new'}/${Date.now()}_${file.name}`
@@ -1623,7 +1630,7 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
           setUploadingCount(prev => Math.max(0, prev - 1))
         }
       }
-      reader.readAsDataURL(file)
+      process()
     })
   }
 
