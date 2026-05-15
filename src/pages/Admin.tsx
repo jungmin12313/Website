@@ -76,6 +76,7 @@ export default function Admin() {
   const [excelCategoryFilter, setExcelCategoryFilter] = useState<'all' | 'building' | 'pathway' | 'elevator' | 'restroom'>('all')
   const [excelGradeFilter, setExcelGradeFilter] = useState<'all' | 'G' | 'Y/R'>('all')
   const [imageLibrary, setImageLibrary] = useState<{ url: string; file?: File; name: string }[]>([]);
+  const [isOptimizing, setIsOptimizing] = useState(false)
 
   const handleImageLibraryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -211,6 +212,33 @@ export default function Admin() {
       return img
     }))
     return { ...r, images: updatedImages }
+  }
+
+  const handleOptimizeFestival = async () => {
+    if (!selectedFestivalId || isOptimizing) return
+    const festival = festivals.find(f => f.id === selectedFestivalId)
+    if (!festival) return
+    
+    if (!confirm('지도의 데이터 용량을 최적화하시겠습니까?\n(모든 이미지를 클라우드로 이관하여 1MB 오류를 해결합니다.)')) return
+    
+    setIsOptimizing(true)
+    try {
+      // 1. 전체 데이터 대청소 (지도 이미지 + 모든 핫스팟)
+      const sanitized = await sanitizeFestival(festival)
+      
+      // 2. 트랜잭션을 통한 안전한 저장 (updateFestivalMetadata가 내부적으로 transaction 사용)
+      await updateFestivalMetadata(sanitized.id, sanitized)
+      
+      const { logAction } = await import('../firebaseUtils')
+      await logAction('OPTIMIZE_FESTIVAL', sanitized.id, { name: sanitized.name })
+      
+      alert('데이터 최적화가 완료되었습니다! 이제 용량 걱정 없이 작업하실 수 있습니다.')
+    } catch (err: any) {
+      console.error('Optimization failed:', err)
+      alert(`최적화 중 오류가 발생했습니다: ${err.message}`)
+    } finally {
+      setIsOptimizing(false)
+    }
   }
 
   const compressImage = (base64: string, maxWidth = 800, quality = 0.4): Promise<string> => {
@@ -413,12 +441,25 @@ export default function Admin() {
     
     try {
       if (!selectedFestivalId) throw new Error('선택된 축제가 없습니다.')
+      const festival = festivals.find(f => f.id === selectedFestivalId)
+      if (!festival) throw new Error('축제 정보를 찾을 수 없습니다.')
 
-      // 저장 전 이미지 클라우드 업로드 및 데이터 정리
+      // 1. 현재 수정 중인 핫스팟 정리
       const sanitizedHs = await sanitizeHotspot(hsWithDesc)
-      const finalHs = JSON.parse(JSON.stringify(sanitizedHs))
       
-      await updateHotspotInFestival(selectedFestivalId, finalHs)
+      // 2. 중요: 이미 DB에 있는 다른 핫스팟들도 '대청소' (전체 용량 줄이기 위함)
+      // 현재 축제의 모든 핫스팟을 가져와서 이번에 수정된 것과 병합 후 전체 정리 실행
+      const otherHotspots = (festival.hotspots || []).filter(h => h.id !== sanitizedHs.id)
+      const mergedHotspots = [...otherHotspots, sanitizedHs]
+      
+      // 전체 핫스팟 배열을 대상으로 클라우드 이관 스캔 실행
+      const deepSanitizedHotspots = await Promise.all(mergedHotspots.map(h => sanitizeHotspot(h)))
+      
+      // 최종 데이터 정리 (JSON 직렬화 가능하도록)
+      const finalHotspots = JSON.parse(JSON.stringify(deepSanitizedHotspots))
+      
+      // 개별 업데이트가 아닌, 정리된 '전체 핫스팟 배열'로 문서 업데이트
+      await updateFestivalMetadata(selectedFestivalId, { hotspots: finalHotspots })
       
       const { logAction } = await import('../firebaseUtils')
       await logAction('SAVE_HOTSPOT', hsWithDesc.id, { label: hsWithDesc.label, festivalId: selectedFestivalId })
@@ -624,6 +665,22 @@ export default function Admin() {
                   <div className="hs-tools">
                     <button className={`tool-btn ${!isLocked ? 'warn' : ''}`} onClick={() => setIsLocked(!isLocked)}>
                       {isLocked ? '🔒 위치 잠금 (안전)' : '🔓 위치 수정 모드 (드래그 가능)'}
+                    </button>
+                  </div>
+
+                  <div className="admin-sidebar-section">
+                    <span className="sidebar-label">데이터 관리</span>
+                    <button 
+                      className={`tool-btn ${isOptimizing ? 'loading' : 'warn'}`} 
+                      onClick={handleOptimizeFestival}
+                      disabled={isOptimizing || !selectedFestivalId}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.8rem', borderRadius: '12px' }}
+                    >
+                      {isOptimizing ? (
+                        <><Loader2 className="animate-spin" size={16} /> 최적화 중...</>
+                      ) : (
+                        <><ShieldAlert size={16} /> 지도 용량 최적화 (1MB 해결)</>
+                      )}
                     </button>
                   </div>
 

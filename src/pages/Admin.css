@@ -302,6 +302,28 @@
   background: #fff7ed;
   color: #ea580c;
   border: 1px solid #ffedd5;
+  font-weight: 700;
+}
+
+.tool-btn.warn:hover {
+  background: #ffedd5;
+  transform: translateY(-2px);
+}
+
+.tool-btn.loading {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 .excel-import-section {
