@@ -242,28 +242,41 @@ export default function Admin() {
   }
 
   const compressImage = (base64: string, maxWidth = 800, quality = 0.4): Promise<string> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image()
+      const timeout = setTimeout(() => {
+        reject(new Error('이미지 처리 시간 초과 (30초)'))
+      }, 30000)
+
       img.src = base64
+      img.onerror = () => {
+        clearTimeout(timeout)
+        reject(new Error('이미지를 로드할 수 없습니다.'))
+      }
       img.onload = () => {
-        const canvas = document.createElement('canvas')
-        let width = img.width
-        let height = img.height
+        clearTimeout(timeout)
+        try {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
 
-        if (width > maxWidth) {
-          height = (maxWidth / width) * height
-          width = maxWidth
-        }
+          if (width > maxWidth) {
+            height = (maxWidth / width) * height
+            width = maxWidth
+          }
 
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        if (ctx) {
-          ctx.imageSmoothingEnabled = true
-          ctx.imageSmoothingQuality = 'high'
-          ctx.drawImage(img, 0, 0, width, height)
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = 'high'
+            ctx.drawImage(img, 0, 0, width, height)
+          }
+          resolve(canvas.toDataURL('image/jpeg', quality))
+        } catch (err) {
+          reject(err)
         }
-        resolve(canvas.toDataURL('image/jpeg', quality))
       }
     })
   }
@@ -1113,6 +1126,7 @@ interface FestivalEditorProps {
 }
 
 function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage }: FestivalEditorProps) {
+  const [uploadingCount, setUploadingCount] = useState(0)
   const update = (field: string, val: any) => setFestival((prev: any) => (prev ? { ...prev, [field]: val } : null))
   
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'thumbnail' | 'images' | 'mapImage') => {
@@ -1120,6 +1134,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
     if (!files || files.length === 0) return
 
     Array.from(files).forEach(file => {
+      setUploadingCount(prev => prev + 1)
       const reader = new FileReader()
       reader.onloadend = async () => {
         try {
@@ -1135,6 +1150,8 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
         } catch (err) {
           console.error('Festival image upload failed:', err)
           alert('이미지 클라우드 업로드에 실패했습니다.')
+        } finally {
+          setUploadingCount(prev => Math.max(0, prev - 1))
         }
       }
       reader.readAsDataURL(file)
@@ -1303,7 +1320,16 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
             <div className="thumb-preview interactive" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {!festival.thumbnail ? (
                 <label className="add-photo-box" style={{ width: '100%', height: '100%' }}>
-                  <Plus /> 썸네일 업로드
+                  {uploadingCount > 0 ? (
+                    <>
+                      <Loader2 size={24} className="animate-spin" />
+                      <span>처리중...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus /> 썸네일 업로드
+                    </>
+                  )}
                   <input type="file" onChange={e => handleImageUpload(e, 'thumbnail')} style={{ display: 'none' }} />
                 </label>
               ) : (
@@ -1350,7 +1376,17 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                 </div>
               ))}
               <label className="add-photo-box">
-                <Plus size={18} />
+                {uploadingCount > 0 ? (
+                  <>
+                    <Loader2 size={24} className="animate-spin" />
+                    <span style={{ fontSize: '0.6rem' }}>처리중({uploadingCount})</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus size={18} />
+                    <span>추가</span>
+                  </>
+                )}
                 <input type="file" multiple onChange={e => handleImageUpload(e, 'images')} style={{ display: 'none' }} />
               </label>
             </div>
@@ -1409,13 +1445,23 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                       </div>
                     ) : (
                       <label className="add-photo-box" style={{ width: '100%', padding: '2rem', height: 'auto' }}>
-                        <Upload size={18} /> {idx === 0 ? '앞면 추가' : '뒷면 추가'}
+                        {uploadingCount > 0 ? (
+                          <>
+                            <Loader2 size={24} className="animate-spin" />
+                            <span>업로드 중...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={18} /> {idx === 0 ? '앞면 추가' : '뒷면 추가'}
+                          </>
+                        )}
                         <input 
                           type="file" 
                           accept="image/*" 
                           onChange={async e => {
                             const file = e.target.files?.[0]
                             if (!file) return
+                            setUploadingCount(prev => prev + 1)
                             const reader = new FileReader()
                             reader.onloadend = async () => {
                               try {
@@ -1437,6 +1483,8 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                               } catch (err) {
                                 console.error('Storage upload failed:', err)
                                 alert('지도 이미지 클라우드 업로드에 실패했습니다. Storage 권한 및 설정을 확인해 주세요.')
+                              } finally {
+                                setUploadingCount(prev => Math.max(0, prev - 1))
                               }
                             }
                             reader.readAsDataURL(file)
@@ -1473,6 +1521,7 @@ interface HotspotEditorProps {
 
 function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
   const [hs, setHs] = useState(hotspot)
+  const [uploadingCount, setUploadingCount] = useState(0)
   const [descText, setDescText] = useState(hotspot.description.join('\n'))
   const [activeTab, setActiveTab] = useState<'location' | 'edit'>('edit')
   const [isMiniDragging, setIsMiniDragging] = useState(false)
@@ -1548,6 +1597,7 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
     const files = e.target.files
     if (!files || files.length === 0) return
     Array.from(files).forEach(file => {
+      setUploadingCount(prev => prev + 1)
       const reader = new FileReader()
       reader.onloadend = async () => {
         try {
@@ -1561,6 +1611,8 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
         } catch (err) {
           console.error('Hotspot photo upload failed:', err)
           alert('사진 클라우드 업로드에 실패했습니다.')
+        } finally {
+          setUploadingCount(prev => Math.max(0, prev - 1))
         }
       }
       reader.readAsDataURL(file)
@@ -1662,8 +1714,17 @@ function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave
                           );
                         })}
                         <label className="add-photo-box mini">
-                          <Plus size={24} />
-                          <span>추가</span>
+                          {uploadingCount > 0 ? (
+                            <>
+                              <Loader2 size={24} className="animate-spin" />
+                              <span style={{ fontSize: '0.7rem' }}>업로드 중({uploadingCount})</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus size={24} />
+                              <span>추가</span>
+                            </>
+                          )}
                           <input type="file" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} />
                         </label>
                       </div>
