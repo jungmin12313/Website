@@ -114,7 +114,8 @@ export default function Admin() {
   useEffect(() => {
     // Firebase Auth State Listener
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user && user.email?.toLowerCase() === 'admin@naeil.app') {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+      if (user && adminEmail && user.email?.toLowerCase() === adminEmail.toLowerCase()) {
         setIsAuthorized(true)
       } else {
         setIsAuthorized(false)

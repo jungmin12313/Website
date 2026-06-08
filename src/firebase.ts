@@ -1,8 +1,29 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+
+/**
+ * ============================================================================
+ * [SECURITY & INFRASTRUCTURE GUIDE]
+ * Firebase API Key 노출 방지 및 플랫폼 제한 안내
+ * 
+ * 본 프로젝트의 소스 코드는 Public 오픈소스로 공개되므로, 
+ * API Key는 절대 코드 내부에 하드코딩하지 않고 환경변수(VITE_*)를 통해 주입받습니다.
+ * 
+ * [!주의!] 클라이언트 사이드 환경 변수는 빌드 시 브라우저에 노출됩니다.
+ * 따라서 무단 도용 방지를 위해 Google Cloud Console에서 'HTTP 리퍼러 제한'을 
+ * 반드시 설정해야 합니다.
+ * 
+ * 1. Google Cloud Console -> API 및 서비스 -> 사용자 인증 정보 접속
+ * 2. 'Browser key (auto created by Firebase)' 선택
+ * 3. '애플리케이션 제한사항' -> '웹사이트' 선택
+ * 4. 허용할 웹사이트 URI 추가:
+ *    - 로컬 개발: http://localhost:*
+ *    - 실제 서비스: https://your-production-domain.com/*
+ * ============================================================================
+ */
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,8 +41,8 @@ if (!firebaseConfig.apiKey) {
   // console.log("✅ Firebase Config Loaded:", firebaseConfig.projectId);
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase (중복 초기화 방지)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize App Check (Monitoring Mode Setup)
 // Note: You need to add VITE_RECAPTCHA_SITE_KEY to your .env file and Vercel environment variables.
