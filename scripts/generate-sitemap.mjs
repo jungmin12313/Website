@@ -16,18 +16,17 @@ const STATIC_PAGES = [
   '/report'
 ];
 
-// 축제 상세 페이지 ID 리스트 (추후 Firebase 등에서 동적으로 가져오도록 확장 가능)
-// 현재는 수동 관리 혹은 빌드 전 데이터 추출 방식 권장
+// Firestore REST API를 통해 동적으로 축제 ID를 불러옵니다.
 const getFestivalIds = async () => {
   try {
-    // 예: public/data/festivals.json 파일이 있다면 읽어오기
-    const dataPath = path.resolve('public/data/festivals.json');
-    if (fs.existsSync(dataPath)) {
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-      return data.map(f => f.id);
+    const res = await fetch('https://firestore.googleapis.com/v1/projects/naeil-b568d/databases/(default)/documents/festivals');
+    if (!res.ok) throw new Error('Failed to fetch from Firestore');
+    const data = await res.json();
+    if (data.documents) {
+      return data.documents.map(doc => doc.name.split('/').pop());
     }
   } catch (e) {
-    console.warn('동적 축제 ID를 불러오지 못했습니다. 정적 페이지만 생성합니다.');
+    console.warn('동적 축제 ID를 불러오지 못했습니다. 정적 페이지만 생성합니다.', e.message);
   }
   return [];
 };

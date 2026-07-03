@@ -8,7 +8,7 @@ import {
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
 import HotspotModal from '../components/HotspotModal'
-import { useSEO } from '../hooks/useSEO'
+import SEO from '../components/SEO'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -112,17 +112,27 @@ export default function FestivalDetail() {
     loadData()
   }, [id, navigate])
 
-  useSEO({
-    title: festival ? `${festival.name} 무장애 축제 지도 | 내일` : '무장애 축제 정보 불러오는 중 | 내일',
-    description: festival ? `${festival.name}의 휠체어 접근성, 장애인 화장실 정보를 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 배리어프리 데이터입니다.` : '로딩 중...',
-    url: festival ? `https://naeilmap.com/maps/${festival.id}` : 'https://naeilmap.com/maps',
-    image: festival?.thumbnail || festival?.mapImage
-  })
 
-  if (!festival) return <div className="loading">불러오는 중...</div>
+
+  if (!festival) return (
+    <div className="loading">
+      <SEO 
+        title="무장애 축제 정보 불러오는 중 | 내일맵" 
+        description="데이터를 불러오고 있습니다." 
+        url="https://naeilmap.com/maps" 
+      />
+      불러오는 중...
+    </div>
+  )
 
   return (
     <div className="detail-page">
+      <SEO 
+        title={`${festival.name} 무장애 축제 지도 | 내일맵`}
+        description={`${festival.name}의 휠체어 접근성, 장애인 화장실 정보를 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 배리어프리 데이터입니다.`}
+        url={`https://naeilmap.com/maps/${festival.id}`}
+        image={festival.thumbnail || festival.mapImage}
+      />
       {festival && (
         <script
           type="application/ld+json"

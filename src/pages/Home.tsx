@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search, ChevronRight } from 'lucide-react'
 import type { Festival } from '../types'
 import defaultHero from '../assets/hero.png'
-import { useSEO } from '../hooks/useSEO'
+import SEO from '../components/SEO'
 import './Home.css'
 
 export default function Home() {
@@ -12,11 +12,7 @@ export default function Home() {
   const [mainFestivals, setMainFestivals] = useState<Festival[]>([])
   const navigate = useNavigate()
 
-  useSEO({
-    title: "내일 - 무장애 축제 지도 | 우리 모두를 위한 배리어프리 축제 여행",
-    description: "무장애 축제 지도 플랫폼 '내일'은 휠체어 사용자, 고령자 등 교통약자를 위한 전국 축제장 무장애 접근성 정보를 제공합니다. 직접 조사한 무장애 축제 지로 평등하고 즐거운 문화를 누려보세요.",
-    url: 'https://naeilmap.com/'
-  });
+
 
   useEffect(() => {
     // Firebase 함수들을 동적 임포트하여 초기 번들 크기 감소 및 실행 지연 방지
@@ -49,6 +45,11 @@ export default function Home() {
 
   return (
     <div className="home">
+      <SEO 
+        title="내일 - 무장애 축제 지도 | 우리 모두를 위한 배리어프리 축제 여행"
+        description="무장애 축제 지도 플랫폼 '내일'은 휠체어 사용자, 고령자 등 교통약자를 위한 전국 축제장 무장애 접근성 정보를 제공합니다. 직접 조사한 무장애 축제 지로 평등하고 즐거운 문화를 누려보세요."
+        url="https://naeilmap.com/"
+      />
       {/* 히어로 섹션 */}
       <section className="hero">
         <img 

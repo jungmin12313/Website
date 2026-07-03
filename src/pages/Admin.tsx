@@ -85,7 +85,7 @@ export default function Admin() {
       const reader = new FileReader()
       reader.onloadend = async () => {
         try {
-          const compressed = await compressImage(reader.result as string, 1200, 0.7)
+          const compressed = await compressImage(file, 1200, 0.7)
           const blob = dataURLtoBlob(compressed)
           const cloudUrl = await uploadToStorage(blob, `library/${Date.now()}_${file.name}`)
           setImageLibrary(prev => [...prev, { url: cloudUrl, file, name: file.name }])
@@ -295,7 +295,7 @@ export default function Admin() {
     const reader = new FileReader()
     reader.onloadend = async () => {
       try {
-        const compressed = await compressImage(reader.result as string, 1600, 0.7)
+        const compressed = await compressImage(file, 1600, 0.7)
         const blob = dataURLtoBlob(compressed)
         const cloudUrl = await uploadToStorage(blob, `settings/hero_bg_${Date.now()}.jpg`)
         setHeroBg(cloudUrl)
@@ -519,7 +519,8 @@ export default function Admin() {
         }
         // Base64인 경우 Storage 업로드 (하위 호환성)
         try {
-          const compressed = await compressImage(img, 1000, 0.7)
+          const imgBlob = dataURLtoBlob(img)
+          const compressed = await compressImage(imgBlob, 1000, 0.7)
           const blob = dataURLtoBlob(compressed)
           const url = await uploadToStorage(blob, `hotspots/${hsId}/report_img_${idx}_${Date.now()}.jpg`)
           return { url, label: `제보사진 ${idx + 1}` }
@@ -1130,7 +1131,7 @@ interface FestivalEditorProps {
   onClose: () => void
   setFestival: React.Dispatch<React.SetStateAction<Festival | null>>
   onSave: () => void
-  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+  compressImage: (file: File | Blob, maxWidth?: number, quality?: number) => Promise<string>
 }
 
 function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage }: FestivalEditorProps) {
@@ -1477,7 +1478,7 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                             const reader = new FileReader()
                             reader.onloadend = async () => {
                               try {
-                                const compressed = await compressImage(reader.result as string, 3000, 0.85)
+                                const compressed = await compressImage(file, 3000, 0.85)
                                 const blob = dataURLtoBlob(compressed)
                                 const cloudUrl = await uploadToStorage(blob, `festivals/${festival.id || 'new'}/maps/map_${idx}_${Date.now()}.jpg`)
                                 
@@ -1528,7 +1529,7 @@ interface HotspotEditorProps {
   onSave: (h: Hotspot) => void
   onClose: () => void
   onChange: (h: Hotspot) => void
-  compressImage: any
+  compressImage: (file: File | Blob, maxWidth?: number, quality?: number) => Promise<string>
 }
 
 function HotspotEditor({ hotspot, mapSrc, imageLibrary, parsedExcelItems, onSave, onClose, onChange, compressImage }: HotspotEditorProps) {
@@ -1932,7 +1933,7 @@ interface PressEditorProps {
   onClose: () => void
   setPress: React.Dispatch<React.SetStateAction<PressArticle | null>>
   onSave: () => void
-  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+  compressImage: (file: File | Blob, maxWidth?: number, quality?: number) => Promise<string>
 }
 
 function PressEditor({ press, onClose, setPress, onSave, compressImage }: PressEditorProps) {
@@ -1944,7 +1945,7 @@ function PressEditor({ press, onClose, setPress, onSave, compressImage }: PressE
     const reader = new FileReader()
     reader.onloadend = async () => {
       try {
-        const compressed = await compressImage(reader.result as string, 1200, 0.7)
+        const compressed = await compressImage(file, 1200, 0.7)
         const blob = dataURLtoBlob(compressed)
         const cloudUrl = await uploadToStorage(blob, `press/${press.id || 'new'}_${Date.now()}.jpg`)
         update('image', cloudUrl)
@@ -2023,7 +2024,7 @@ interface GalleryEditorProps {
   onClose: () => void
   setGallery: React.Dispatch<React.SetStateAction<GalleryImage | null>>
   onSave: () => void
-  compressImage: (base64: string, maxWidth?: number, quality?: number) => Promise<string>
+  compressImage: (file: File | Blob, maxWidth?: number, quality?: number) => Promise<string>
 }
 
 function GalleryEditor({ gallery, onClose, setGallery, onSave, compressImage }: GalleryEditorProps) {
@@ -2035,7 +2036,7 @@ function GalleryEditor({ gallery, onClose, setGallery, onSave, compressImage }: 
     const reader = new FileReader()
     reader.onloadend = async () => {
       try {
-        const compressed = await compressImage(reader.result as string, 1200, 0.7)
+        const compressed = await compressImage(file, 1200, 0.7)
         const blob = dataURLtoBlob(compressed)
         const cloudUrl = await uploadToStorage(blob, `gallery/${gallery.id || 'new'}_${Date.now()}.jpg`)
         update('url', cloudUrl)

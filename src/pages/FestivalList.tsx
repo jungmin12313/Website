@@ -4,7 +4,7 @@ import { Calendar, MapPin } from 'lucide-react'
 import type { Festival } from '../types'
 import { getFestivals } from '../firebaseUtils'
 import Skeleton from '../components/Skeleton'
-import { useSEO } from '../hooks/useSEO'
+import SEO from '../components/SEO'
 import './FestivalList.css'
 
 export default function FestivalList() {
@@ -15,11 +15,7 @@ export default function FestivalList() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  useSEO({
-    title: "전국 무장애지도 전체 보기 | 내일",
-    description: "전국 각지의 축제 현장을 직접 조사하여 제작한 무장애지도를 만나보세요. 휠체어 접근 시설과 편의 정보를 한눈에 제공합니다.",
-    url: 'https://naeilmap.com/maps'
-  });
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -69,6 +65,11 @@ export default function FestivalList() {
 
   return (
     <div className="festival-list-page">
+      <SEO 
+        title="전국 무장애지도 전체 보기 | 내일"
+        description="전국 각지의 축제 현장을 직접 조사하여 제작한 무장애지도를 만나보세요. 휠체어 접근 시설과 편의 정보를 한눈에 제공합니다."
+        url="https://naeilmap.com/maps"
+      />
       <div className="list-container">
         {/* 필터 */}
         <div className="filters">

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 import './About.css';
 
 "use client";
@@ -48,11 +48,7 @@ const VOICES = [
 
 
 export default function About() {
-  useSEO({
-    title: "브랜드 스토리 | 내일 - 무장애지도 전문 플랫폼",
-    description: "휠체어 사용자도 즐길 수 있는 축제를 꿈꾸는 '내일'의 이야기. 왜 우리가 직접 현장에서 무장애지도를 제작하는지 그 이유를 들려드립니다.",
-    url: 'https://naeilmap.com/about'
-  });
+
 
   useEffect(() => {
 
@@ -87,6 +83,12 @@ export default function About() {
             "keywords": "무장애지도, 무장애 축제, 무장애축제지도, 배리어프리, 장애인 문화 접근성, 휠체어 축제 지도"
           })
         }}
+      />
+      
+      <SEO 
+        title="브랜드 스토리 | 내일 - 무장애지도 전문 플랫폼"
+        description="휠체어 사용자도 즐길 수 있는 축제를 꿈꾸는 '내일'의 이야기. 왜 우리가 직접 현장에서 무장애지도를 제작하는지 그 이유를 들려드립니다."
+        url="https://naeilmap.com/about"
       />
 
       <style>{`
