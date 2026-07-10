@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
-  AlertCircle, X, RefreshCcw
+  AlertCircle, X, RefreshCcw, Smartphone
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import HotspotModal from '../components/HotspotModal'
 import SEO from '../components/SEO'
 import './FestivalDetail.css'
@@ -23,27 +24,29 @@ export default function FestivalDetail() {
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null)
   const [reports, setReports] = useState<Report[]>([])
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
-  const [mapScale, setMapScale] = useState(0.5)
-  const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
   const [isFullScreen, setIsFullScreen] = useState(false)
-  const mapRef = useRef<HTMLDivElement>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const touchLastTimeRef = useRef<number>(0)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isPortrait, setIsPortrait] = useState(true)
+  const [showRotateGuide, setShowRotateGuide] = useState(true)
 
-  // 마우스 휠 스크롤 확대/축소 지원
   useEffect(() => {
-    const el = mapRef.current
-    if (!el) return
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault()
-      const delta = e.deltaY < 0 ? 1.1 : 0.9
-      setMapScale(prev => Math.max(0.1, Math.min(5, prev * delta)))
-    }
-    el.addEventListener('wheel', handleWheel, { passive: false })
-    return () => el.removeEventListener('wheel', handleWheel)
-  }, [])
+    const checkOrientation = () => {
+      const mobile = window.innerWidth <= 1024;
+      // Using window.matchMedia for reliable orientation check if possible, or innerHeight/Width
+      const portrait = window.innerHeight > window.innerWidth;
+      setIsMobile(mobile);
+      setIsPortrait(portrait);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
+
 
   // 전체화면 상태 변화 감지
   useEffect(() => {
@@ -269,16 +272,47 @@ export default function FestivalDetail() {
 
             {/* 지도 영역 - ref를 여기에 연결해 전체화면 대상이 됨 */}
             <div
-              className={`map-area${isFullScreen ? ' is-fullscreen' : ''}`}
+              className={`map-area${isFullScreen ? ' is-fullscreen' : ''}${isMobile && !isPortrait ? ' mobile-landscape-fullscreen' : ''}`}
               ref={mapContainerRef}
             >
+              {isMobile && isPortrait && showRotateGuide && (
+                <div className="rotate-guide-overlay">
+                  <button className="guide-close-btn" onClick={() => setShowRotateGuide(false)} aria-label="안내 닫기">
+                    <X size={24} />
+                  </button>
+                  <div className="guide-content">
+                    <div className="phone-icon-wrap">
+                      <Smartphone size={48} className="phone-icon" />
+                    </div>
+                    <p>지도를 더 넓게 보시려면<br/>기기를 <strong>가로로 회전</strong>해주세요</p>
+                  </div>
+                </div>
+              )}
               {(() => {
-                const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
+                const validMaps = (festival.mapImages || []).filter(url => url && url.trim() !== '')
+                const maps = validMaps.length > 0 ? validMaps : (festival.mapImage ? [festival.mapImage] : [])
                 if (maps.length > 1) {
                   return (
                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', position: 'absolute', top: '0.75rem', left: '0.75rem', zIndex: 11 }}>
-                      <button style={{ padding: '0.4rem 0.9rem', background: activeMapIndex === 0 ? 'var(--primary)' : 'white', color: activeMapIndex === 0 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.85rem' }} onClick={() => setActiveMapIndex(0)}>앞면 지도</button>
-                      <button style={{ padding: '0.4rem 0.9rem', background: activeMapIndex === 1 ? 'var(--primary)' : 'white', color: activeMapIndex === 1 ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.85rem' }} onClick={() => setActiveMapIndex(1)}>뒷면 지도</button>
+                      {maps.map((_, idx) => (
+                        <button 
+                          key={idx}
+                          style={{ 
+                            padding: '0.4rem 0.9rem', 
+                            background: activeMapIndex === idx ? 'var(--blue)' : 'white', 
+                            color: activeMapIndex === idx ? 'white' : 'var(--gray-800)', 
+                            border: `1px solid ${activeMapIndex === idx ? 'var(--blue)' : 'var(--gray-300)'}`, 
+                            borderRadius: '0.5rem', 
+                            fontWeight: 600, 
+                            cursor: 'pointer', 
+                            transition: 'all 0.2s', 
+                            fontSize: '0.85rem' 
+                          }} 
+                          onClick={() => setActiveMapIndex(idx)}
+                        >
+                          {idx === 0 ? '앞면 지도' : '뒷면 지도'}
+                        </button>
+                      ))}
                     </div>
                   )
                 }
@@ -286,227 +320,104 @@ export default function FestivalDetail() {
               })()}
 
 
-              {/* 지도 뷰포트 */}
-              <div
-                className={`map-viewport ${isDragging ? 'dragging' : ''}`}
-                ref={mapRef}
-                onMouseDown={(e) => {
-                  if (!mapRef.current) return
-                  setIsDragging(true)
-                  setDragStart({
-                    x: e.pageX,
-                    y: e.pageY,
-                    scrollLeft: mapRef.current.scrollLeft,
-                    scrollTop: mapRef.current.scrollTop
-                  })
-                }}
-                onMouseMove={(e) => {
-                  if (!isDragging || !mapRef.current) return
-                  e.preventDefault()
-                  const dx = e.pageX - dragStart.x
-                  const dy = e.pageY - dragStart.y
-                  mapRef.current.scrollLeft = dragStart.scrollLeft - dx
-                  mapRef.current.scrollTop = dragStart.scrollTop - dy
-                }}
-                onMouseUp={() => setIsDragging(false)}
-                onMouseLeave={() => setIsDragging(false)}
-                onTouchStart={(e) => {
-                  if (!mapRef.current) return
-                  if (e.touches.length === 2) {
-                    setIsDragging(false)
-                    const dist = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                    )
-                    ;(mapRef.current as any)._lastDist = dist
-                  } else if (e.touches.length === 1) {
-                    setIsDragging(true)
-                    const touch = e.touches[0]
-                    setDragStart({
-                      x: touch.pageX,
-                      y: touch.pageY,
-                      scrollLeft: mapRef.current.scrollLeft,
-                      scrollTop: mapRef.current.scrollTop
-                    })
-                    
-                    const now = Date.now()
-                    if (now - touchLastTimeRef.current < 300) {
-                      // 더블 탭 시 확대/축소 토글
-                      setMapScale(prev => (prev < 1 ? 1.5 : 0.5))
-                    }
-                    touchLastTimeRef.current = now
-                  }
-                }}
-                onTouchMove={(e) => {
-                  if (!mapRef.current) return
-                  if (e.touches.length === 2 || isDragging) {
-                    if (e.cancelable) e.preventDefault()
-                  }
-
-                  if (e.touches.length === 2) {
-                    const dist = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                    )
-                    const lastDist = (mapRef.current as any)._lastDist || dist
-                    const delta = dist / lastDist
-                    
-                    if (Math.abs(dist - lastDist) > 1) {
-                      setMapScale(prev => Math.max(0.1, Math.min(5, prev * delta)))
-                      ;(mapRef.current as any)._lastDist = dist
-                    }
-                  } else if (isDragging && e.touches.length === 1) {
-                    const touch = e.touches[0]
-                    const dx = touch.pageX - dragStart.x
-                    const dy = touch.pageY - dragStart.y
-                    mapRef.current.scrollLeft = dragStart.scrollLeft - dx
-                    mapRef.current.scrollTop = dragStart.scrollTop - dy
-                  }
-                }}
-                onTouchEnd={() => {
-                  setIsDragging(false)
-                  if (mapRef.current) delete (mapRef.current as any)._lastDist
-                }}
+              {/* 지도 뷰포트 및 컨트롤 */}
+              <TransformWrapper
+                initialScale={1}
+                minScale={0.5}
+                maxScale={4}
+                centerOnInit={true}
+                limitToBounds={true}
               >
-                <div
-                  className="map-scaler"
-                  style={{
-                    width: imgSize.w ? `${imgSize.w * mapScale}px` : 'auto',
-                    height: imgSize.h ? `${imgSize.h * mapScale}px` : 'auto'
-                  }}
-                >
-                  <div
-                    className="map-image-wrap"
-                    style={{
-                      transform: `scale(${mapScale})`,
-                      transformOrigin: 'top left'
-                    }}
-                  >
-                    {(() => {
-                      const maps = festival.mapImages?.length ? festival.mapImages : (festival.mapImage ? [festival.mapImage] : [])
-                      const currentMap = maps[activeMapIndex]
-                      return currentMap ? (
-                        <img
-                          src={currentMap}
-                          alt="축제 무장애지도"
-                          className="map-img"
-                          loading="lazy"
-                          decoding="async"
-                          onLoad={(e) => {
-                            const img = e.currentTarget
-                            const viewport = mapRef.current
-                            setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
-                            if (viewport) {
-                              const scaleX = (viewport.clientWidth - 40) / img.naturalWidth
-                              const scaleY = (viewport.clientHeight - 40) / img.naturalHeight
-                              const fitScale = Math.min(scaleX, scaleY, 1)
-                              setMapScale(fitScale)
-                            }
-                          }}
-                          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-                        />
-                      ) : (
-                        <div className="map-placeholder">
-                          <p>지도 이미지가 준비 중입니다.</p>
-                          <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
-                        </div>
-                      )
-                    })()}
+                {({ zoomIn, zoomOut, resetTransform, state }) => (
+                  <>
+                    <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }} contentStyle={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="map-image-wrap" style={{ position: 'relative', display: 'inline-block' }}>
+                        {(() => {
+                          const validMaps = (festival.mapImages || []).filter(url => url && url.trim() !== '')
+                          const maps = validMaps.length > 0 ? validMaps : (festival.mapImage ? [festival.mapImage] : [])
+                          const currentMap = maps[activeMapIndex]
+                          return currentMap ? (
+                            <img
+                              src={currentMap}
+                              alt="축제 무장애지도"
+                              className="map-img"
+                              loading="lazy"
+                              decoding="async"
+                              style={{ display: 'block', maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+                              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                            />
+                          ) : (
+                            <div className="map-placeholder">
+                              <p>지도 이미지가 준비 중입니다.</p>
+                              <p className="map-placeholder-sub">어드민 페이지에서 지도를 업로드하고 핫스팟을 설정해주세요.</p>
+                            </div>
+                          )
+                        })()}
 
-                    {/* 핫스팟 */}
-                    {festival.hotspots.filter(hs => (hs.mapIndex || 0) === activeMapIndex).map(hs => (
-                      <button
-                        key={hs.id}
-                        className={`hotspot-btn ${hs.isReportBased ? 'report-pin' : 'info-pin'}`}
-                        style={{
-                          left: `${hs.x}%`,
-                          top: `${hs.y}%`,
-                          zIndex: hs.isReportBased ? 12 : 10
-                        }}
-                        onClick={() => setSelectedHotspot(hs)}
-                        title={hs.label}
-                      />
-                    ))}
+                        {/* 핫스팟 */}
+                        {festival.hotspots.filter(hs => (hs.mapIndex || 0) === activeMapIndex).map(hs => (
+                          <button
+                            key={hs.id}
+                            className={`hotspot-btn ${hs.isReportBased ? 'report-pin' : 'info-pin'}`}
+                            style={{
+                              left: `${hs.x}%`,
+                              top: `${hs.y}%`,
+                              zIndex: hs.isReportBased ? 12 : 10
+                            }}
+                            onClick={() => setSelectedHotspot(hs)}
+                            title={hs.label}
+                          />
+                        ))}
 
-                    {/* 승인된 제보 아이콘 */}
-                    {reports.filter(r => (r.mapIndex || 0) === activeMapIndex).map(r => (
-                      <button
-                        key={r.id}
-                        className="report-pin-btn pulse"
-                        style={{
-                          left: `${r.x}%`,
-                          top: `${r.y}%`,
-                          position: 'absolute',
-                          transform: 'translate(-50%, -100%)',
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--red)',
-                          cursor: 'pointer',
-                          zIndex: 10
-                        }}
-                        onClick={() => setSelectedReport(r)}
-                        title="현장 변동사항 제보"
-                      >
-                        <AlertCircle size={24} color="#E53E3E" fill="white" />
+                        {/* 승인된 제보 아이콘 */}
+                        {reports.filter(r => (r.mapIndex || 0) === activeMapIndex).map(r => (
+                          <button
+                            key={r.id}
+                            className="report-pin-btn pulse"
+                            style={{
+                              left: `${r.x}%`,
+                              top: `${r.y}%`,
+                              position: 'absolute',
+                              transform: 'translate(-50%, -100%)',
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--red)',
+                              cursor: 'pointer',
+                              zIndex: 10
+                            }}
+                            onClick={() => setSelectedReport(r)}
+                            title="현장 변동사항 제보"
+                          >
+                            <AlertCircle size={24} color="#E53E3E" fill="white" />
+                          </button>
+                        ))}
+                      </div>
+                    </TransformComponent>
+
+                    {/* 하단 컨트롤 */}
+                    <div className="map-controls">
+                      <button type="button" onClick={() => zoomOut()} title="축소">
+                        <Minus size={18} />
                       </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                      
+                      <button type="button" className="reset-zoom-btn" onClick={() => resetTransform()} title="화면에 맞춤">
+                        <RefreshCcw size={16} />
+                      </button>
 
-              {/* 하단 컨트롤 - 뷰포트 다음에 위치하여 터치 이벤트 우선순위 확보 */}
-              <div className="map-controls">
-                <button 
-                  type="button" 
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMapScale(s => Math.max(0.1, s - 0.1));
-                  }} 
-                  title="축소"
-                >
-                  <Minus size={18} />
-                </button>
-                
-                <button 
-                  type="button" 
-                  className="reset-zoom-btn"
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    if (mapRef.current) {
-                      const img = mapRef.current.querySelector('.map-img') as HTMLImageElement;
-                      if (img) {
-                        const scaleX = (mapRef.current.clientWidth - 40) / img.naturalWidth;
-                        const scaleY = (mapRef.current.clientHeight - 40) / img.naturalHeight;
-                        const fitScale = Math.min(scaleX, scaleY, 1);
-                        setMapScale(fitScale);
-                        mapRef.current.scrollLeft = 0;
-                        mapRef.current.scrollTop = 0;
-                      }
-                    }
-                  }}
-                  title="화면에 맞춤"
-                >
-                  <RefreshCcw size={16} />
-                </button>
+                      <span>{Math.round(state.scale * 100)}%</span>
 
-                <span>{Math.round(mapScale * 100)}%</span>
+                      <button type="button" onClick={() => zoomIn()} title="확대">
+                        <Plus size={18} />
+                      </button>
 
-                <button 
-                  type="button" 
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMapScale(s => Math.min(5, s + 0.1));
-                  }} 
-                  title="확대"
-                >
-                  <Plus size={18} />
-                </button>
-
-                <div className="control-divider" />
-                <button type="button" onPointerDown={(e) => { e.stopPropagation(); toggleFullScreen(); }} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
-                  {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
-                </button>
-              </div>
+                      <div className="control-divider" />
+                      <button type="button" onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
+                        {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </TransformWrapper>
 
               {/* 모달: map-area 안에 배치해야 전체화면에서도 보임 */}
               {selectedHotspot && (

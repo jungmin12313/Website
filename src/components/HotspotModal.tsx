@@ -27,7 +27,7 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={`modal-box ${hotspot.photos.length >= 2 ? 'modal-enhanced' : 'modal-default'} ${hotspot.isReportBased ? 'modal-report-mode' : ''}`}>
-        <button className="modal-close" onClick={onClose}><X size={20} /></button>
+        <button className="modal-close" aria-label="닫기" onClick={onClose}><X size={20} /></button>
 
         {hotspot.isReportBased && (
           <div className="report-badge-banner">
@@ -101,12 +101,14 @@ export default function HotspotModal({ hotspot, pictograms, onClose }: Props) {
                   <>
                     <button
                       className="slider-btn prev"
+                      aria-label="이전 사진"
                       onClick={() => setPhotoIdx(i => (i - 1 + hotspot.photos.length) % hotspot.photos.length)}
                     >
                       <ChevronLeft size={18} />
                     </button>
                     <button
                       className="slider-btn next"
+                      aria-label="다음 사진"
                       onClick={() => setPhotoIdx(i => (i + 1) % hotspot.photos.length)}
                     >
                       <ChevronRight size={18} />

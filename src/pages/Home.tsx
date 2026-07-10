@@ -75,7 +75,7 @@ export default function Home() {
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
             />
-            <button onClick={handleSearch}><Search size={20} /></button>
+            <button onClick={handleSearch} aria-label="검색"><Search size={20} /></button>
           </div>
 
           {mainFestivals.length > 0 && (
