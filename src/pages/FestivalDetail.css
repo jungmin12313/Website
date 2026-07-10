@@ -255,6 +255,47 @@
   background: var(--white);
 }
 
+.map-layer-toggle {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 6px;
+  border-radius: 30px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  z-index: 100;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.map-layer-btn {
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-layer-btn:hover {
+  color: var(--gray-800);
+}
+
+.map-layer-btn.active {
+  background: var(--blue);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
 .map-controls {
   position: absolute;
   bottom: 1rem;

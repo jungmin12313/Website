@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
-  AlertCircle, X, RefreshCcw, Smartphone
+  AlertCircle, X, RefreshCcw, Smartphone, Map, Layers
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
@@ -293,24 +293,16 @@ export default function FestivalDetail() {
                 const maps = validMaps.length > 0 ? validMaps : (festival.mapImage ? [festival.mapImage] : [])
                 if (maps.length > 1) {
                   return (
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', position: 'absolute', top: '0.75rem', left: '0.75rem', zIndex: 11 }}>
+                    <div className="map-layer-toggle">
                       {maps.map((_, idx) => (
                         <button 
                           key={idx}
-                          style={{ 
-                            padding: '0.4rem 0.9rem', 
-                            background: activeMapIndex === idx ? 'var(--blue)' : 'white', 
-                            color: activeMapIndex === idx ? 'white' : 'var(--gray-800)', 
-                            border: `1px solid ${activeMapIndex === idx ? 'var(--blue)' : 'var(--gray-300)'}`, 
-                            borderRadius: '0.5rem', 
-                            fontWeight: 600, 
-                            cursor: 'pointer', 
-                            transition: 'all 0.2s', 
-                            fontSize: '0.85rem' 
-                          }} 
+                          className={`map-layer-btn ${activeMapIndex === idx ? 'active' : ''}`}
                           onClick={() => setActiveMapIndex(idx)}
+                          title={idx === 0 ? '앞면 지도' : '뒷면 지도'}
                         >
-                          {idx === 0 ? '앞면 지도' : '뒷면 지도'}
+                          {idx === 0 ? <Map size={18} /> : <Layers size={18} />}
+                          <span>{idx === 0 ? '앞면' : '뒷면'}</span>
                         </button>
                       ))}
                     </div>
