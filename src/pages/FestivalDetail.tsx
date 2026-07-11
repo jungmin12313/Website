@@ -322,7 +322,7 @@ export default function FestivalDetail() {
               >
                 {({ zoomIn, zoomOut, resetTransform, state }) => (
                   <>
-                    <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }} contentStyle={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }} contentStyle={{ minWidth: '100%', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div className="map-image-wrap" style={{ position: 'relative', display: 'inline-block' }}>
                         {(() => {
                           const validMaps = (festival.mapImages || []).filter(url => url && url.trim() !== '')
