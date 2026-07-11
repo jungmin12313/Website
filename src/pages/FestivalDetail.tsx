@@ -67,13 +67,15 @@ export default function FestivalDetail() {
   }, [])
 
   // 전체화면 토글
+  // 전체화면 토글
   const toggleFullScreen = () => {
     const doc = document as any
     const el = mapContainerRef.current as any
+    const isCurrentlyFullscreen = isFullScreen || !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement)
 
-    if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+    if (!isCurrentlyFullscreen) {
       if (el.requestFullscreen) {
-        el.requestFullscreen().catch((err: any) => console.error(err))
+        el.requestFullscreen().catch((err: any) => console.log('Native API error:', err))
       } else if (el.webkitRequestFullscreen) {
         el.webkitRequestFullscreen()
       } else if (el.mozRequestFullScreen) {
@@ -81,18 +83,30 @@ export default function FestivalDetail() {
       } else if (el.msRequestFullscreen) {
         el.msRequestFullscreen()
       }
+      setIsFullScreen(true)
     } else {
-      if (doc.exitFullscreen) {
-        doc.exitFullscreen()
-      } else if (doc.webkitExitFullscreen) {
+      if (doc.exitFullscreen && doc.fullscreenElement) {
+        doc.exitFullscreen().catch(() => {})
+      } else if (doc.webkitExitFullscreen && doc.webkitFullscreenElement) {
         doc.webkitExitFullscreen()
-      } else if (doc.mozCancelFullScreen) {
+      } else if (doc.mozCancelFullScreen && doc.mozFullScreenElement) {
         doc.mozCancelFullScreen()
-      } else if (doc.msExitFullscreen) {
+      } else if (doc.msExitFullscreen && doc.msFullscreenElement) {
         doc.msExitFullscreen()
       }
+      setIsFullScreen(false)
     }
   }
+
+  // 전체화면 시 바디 스크롤 잠금
+  useEffect(() => {
+    if (isFullScreen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isFullScreen])
 
   useEffect(() => {
     const loadData = async () => {
