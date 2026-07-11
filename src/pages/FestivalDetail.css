@@ -848,7 +848,8 @@
   border-radius: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
-  background: var(--gray-100) !important;
+  background: var(--white) !important;
+  animation: fullscreen-zoom-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* 기본 상태 맵 이미지 크기 제한 */

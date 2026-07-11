@@ -98,15 +98,15 @@ export default function FestivalDetail() {
     }
   }
 
-  // 전체화면 시 바디 스크롤 잠금
+  // 전체화면 및 가로모드 시 바디 스크롤 잠금
   useEffect(() => {
-    if (isFullScreen) {
+    if (isFullScreen || (isMobile && !isPortrait)) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [isFullScreen])
+  }, [isFullScreen, isMobile, isPortrait])
 
   useEffect(() => {
     const loadData = async () => {
