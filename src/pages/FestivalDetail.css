@@ -842,4 +842,24 @@
   .report-modal-header {
     margin-bottom: 0.5rem;
   }
+
+  /* 가로 모드에서 지도 조작 버튼이 화면을 가리지 않도록 모서리로 이동 및 크기 축소 */
+  .map-layer-toggle {
+    top: 12px;
+    left: 12px;
+    transform: none;
+    transform-origin: top left;
+    scale: 0.85;
+  }
+
+  .map-controls {
+    bottom: 12px;
+    right: 12px;
+    left: auto;
+    margin: 0;
+    transform: none;
+    transform-origin: bottom right;
+    scale: 0.85;
+    padding: 0.4rem;
+  }
 }
