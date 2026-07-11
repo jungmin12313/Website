@@ -246,7 +246,7 @@ p, h1, h2, h3, h4, h5, h6, span {
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 /* Performance Optimization: Content Visibility */
