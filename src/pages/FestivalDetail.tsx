@@ -335,7 +335,6 @@ export default function FestivalDetail() {
                               className="map-img"
                               loading="lazy"
                               decoding="async"
-                              style={{ display: 'block', maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
                               onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                             />
                           ) : (

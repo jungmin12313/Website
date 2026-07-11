@@ -817,7 +817,6 @@
   to { opacity: 1; }
 }
 
-/* 모바일 가로모드 꽉찬 화면 (Fullscreen Landscape) */
 .mobile-landscape-fullscreen {
   position: fixed !important;
   top: 0 !important;
@@ -831,6 +830,19 @@
   background: var(--gray-100) !important;
 }
 
+/* 기본 상태 맵 이미지 크기 제한 */
+.map-img {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* 데스크탑 풀스크린 모드 맵 이미지 크기 조정 */
+.is-fullscreen .map-img {
+  max-height: 100vh;
+}
+
 @media (max-width: 900px) and (orientation: landscape) {
   /* 가로 모드일 때 모달 높이 조절 */
   .report-modal-box {
@@ -841,6 +853,14 @@
   
   .report-modal-header {
     margin-bottom: 0.5rem;
+  }
+
+  /* 핸드폰 가로 모드 시 지도가 가로 폭에 꽉 차게 만들기 */
+  .mobile-landscape-fullscreen .map-img {
+    width: 100vw;
+    height: auto;
+    max-width: none;
+    max-height: none;
   }
 
   /* 가로 모드에서 지도 조작 버튼이 화면을 가리지 않도록 모서리로 이동 및 크기 축소 */
