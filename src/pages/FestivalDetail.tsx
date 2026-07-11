@@ -293,12 +293,16 @@ export default function FestivalDetail() {
                 const maps = validMaps.length > 0 ? validMaps : (festival.mapImage ? [festival.mapImage] : [])
                 if (maps.length > 1) {
                   return (
-                    <div className="map-layer-toggle">
+                    <div 
+                      className="map-layer-toggle"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
                       {maps.map((_, idx) => (
                         <button 
                           key={idx}
                           className={`map-layer-btn ${activeMapIndex === idx ? 'active' : ''}`}
-                          onClick={() => setActiveMapIndex(idx)}
+                          onPointerDown={(e) => { e.stopPropagation(); setActiveMapIndex(idx); }}
+                          onClick={(e) => { e.stopPropagation(); setActiveMapIndex(idx); }}
                           title={idx === 0 ? '앞면 지도' : '뒷면 지도'}
                         >
                           {idx === 0 ? <Map size={18} /> : <Layers size={18} />}
@@ -386,23 +390,47 @@ export default function FestivalDetail() {
                     </TransformComponent>
 
                     {/* 하단 컨트롤 */}
-                    <div className="map-controls">
-                      <button type="button" onClick={() => zoomOut()} title="축소">
+                    <div 
+                      className="map-controls"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <button 
+                        type="button" 
+                        onPointerDown={(e) => { e.stopPropagation(); zoomOut(); }}
+                        onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+                        title="축소"
+                      >
                         <Minus size={18} />
                       </button>
                       
-                      <button type="button" className="reset-zoom-btn" onClick={() => resetTransform()} title="화면에 맞춤">
+                      <button 
+                        type="button" 
+                        className="reset-zoom-btn" 
+                        onPointerDown={(e) => { e.stopPropagation(); resetTransform(); }}
+                        onClick={(e) => { e.stopPropagation(); resetTransform(); }}
+                        title="화면에 맞춤"
+                      >
                         <RefreshCcw size={16} />
                       </button>
 
                       <span>{Math.round(state.scale * 100)}%</span>
 
-                      <button type="button" onClick={() => zoomIn()} title="확대">
+                      <button 
+                        type="button" 
+                        onPointerDown={(e) => { e.stopPropagation(); zoomIn(); }}
+                        onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+                        title="확대"
+                      >
                         <Plus size={18} />
                       </button>
 
                       <div className="control-divider" />
-                      <button type="button" onClick={toggleFullScreen} title={isFullScreen ? '전체화면 종료' : '전체화면'}>
+                      <button 
+                        type="button" 
+                        onPointerDown={(e) => { e.stopPropagation(); toggleFullScreen(); }}
+                        onClick={(e) => { e.stopPropagation(); toggleFullScreen(); }}
+                        title={isFullScreen ? '전체화면 종료' : '전체화면'}
+                      >
                         {isFullScreen ? <Minimize2 size={16} /> : <Maximize size={16} />}
                       </button>
                     </div>

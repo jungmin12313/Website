@@ -237,6 +237,7 @@
   background: var(--gray-100);
   min-width: 0;
   transition: all 0.3s ease;
+  touch-action: none;
 }
 
 /* Fullscreen pseudo-class for broader support */
