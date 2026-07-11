@@ -98,14 +98,19 @@ export default function FestivalDetail() {
     }
   }
 
-  // 전체화면 및 가로모드 시 바디 스크롤 잠금
+  // 전체화면 및 가로모드 시 바디 스크롤 잠금 & 글로벌 풀스크린 클래스 부여
   useEffect(() => {
     if (isFullScreen || (isMobile && !isPortrait)) {
       document.body.style.overflow = 'hidden'
+      document.body.classList.add('has-fullscreen-map')
     } else {
       document.body.style.overflow = ''
+      document.body.classList.remove('has-fullscreen-map')
     }
-    return () => { document.body.style.overflow = '' }
+    return () => { 
+      document.body.style.overflow = '' 
+      document.body.classList.remove('has-fullscreen-map')
+    }
   }, [isFullScreen, isMobile, isPortrait])
 
   useEffect(() => {

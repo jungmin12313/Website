@@ -164,6 +164,22 @@ body {
   flex: 1;
 }
 
+/* 진정한 풀스크린 맵을 위한 글로벌 강제 숨김 처리 */
+body.has-fullscreen-map {
+  padding-top: 0 !important;
+}
+body.has-fullscreen-map .navbar,
+body.has-fullscreen-map .tab-bar,
+body.has-fullscreen-map footer,
+body.has-fullscreen-map .detail-page {
+  /* detail-page 자체를 숨기면 맵도 사라지므로 주의! navbar와 tab-bar만 숨깁니다. */
+}
+body.has-fullscreen-map .navbar,
+body.has-fullscreen-map .tab-bar,
+body.has-fullscreen-map footer {
+  display: none !important;
+}
+
 .hero {
   position: relative;
   min-height: calc(100vh - var(--nav-height));
