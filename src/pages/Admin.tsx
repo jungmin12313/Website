@@ -244,48 +244,52 @@ export default function Admin() {
 
   const compressImage = (file: File | Blob, maxWidth = 800, quality = 0.4): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new Image()
-      const url = URL.createObjectURL(file)
-      
-      const timeout = setTimeout(() => {
-        URL.revokeObjectURL(url)
-        reject(new Error('이미지 처리 시간 초과 (30초)'))
-      }, 30000)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        const url = e.target?.result as string
+        
+        const timeout = setTimeout(() => {
+          reject(new Error('이미지 처리 시간 초과 (30초)'))
+        }, 30000)
 
-      img.onerror = () => {
-        clearTimeout(timeout)
-        URL.revokeObjectURL(url)
-        reject(new Error(`이미지를 로드할 수 없습니다. (타입: ${file.type}, 크기: ${Math.round(file.size/1024)}KB)`))
-      }
-      img.onload = () => {
-        clearTimeout(timeout)
-        try {
-          const canvas = document.createElement('canvas')
-          let width = img.width
-          let height = img.height
-
-          if (width > maxWidth) {
-            height = (maxWidth / width) * height
-            width = maxWidth
-          }
-
-          canvas.width = width
-          canvas.height = height
-          const ctx = canvas.getContext('2d')
-          if (ctx) {
-            ctx.imageSmoothingEnabled = true
-            ctx.imageSmoothingQuality = 'high'
-            ctx.drawImage(img, 0, 0, width, height)
-          }
-          const result = canvas.toDataURL('image/jpeg', quality)
-          URL.revokeObjectURL(url)
-          resolve(result)
-        } catch (err) {
-          URL.revokeObjectURL(url)
-          reject(err)
+        img.onerror = () => {
+          clearTimeout(timeout)
+          console.warn(`이미지 압축 중 렌더링 실패. 원본 이미지를 그대로 사용합니다. (타입: ${file.type}, 크기: ${Math.round(file.size/1024)}KB)`)
+          resolve(url) // 압축 실패 시 원본 데이터 URL 반환
         }
+        
+        img.onload = () => {
+          clearTimeout(timeout)
+          try {
+            const canvas = document.createElement('canvas')
+            let width = img.width
+            let height = img.height
+
+            if (width > maxWidth) {
+              height = (maxWidth / width) * height
+              width = maxWidth
+            }
+
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+              ctx.imageSmoothingEnabled = true
+              ctx.imageSmoothingQuality = 'high'
+              ctx.drawImage(img, 0, 0, width, height)
+            }
+            const result = canvas.toDataURL('image/jpeg', quality)
+            resolve(result)
+          } catch (err) {
+            console.warn('Canvas 변환 실패. 원본 이미지를 사용합니다.', err)
+            resolve(url) // 에러 발생 시 원본 데이터 URL 반환
+          }
+        }
+        img.src = url
       }
-      img.src = url
+      reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'))
+      reader.readAsDataURL(file)
     })
   }
 
@@ -1493,9 +1497,9 @@ function FestivalEditor({ festival, onClose, setFestival, onSave, compressImage 
                                 
                                 update('mapImages', cleanedMaps)
                                 if (idx === 0) update('mapImage', cloudUrl)
-                              } catch (err) {
+                              } catch (err: any) {
                                 console.error('Storage upload failed:', err)
-                                alert('지도 이미지 클라우드 업로드에 실패했습니다. Storage 권한 및 설정을 확인해 주세요.')
+                                alert(`지도 이미지 클라우드 업로드에 실패했습니다. (에러: ${err.message || err})`)
                               } finally {
                                 setUploadingCount(prev => Math.max(0, prev - 1))
                               }
