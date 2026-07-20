@@ -63,8 +63,8 @@ export default function Home() {
         />
         <div className="hero-overlay" style={{ zIndex: 1 }} />
         <div className="hero-content">
-          <h1 className="hero-title">
-            모두를 위한 무장애 축제 지도, 내일
+          <h1 className="hero-title" style={{ fontFamily: 'var(--font-title)', fontWeight: 800 }}>
+            모두를 위한 무장애지도
           </h1>
           <div className="search-bar">
             <input
