@@ -80,8 +80,8 @@ export default function FestivalDetail() {
     if (!isCurrentlyFullscreen) {
       if (el.requestFullscreen) {
         el.requestFullscreen().then(() => {
-          if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
-            window.screen.orientation.lock('landscape').catch(() => {})
+          if (window.screen && window.screen.orientation && (window.screen.orientation as any).lock) {
+            (window.screen.orientation as any).lock('landscape').catch(() => {})
           }
         }).catch((err: any) => console.log('Native API error:', err))
       } else if (el.webkitRequestFullscreen) {
@@ -95,8 +95,8 @@ export default function FestivalDetail() {
     } else {
       if (doc.exitFullscreen && doc.fullscreenElement) {
         doc.exitFullscreen().then(() => {
-          if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
-            window.screen.orientation.unlock()
+          if (window.screen && window.screen.orientation && (window.screen.orientation as any).unlock) {
+            (window.screen.orientation as any).unlock()
           }
         }).catch(() => {})
       } else if (doc.webkitExitFullscreen && doc.webkitFullscreenElement) {
