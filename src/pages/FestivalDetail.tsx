@@ -31,17 +31,22 @@ export default function FestivalDetail() {
   const [showRotateGuide, setShowRotateGuide] = useState(true)
 
   useEffect(() => {
+    let timeoutId: any;
     const checkOrientation = () => {
-      const mobile = window.innerWidth <= 1024;
-      // Using window.matchMedia for reliable orientation check if possible, or innerHeight/Width
-      const portrait = window.innerHeight > window.innerWidth;
-      setIsMobile(mobile);
-      setIsPortrait(portrait);
+      // iOS 등에서 orientationchange 직후 innerWidth가 늦게 갱신되는 버그 방지
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const mobile = window.matchMedia('(max-width: 1024px)').matches || window.innerWidth <= 1024;
+        const portrait = window.matchMedia('(orientation: portrait)').matches;
+        setIsMobile(mobile);
+        setIsPortrait(portrait);
+      }, 150);
     };
     checkOrientation();
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('resize', checkOrientation);
       window.removeEventListener('orientationchange', checkOrientation);
     };
@@ -67,7 +72,6 @@ export default function FestivalDetail() {
   }, [])
 
   // 전체화면 토글
-  // 전체화면 토글
   const toggleFullScreen = () => {
     const doc = document as any
     const el = mapContainerRef.current as any
@@ -75,7 +79,11 @@ export default function FestivalDetail() {
 
     if (!isCurrentlyFullscreen) {
       if (el.requestFullscreen) {
-        el.requestFullscreen().catch((err: any) => console.log('Native API error:', err))
+        el.requestFullscreen().then(() => {
+          if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+            window.screen.orientation.lock('landscape').catch(() => {})
+          }
+        }).catch((err: any) => console.log('Native API error:', err))
       } else if (el.webkitRequestFullscreen) {
         el.webkitRequestFullscreen()
       } else if (el.mozRequestFullScreen) {
@@ -86,7 +94,11 @@ export default function FestivalDetail() {
       setIsFullScreen(true)
     } else {
       if (doc.exitFullscreen && doc.fullscreenElement) {
-        doc.exitFullscreen().catch(() => {})
+        doc.exitFullscreen().then(() => {
+          if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+            window.screen.orientation.unlock()
+          }
+        }).catch(() => {})
       } else if (doc.webkitExitFullscreen && doc.webkitFullscreenElement) {
         doc.webkitExitFullscreen()
       } else if (doc.mozCancelFullScreen && doc.mozFullScreenElement) {
