@@ -60,8 +60,11 @@ export async function updateFestivalMetadata(festivalId: string, updates: Partia
   const festRef = doc(db, 'festivals', festivalId)
   await runTransaction(db, async (transaction) => {
     const festDoc = await transaction.get(festRef)
-    if (!festDoc.exists()) throw new Error('축제가 존재하지 않습니다.')
-    transaction.update(festRef, updates)
+    if (!festDoc.exists()) {
+      transaction.set(festRef, updates)
+    } else {
+      transaction.update(festRef, updates)
+    }
   })
 }
 
