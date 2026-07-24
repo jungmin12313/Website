@@ -14,14 +14,18 @@ export default function Press() {
   });
 
   useEffect(() => {
-    getPress().then(setPressList).catch(console.error)
+    getPress().then(data => {
+      // 옛날 기사부터 최상단에 오도록 날짜 기준 오름차순 정렬
+      const sorted = data.sort((a, b) => a.date.localeCompare(b.date));
+      setPressList(sorted);
+    }).catch(console.error)
   }, [])
 
   return (
     <div className="about-page" style={{ padding: '60px 24px', minHeight: 'calc(100vh - var(--nav-height))', background: 'var(--gray-50)' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', background: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1.5rem' }}>보도자료</h1>
-        <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>내일과 관련된 최신 소식과 보도자료입니다.</p>
+        <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>'내일'과 관련된 최신 소식과 보도자료입니다.</p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {pressList.length === 0 && (
