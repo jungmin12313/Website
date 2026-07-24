@@ -906,3 +906,58 @@
     padding: 0.4rem;
   }
 }
+
+/* === 핫스팟 클릭 안내 오버레이 === */
+.hotspot-guide-overlay-top {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: none;
+  animation: slideDownFadeIn 0.5s ease-out forwards, fadeOutUp 0.5s ease-in 4s forwards;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.hotspot-guide-content {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  word-break: keep-all;
+}
+
+.hotspot-guide-content strong {
+  color: #FFE066;
+  font-weight: 800;
+}
+
+@keyframes slideDownFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+}

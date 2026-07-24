@@ -29,6 +29,19 @@ export default function FestivalDetail() {
   const [isMobile, setIsMobile] = useState(false)
   const [isPortrait, setIsPortrait] = useState(true)
   const [showRotateGuide, setShowRotateGuide] = useState(true)
+  const [hasSeenHotspotGuide, setHasSeenHotspotGuide] = useState(false)
+  const [showHotspotGuide, setShowHotspotGuide] = useState(false)
+
+  useEffect(() => {
+    if (tab === 'map' && !hasSeenHotspotGuide) {
+      setShowHotspotGuide(true)
+      setHasSeenHotspotGuide(true)
+      const timer = setTimeout(() => {
+        setShowHotspotGuide(false)
+      }, 4500)
+      return () => clearTimeout(timer)
+    }
+  }, [tab, hasSeenHotspotGuide])
 
   useEffect(() => {
     let timeoutId: any;
@@ -316,6 +329,14 @@ export default function FestivalDetail() {
                       <Smartphone size={48} className="phone-icon" />
                     </div>
                     <p>지도를 더 넓게 보시려면<br/>기기를 <strong>가로로 회전</strong>해주세요</p>
+                  </div>
+                </div>
+              )}
+              {showHotspotGuide && (
+                <div className="hotspot-guide-overlay-top">
+                  <div className="hotspot-guide-content">
+                    지도 위 <strong>깜빡이는 점(파동)</strong>을 누르면<br/>
+                    상세 정보를 볼 수 있습니다.
                   </div>
                 </div>
               )}
