@@ -336,9 +336,9 @@ export default function FestivalDetail() {
               )}
               {showHotspotGuide && (
                 <div className="hotspot-guide-overlay-top">
-                  <div className="hotspot-guide-content">
-                    지도 위 <strong>깜빡이는 점(파동)</strong>을 누르면<br/>
-                    상세 정보를 볼 수 있습니다.
+                  <div className="hotspot-guide-content" onClick={() => setShowHotspotGuide(false)}>
+                    <span>지도 위 <strong>깜빡이는 점(파동)</strong>을 누르면<br/>상세 정보를 볼 수 있습니다.</span>
+                    <button className="hotspot-guide-close" aria-label="닫기"><X size={16} /></button>
                   </div>
                 </div>
               )}
