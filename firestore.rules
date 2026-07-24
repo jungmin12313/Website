@@ -24,6 +24,18 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
+    // 보도자료: 누구나 조회 가능, 수정은 관리자만
+    match /press/{pressId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // 갤러리: 누구나 조회 가능, 수정은 관리자만
+    match /gallery/{galleryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     // 감사 로그: 클라이언트 행위 기록(create)은 허용하되, 조회 및 관리는 관리자만
     match /audit_logs/{logId} {
       allow create: if true;

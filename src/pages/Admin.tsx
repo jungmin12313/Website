@@ -1091,14 +1091,19 @@ export default function Admin() {
           if (!editingPress.title || !editingPress.publisher || !editingPress.date || !editingPress.link) {
             return alert('필수 항목을 모두 입력해주세요.')
           }
-          await savePress(editingPress)
-          setPressList(p => {
-            const exists = p.find(item => item.id === editingPress.id)
-            if (exists) return p.map(item => item.id === editingPress.id ? editingPress : item)
-            return [editingPress, ...p]
-          })
-          setEditingPress(null)
-          alert('보도자료가 저장되었습니다.')
+          try {
+            await savePress(editingPress)
+            setPressList(p => {
+              const exists = p.find(item => item.id === editingPress.id)
+              if (exists) return p.map(item => item.id === editingPress.id ? editingPress : item)
+              return [editingPress, ...p]
+            })
+            setEditingPress(null)
+            alert('보도자료가 저장되었습니다.')
+          } catch (err: any) {
+            console.error('보도자료 저장 에러:', err)
+            alert(`보도자료 저장에 실패했습니다: ${err.message || err}`)
+          }
         }}
         compressImage={compressImage}
       />
