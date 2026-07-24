@@ -910,7 +910,7 @@
 /* === 핫스팟 클릭 안내 오버레이 === */
 .hotspot-guide-overlay-top {
   position: absolute;
-  top: 24px;
+  top: 80px; /* map-layer-toggle(top: 24px)와 겹치지 않도록 아래로 이동 */
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
