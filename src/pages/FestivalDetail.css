@@ -532,6 +532,7 @@
   line-height: 1.7;
   color: var(--gray-800);
   margin-bottom: 24px;
+  white-space: pre-wrap;
 }
 
 .transport-service {

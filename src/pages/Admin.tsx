@@ -350,8 +350,9 @@ export default function Admin() {
       await logAction('SAVE_FESTIVAL', sanitized.id, { name: sanitized.name })
       setEditingFestival(null)
       alert('축제 정보가 클라우드에 저장되었습니다.')
-    } catch (e) {
-      alert('저장에 실패했습니다.')
+    } catch (e: any) {
+      console.error(e)
+      alert(`저장에 실패했습니다. (에러: ${e.message || e})`)
     }
   }
 
