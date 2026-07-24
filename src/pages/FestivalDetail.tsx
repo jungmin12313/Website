@@ -32,8 +32,10 @@ export default function FestivalDetail() {
   const [hasSeenHotspotGuide, setHasSeenHotspotGuide] = useState(false)
   const [showHotspotGuide, setShowHotspotGuide] = useState(false)
 
+  const isRotateGuideVisible = isMobile && isPortrait && showRotateGuide;
+
   useEffect(() => {
-    if (tab === 'map' && !hasSeenHotspotGuide) {
+    if (tab === 'map' && !isRotateGuideVisible && !hasSeenHotspotGuide) {
       setShowHotspotGuide(true)
       setHasSeenHotspotGuide(true)
       const timer = setTimeout(() => {
@@ -41,7 +43,7 @@ export default function FestivalDetail() {
       }, 4500)
       return () => clearTimeout(timer)
     }
-  }, [tab, hasSeenHotspotGuide])
+  }, [tab, isRotateGuideVisible, hasSeenHotspotGuide])
 
   useEffect(() => {
     let timeoutId: any;
