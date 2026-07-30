@@ -211,15 +211,6 @@ export default function Partnership() {
         <div className="reveal logo-wall">
           <div className="sec-kicker">PARTNERS</div>
           <h2 className="sec-heading" style={{ marginBottom: 0 }}>전남 광주 지역의 17개 기관이 현재 '내일'과 함께 하고 있습니다</h2>
-          
-          <div className="logo-grid">
-            <div className="logo-item">동구청</div>
-            <div className="logo-item">조선이공대 RISE사업단</div>
-            <div className="logo-item">지속가능발전협의회</div>
-            <div className="logo-item">전남대학교병원</div>
-            <div className="logo-item">5·18민중항쟁기념행사위원회</div>
-            <div className="logo-item">지체장애인협회</div>
-          </div>
         </div>
       </section>
 
