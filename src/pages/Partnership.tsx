@@ -105,12 +105,12 @@ export default function Partnership() {
           <div className="stat-label">협력 기관 네트워크</div>
         </div>
         <div className="reveal stat-pill" style={{ transitionDelay: '0.2s' }}>
-          <div className="stat-num blue">70명+</div>
+          <div className="stat-num blue">100명+</div>
           <div className="stat-label">현장 조사 참여 인원</div>
         </div>
         <div className="reveal stat-pill" style={{ transitionDelay: '0.3s' }}>
-          <div className="stat-num">2관왕</div>
-          <div className="stat-label">공인된 성과<br/>(동구청장상 · 소셜벤처 우수 공모전)</div>
+          <div className="stat-num">5관왕</div>
+          <div className="stat-label">공인된 성과</div>
         </div>
       </div>
 
@@ -124,17 +124,14 @@ export default function Partnership() {
           <div className="reveal portfolio-card" style={{ transitionDelay: '0.2s' }}>
             <h3>실생활권</h3>
             <p>일상적으로 오가는 상권과 시설의 접근성을 데이터로 기록합니다.</p>
-            <span className="portfolio-ex">(예: 산책길 가이드맵)</span>
           </div>
           <div className="reveal portfolio-card" style={{ transitionDelay: '0.3s' }}>
             <h3>축제·행사</h3>
             <p>짧은 기간 많은 인파가 몰리는 야외 행사장의 접근 경로를 확인합니다.</p>
-            <span className="portfolio-ex">(예: 5·18 전야제, 충장축제)</span>
           </div>
           <div className="reveal portfolio-card" style={{ transitionDelay: '0.4s' }}>
             <h3>실내 시설</h3>
             <p>병원, 복합시설처럼 복잡한 실내 동선을 직접 걸으며 확인합니다.</p>
-            <span className="portfolio-ex">(예: 전남대학교병원)</span>
           </div>
         </div>
       </section>
@@ -213,7 +210,7 @@ export default function Partnership() {
       <section className="partnership-section">
         <div className="reveal logo-wall">
           <div className="sec-kicker">PARTNERS</div>
-          <h2 className="sec-heading" style={{ marginBottom: 0 }}>지금 '내일'과 함께하고 있습니다</h2>
+          <h2 className="sec-heading" style={{ marginBottom: 0 }}>전남 광주 지역의 17개 기관이 현재 '내일'과 함께 하고 있습니다</h2>
           
           <div className="logo-grid">
             <div className="logo-item">동구청</div>
