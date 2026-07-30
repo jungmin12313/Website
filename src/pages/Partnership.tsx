@@ -165,7 +165,7 @@ export default function Partnership() {
           </div>
           
           <div className="reveal service-item service-sub-item">
-            <h4>정기 구독형 관리 <span className="service-badge" style={{ background: 'var(--gray-600)', color: 'white' }}>준비중</span></h4>
+            <h4>정기 구독형 관리 <span className="service-badge" style={{ background: 'var(--gray-600)', color: 'var(--white)' }}>준비중</span></h4>
             <p style={{ textAlign: 'center' }}>한 번의 진단으로 끝내지 않고, 매달 최신 상태로 유지하는 구독 서비스를 준비하고 있습니다.</p>
             <button className="btn-pill-blue" style={{ background: 'var(--gray-700)', padding: '12px 24px' }} onClick={() => scrollToForm('정기구독(준비중)')}>
               오픈 소식 먼저 받아보기

@@ -69,6 +69,7 @@
 [data-theme='high-contrast'] .calendar-page,
 [data-theme='high-contrast'] .detail-page,
 [data-theme='high-contrast'] .festival-list-page,
+[data-theme='high-contrast'] .partnership-page,
 [data-theme='high-contrast'] .glass-card,
 [data-theme='high-contrast'] .transport-service {
   background-color: #000000 !important;
@@ -98,7 +99,8 @@
 [data-theme='high-contrast'] .btn-primary,
 [data-theme='high-contrast'] .add-main-btn,
 [data-theme='high-contrast'] .editor-save,
-[data-theme='high-contrast'] .status-toggle-btn.resolved {
+[data-theme='high-contrast'] .status-toggle-btn.resolved,
+[data-theme='high-contrast'] .btn-pill-blue {
   background: #FFFF00 !important;
   color: #000000 !important;
   border: 3px solid #FFFF00 !important;
