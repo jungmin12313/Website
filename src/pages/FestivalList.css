@@ -132,6 +132,14 @@
 
 @media (max-width: 600px) {
   .card-grid { grid-template-columns: 1fr; }
+  .filters {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .filter-select.half-width {
+    flex: 1 1 100%;
+    width: 100%;
+  }
 }
 
 /* 고대비 모드 */
