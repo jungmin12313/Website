@@ -18,6 +18,7 @@ const Story = lazy(() => import('./pages/Story'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Press = lazy(() => import('./pages/Press'))
 const Newsletter = lazy(() => import('./pages/Newsletter'))
+const Partnership = lazy(() => import('./pages/Partnership'))
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/press" element={<Press />} />
             <Route path="/newsletter" element={<Newsletter />} />
+            <Route path="/partnership" element={<Partnership />} />
           </Routes>
         </Suspense>
       </main>

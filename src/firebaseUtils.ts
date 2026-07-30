@@ -195,6 +195,27 @@ export async function logAction(action: string, entityId: string, details: any):
   }
 }
 
+// --- 기관·기업 제휴(Partnership Inquiry) 관련 ---
+export interface PartnershipInquiry {
+  id: string;
+  name: string;
+  organization: string;
+  contact: string;
+  email: string;
+  service: string;
+  content: string;
+  createdAt: number;
+}
+
+export async function savePartnershipInquiry(inquiry: Omit<PartnershipInquiry, 'id' | 'createdAt'>): Promise<void> {
+  const inquiryId = `inq-${Date.now()}`;
+  await setDoc(doc(db, 'partnership_inquiries', inquiryId), {
+    ...inquiry,
+    id: inquiryId,
+    createdAt: Date.now()
+  });
+}
+
 // 초기 데이터 세팅용 (만약 서버가 비어있다면)
 export async function seedInitialData(festivals: Festival[]) {
   for (const f of festivals) {

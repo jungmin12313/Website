@@ -39,6 +39,7 @@ export default function Navbar() {
               <Link to="/calendar" className={`nav-link ${location.pathname.startsWith('/calendar') ? 'active' : ''}`}>축제 캘린더</Link>
               
               <Link to="/report" className={`nav-link ${location.pathname.startsWith('/report') ? 'active' : ''}`}>신고센터</Link>
+              <Link to="/partnership" className={`nav-link ${location.pathname.startsWith('/partnership') ? 'active' : ''}`}>기관·기업 제휴</Link>
               
               <div className="dropdown">
                 <span className={`nav-link ${(location.pathname.startsWith('/press') || location.pathname.startsWith('/gallery') || location.pathname.startsWith('/newsletter')) ? 'active' : ''}`} style={{ cursor: 'pointer' }}>
@@ -78,6 +79,7 @@ export default function Navbar() {
             <Link to="/maps" className={`sidebar-link ${location.pathname.startsWith('/maps') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>무장애지도</Link>
             <Link to="/calendar" className={`sidebar-link ${location.pathname.startsWith('/calendar') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>축제 캘린더</Link>
             <Link to="/report" className={`sidebar-link ${location.pathname.startsWith('/report') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>신고센터</Link>
+            <Link to="/partnership" className={`sidebar-link ${location.pathname.startsWith('/partnership') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>기관·기업 제휴</Link>
             <Link to="/press" className={`sidebar-link ${location.pathname.startsWith('/press') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>보도자료</Link>
             <Link to="/gallery" className={`sidebar-link ${location.pathname.startsWith('/gallery') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>갤러리</Link>
             <Link to="/newsletter" className={`sidebar-link ${location.pathname.startsWith('/newsletter') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>뉴스레터 구독</Link>
