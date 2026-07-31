@@ -211,6 +211,14 @@ export default function Partnership() {
         <div className="reveal logo-wall">
           <div className="sec-kicker">PARTNERS</div>
           <h2 className="sec-heading" style={{ marginBottom: 0 }}>전남 광주 지역의 17개 기관이 현재 '내일'과 함께 하고 있습니다</h2>
+          
+          <div className="logo-grid">
+            <div className="logo-item"><img src="/images/partners/partner1.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/partner2.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/partner3.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/partner4.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/partner5.png" alt="파트너 기관" /></div>
+          </div>
         </div>
       </section>
 
