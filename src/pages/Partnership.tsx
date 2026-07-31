@@ -218,6 +218,11 @@ export default function Partnership() {
             <div className="logo-item"><img src="/images/partners/partner3.png" alt="파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner4.png" alt="파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner5.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/광주광역시_지체장애인협회.png" alt="광주광역시 지체장애인협회" /></div>
+            <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-01 031416.png" alt="추가 파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-01 031645.png" alt="추가 파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/인액터스_전남.png" alt="인액터스 전남" /></div>
+            <div className="logo-item"><img src="/images/partners/지속가능발전.png" alt="지속가능발전협의회" /></div>
           </div>
         </div>
       </section>
