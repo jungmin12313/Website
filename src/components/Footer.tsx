@@ -7,104 +7,62 @@ export default function Footer() {
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | null>(null)
 
   return (
-    <footer className="footer">
-
-
-      {/* 2. MAIN FOOTER CONTENT GRID */}
-      <div className="footer-inner">
-        {/* Column 1: Brand Info & SNS */}
-        <div className="footer-brand">
+    <footer className="footer dark-footer">
+      <div className="footer-top-grid">
+        <div className="footer-brand-section">
+          <p className="footer-slogan">모두의 더 나은 내일을 위해</p>
           <Link to="/" className="f-logo-link">
             <img 
               src="/logo_transparent.png" 
               alt="내일 - 무장애지도" 
               className="footer-logo" 
               loading="lazy" 
-              width="130" 
-              height="45" 
+              width="100" 
             />
           </Link>
-          <p className="footer-desc">
-            장애인, 노인, 휠체어 사용자 모두가 불안함 없이 축제를 즐길 수 있도록 배리어프리 현장 기록을 지도 위에 담아냅니다.
-          </p>
-          <div className="footer-social-badges">
-            <a href="mailto:jm56s@naver.com" className="social-badge-btn" aria-label="이메일 문의">
-              <Mail size={16} />
-              <span>문의하기</span>
-            </a>
-            <a 
-              href="https://www.instagram.com/naeil__official" 
-              className="social-badge-btn instagram"
-              target="_blank" 
-              rel="noopener noreferrer"
-              aria-label="내일 공식 인스타그램"
-            >
-              <Instagram size={16} />
-              <span>@naeil__official</span>
-            </a>
+        </div>
+
+        <div className="footer-links-grid">
+          <div className="f-col">
+            <h4>내일 이야기</h4>
+            <Link to="/about">히스토리</Link>
+            <Link to="/press">미디어/파트너</Link>
           </div>
-        </div>
-
-        {/* Column 2: Service Map */}
-        <div className="f-col">
-          <h4>서비스</h4>
-          <Link to="/about" className="f-link">내일 이야기</Link>
-          <Link to="/maps" className="f-link">무장애지도</Link>
-          <Link to="/calendar" className="f-link">축제 캘린더</Link>
-          <Link to="/gallery" className="f-link">축제 현장 갤러리</Link>
-        </div>
-
-        {/* Column 3: Community & Participation */}
-        <div className="f-col">
-          <h4>참여 및 소식</h4>
-          <Link to="/story" className="f-link">인터뷰 및 소식</Link>
-          <Link to="/press" className="f-link">보도자료</Link>
-          <Link to="/newsletter" className="f-link">뉴스레터 구독</Link>
-          <Link to="/report" className="f-link border-highlight">지도 정보 제보하기</Link>
+          <div className="f-col">
+            <h4>무장애지도 내일</h4>
+            <Link to="/maps">지도 보기</Link>
+            <Link to="/gallery">축제 갤러리</Link>
+          </div>
+          <div className="f-col">
+            <h4>활동 함께하기</h4>
+            <Link to="/report">지도 정보 제보</Link>
+            <Link to="/partnership">협업 · 제휴</Link>
+          </div>
         </div>
       </div>
-      
-      {/* 3. BOTTOM: LEGAL LINKS, COPYRIGHT & DETAILED PROJECT INFO */}
-      <div className="footer-bottom">
-        <div className="footer-bottom-inner">
-          <div className="footer-legal-links">
-            <button 
-              onClick={() => setActiveModal('terms')} 
-              className="legal-btn"
-              aria-label="이용약관 보기"
-            >
-              <FileText size={14} className="legal-icon" />
-              <span>이용약관</span>
-            </button>
-            <span className="legal-divider" />
-            <button 
-              onClick={() => setActiveModal('privacy')} 
-              className="legal-btn priority"
-              aria-label="개인정보처리방침 보기"
-            >
-              <Shield size={14} className="legal-icon" />
-              <span>개인정보처리방침</span>
-            </button>
-          </div>
 
-          <div className="footer-copyright-admin">
-            <p className="copyright">© 2026 내일. All rights reserved.</p>
-            <Link to="/admin" className="admin-subtle-link" aria-label="관리자 로그인 페이지로 이동">
-              <Lock size={12} className="lock-icon" />
-              <span>관리자 로그인</span>
-            </Link>
+      <div className="footer-bottom-section">
+        <div className="footer-bottom-left">
+          <p className="copyright">Copyright © 내일. All Rights Reserved.</p>
+          <p className="company-info">
+            프로젝트명: 모두의 내일 | 대표: 신중민<br/>
+            사업자등록번호: 527-13-02973 | 사업장 소재지: 광주광역시 북구 신안동<br/>
+            공식 연락처: contact@naeilmap.com
+          </p>
+          <div className="legal-links">
+            <button onClick={() => setActiveModal('terms')}>서비스 이용약관</button>
+            <button onClick={() => setActiveModal('privacy')}>개인정보 처리방침</button>
+            <Link to="/admin" className="admin-link">관리자 로그인</Link>
           </div>
         </div>
 
-        {/* Muted and Subordinate Project Info Block */}
-        <div className="footer-project-info">
-          <span>플랫폼명 : 무장애 축제 지도 '내일'</span>
-          <span className="info-dot">•</span>
-          <span>대표 : 신중민</span>
-          <span className="info-dot">•</span>
-          <span>프로젝트 : 교통약자의 문화예술 접근성 활성화</span>
-          <span className="info-dot">•</span>
-          <span>공식 연락처 : jm56s@naver.com</span>
+        <div className="footer-bottom-right">
+          <Link to="/newsletter" className="social-pill-btn">
+            <Mail size={14} /> 뉴스레터
+          </Link>
+          <a href="https://www.instagram.com/naeil__official" target="_blank" rel="noopener noreferrer" className="social-pill-btn">
+            <Instagram size={14} /> 인스타그램
+          </a>
         </div>
       </div>
 

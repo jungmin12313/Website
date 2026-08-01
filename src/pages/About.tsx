@@ -28,23 +28,6 @@ const STATS = [
   },
 ];
 
-const VOICES = [
-  {
-    quote: "정보가 없는 건 아니에요. 근데 그 정보가 진짜인지 믿기가 힘들죠. 가보기 전까지는 늘 불안함이 앞서요.",
-    contextParts: ["이 말이 '내일'의 출발점이었습니다. 불안을 없애는 건 더 많은 정보가 아니라, ", "더 믿을 수 있는 정보", "였습니다. 내일이 직접 현장에 나가 바퀴로 확인하기 시작한 이유입니다."],
-    who: "휠체어 이용자 · 현장 인터뷰",
-  },
-  {
-    quote: "경사로가 있다는 표시보다, 그 경사가 얼마나 가파른지가 더 중요해요. 그걸 아는 사람이 직접 가서 봐줘야 해요.",
-    contextParts: ["그래서 내일은 '있다/없다'가 아닌 ", "'쓸 수 있다/없다'", "로 기준을 바꿨습니다. 경사도, 단차 높이, 통로 폭을 직접 측정하고 수치로 기록합니다."],
-    who: "장애인 이동권 활동가 · 현장 인터뷰",
-  },
-  {
-    quote: "축제를 즐기러 간 건데, 입구에서 발길을 돌릴 때의 기분을 설명하기가 어려워요.",
-    contextParts: ["이 기분을 다시는 느끼지 않도록. 지도 한 장이 그 무게를 담을 수 있다고, 내일은 믿습니다. ", "수익을 쫓는 기업이 아닌, 사회적 가치를 쫓는 팀 '내일'의 순수한 열정", "입니다."],
-    who: "휠체어 이용자 · 현장 인터뷰",
-  },
-];
 
 
 export default function About() {
@@ -104,21 +87,7 @@ export default function About() {
           transform: translateY(0);
         }
 
-        .diff-card {
-           background: white;
-           border: 1px solid #d8e4f2;
-           padding: 40px;
-           border-radius: 24px;
-           transition: all 0.4s ease;
-           box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-        }
-        .diff-card:hover {
-           transform: translateY(-10px);
-           box-shadow: 0 20px 40px rgba(82, 165, 255, 0.1);
-           border-color: #52a5ff;
-        }
-
-        .stat-num.blue { color: #52a5ff; }
+        .stat-num.blue { color: var(--blue); }
         .stat-num.small { font-size: 22px; line-height: 1.3; }
       `}</style>
 
@@ -157,30 +126,7 @@ export default function About() {
         ))}
       </div>
 
-      {/* DIFFERENCES SECTION */}
-      <section id="diff" style={{ padding: "100px 36px", background: "inherit" }}>
-        <div className="reveal sec-kicker">THE DIFFERENCE</div>
-        <h2 className="reveal story-heading" style={{ marginBottom: 50 }}>'내일'은 무엇이 무엇이 다른가요?</h2>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }} className="diff-grid">
-           <div className="reveal diff-card">
-              <div className="mv-label" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "inherit", marginBottom: 14, textTransform: "uppercase" }}>Difference 01</div>
-              <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>더 직관적인 무장애지도</h3>
-              <p className="story-body" style={{ fontSize: 15 }}>
-                무장애지도 위 픽토그램을 클릭하면 현장 사진은 물론 실제 휠체어 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
-                <strong>"가보기 전에도 현장의 모습을 생생하게"</strong>
-              </p>
-           </div>
-           <div className="reveal diff-card" style={{ transitionDelay: '0.1s' }}>
-              <div className="mv-label" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "inherit", marginBottom: 14, textTransform: "uppercase" }}>Difference 02</div>
-              <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>함께 만들어가는 정보</h3>
-              <p className="story-body" style={{ fontSize: 15 }}>
-                사용자가 직접 경험하고 제보한 현장의 디테일이 실시간으로 지도에 더해집니다.<br/><br/>
-                <strong>"당신의 발걸음이 누군가에게는 새로운 길이 됩니다"</strong>
-              </p>
-           </div>
-        </div>
-      </section>
+
 
       {/* STORY */}
       <section id="story" className="about-story" aria-label="우리가 시작한 이유">
@@ -198,26 +144,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* VOICE */}
-      <section className="about-voice" aria-label="당사자의 목소리">
-        <div style={{ maxWidth: 560, marginBottom: 48 }}>
-          <div className="about-pill reveal">당사자의 목소리</div>
-          <div className="reveal story-heading" style={{ marginTop: 12, marginBottom: 14, transitionDelay: '0.1s' }}>
-            내일이 현장으로 나간<br />진짜 이유
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          {VOICES.map((v, i) => (
-            <div key={i} className="reveal voice-card" style={{ transitionDelay: `${i * 0.1 + 0.1}s` }}>
-              <div className="voice-bar" />
-              <div>
-                <div className="voice-q">&ldquo;{v.quote}&rdquo;</div>
-                <div className="voice-who" style={{ fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 500 }}>{v.who}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* CTA */}
       <section className="about-cta" aria-label="함께하기">
@@ -232,11 +159,11 @@ export default function About() {
 
       {/* FOOTER */}
       <footer className="about-footer">
-        <div style={{ fontFamily: "'Noto Serif KR', serif", fontSize: 17, fontWeight: 700 }}>
-          내일 · 무장애 축제 지도
+        <div style={{ fontFamily: "var(--font), sans-serif", fontSize: 17, fontWeight: 700 }}>
+          내일 · 무장애 데이터
         </div>
         <div style={{ fontSize: 11, lineHeight: 1.75, textAlign: "right", opacity: 0.7 }}>
-          장애인 문화 접근권 프로젝트
+          장애인 이동권 개선 프로젝트
         </div>
       </footer>
     </div>

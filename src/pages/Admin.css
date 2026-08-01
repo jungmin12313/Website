@@ -75,7 +75,7 @@
 
 .tab-btn.active {
   background: white;
-  color: #2563eb;
+  color: var(--blue);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -118,7 +118,7 @@
 }
 
 .add-main-btn {
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   padding: 0.8rem 1.5rem;
   border-radius: 12px;
@@ -157,7 +157,7 @@
 }
 
 .admin-f-card:hover {
-  border-color: #2563eb;
+  border-color: var(--blue);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   transform: translateY(-4px);
 }
@@ -260,7 +260,7 @@
 
 .admin-select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: white;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
@@ -269,7 +269,7 @@
   width: 100%;
   padding: 0.8rem;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue);
   border-radius: 12px;
   font-weight: 700;
   display: flex;
@@ -281,10 +281,10 @@
 }
 
 .add-btn:hover, .add-btn.active {
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   border-style: solid;
-  border-color: #2563eb;
+  border-color: var(--blue);
 }
 
 .tool-btn {
@@ -431,12 +431,12 @@
 }
 
 .excel-card:hover {
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: #f8fafc;
 }
 
 .excel-card.selected {
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: #eff6ff;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
@@ -505,7 +505,7 @@
 
 .hs-name:hover {
   background: white;
-  color: #2563eb;
+  color: var(--blue);
 }
 
 .hs-delete {
@@ -566,7 +566,7 @@
   position: absolute;
   transform: translate(-50%, -50%);
   background: rgba(37, 99, 235, 0.1);
-  border: 3px solid #2563eb;
+  border: 3px solid var(--blue);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -649,7 +649,7 @@
 }
 
 .upload-hero-btn {
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   padding: 1rem 2rem;
   border-radius: 14px;
@@ -699,7 +699,7 @@
 }
 
 .report-card:hover {
-  border-color: #2563eb;
+  border-color: var(--blue);
   box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.1);
   transform: translateY(-4px);
 }
@@ -816,7 +816,7 @@
 .status-toggle-btn {
   font-size: 0.85rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--blue);
   padding: 0.5rem 1rem;
   background: #eff6ff;
   border-radius: 10px;
@@ -824,7 +824,7 @@
 }
 
 .status-toggle-btn:hover {
-  background: #2563eb;
+  background: var(--blue);
   color: white;
 }
 
@@ -951,7 +951,7 @@
 
 .editor-form input:focus, .editor-form textarea:focus, .editor-form select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: white;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
@@ -993,7 +993,7 @@
 
 .thumb-pos-control input[type="range"] {
   width: 100%;
-  accent-color: #2563eb;
+  accent-color: var(--blue);
   margin-bottom: 1rem;
   height: 6px;
   background: #f1f5f9;
@@ -1052,8 +1052,8 @@
 
 .add-photo-box:hover {
   background: white;
-  border-color: #2563eb;
-  color: #2563eb;
+  border-color: var(--blue);
+  color: var(--blue);
 }
 
 /* --- Hotspot Editor Overhaul --- */
@@ -1107,7 +1107,7 @@
 .editor-badge {
   font-size: 0.7rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--blue);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1138,7 +1138,7 @@
 
 .header-tabs button.active {
   background: white;
-  color: #2563eb;
+  color: var(--blue);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -1217,7 +1217,7 @@
 
 .form-section input:focus, .form-section textarea:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: white;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
@@ -1316,7 +1316,7 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: #2563eb;
+  color: var(--blue);
   font-weight: bold;
 }
 
@@ -1374,7 +1374,7 @@
 
 .mini-selection-box {
   position: absolute;
-  border: 2px dashed #2563eb;
+  border: 2px dashed var(--blue);
   background: rgba(37, 99, 235, 0.1);
   pointer-events: none;
   z-index: 10;
@@ -1388,7 +1388,7 @@
 }
 
 .mini-hotspot.current {
-  border: 2px dashed #2563eb;
+  border: 2px dashed var(--blue);
   background: rgba(37, 99, 235, 0.15);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(37, 99, 235, 0.2);
   display: flex;
@@ -1440,7 +1440,7 @@
 
 .editor-badge.edit {
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue);
 }
 
 .mini-hs-label::after {
@@ -1569,7 +1569,7 @@
 }
 
 .editor-save {
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   padding: 1rem 2.5rem;
   border-radius: 14px;
@@ -1671,14 +1671,14 @@
 
 .checkbox-label:hover {
   background: white;
-  border-color: #2563eb;
+  border-color: var(--blue);
 }
 
 .checkbox-label input[type="checkbox"] {
   width: auto;
   margin: 0;
   transform: scale(1.3);
-  accent-color: #2563eb;
+  accent-color: var(--blue);
 }
 
 .services-container {
@@ -1698,7 +1698,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.6rem;
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   border-radius: 12px;
   font-weight: 800;
@@ -1750,7 +1750,7 @@
   width: 80px;
   height: 80px;
   background: #eff6ff;
-  color: #2563eb;
+  color: var(--blue);
   border-radius: 24px;
   display: flex;
   align-items: center;
@@ -1784,14 +1784,14 @@
 
 .login-card input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--blue);
   background: white;
   box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.1);
 }
 
 .login-card button {
   padding: 1rem;
-  background: #2563eb;
+  background: var(--blue);
   color: white;
   border-radius: 16px;
   font-weight: 800;

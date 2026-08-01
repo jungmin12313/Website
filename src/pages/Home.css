@@ -253,3 +253,230 @@
   border: 2px solid #fff !important;
 }
 
+/* 스토리텔링 & 임팩트 대시보드 */
+.home-story-section {
+  padding: 6rem 1.5rem;
+  background-color: var(--gray-50);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.story-container {
+  max-width: 1000px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.story-content {
+  text-align: center;
+}
+
+.story-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+  word-break: keep-all;
+}
+
+.story-title .highlight {
+  color: var(--blue);
+}
+
+.story-desc {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--gray-600);
+  word-break: keep-all;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.story-desc strong {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.impact-dashboard {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.impact-card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem;
+  flex: 1 1 250px;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.impact-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--blue-light);
+}
+
+.impact-number {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--blue);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.impact-unit {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+
+.impact-label {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+@media (max-width: 768px) {
+  .story-title {
+    font-size: 1.75rem;
+  }
+  .impact-number {
+    font-size: 2.75rem;
+  }
+  .home-story-section {
+    padding: 4rem 1.5rem;
+  }
+}
+
+[data-theme='high-contrast'] .home-story-section {
+  background-color: #000;
+  border-top: 2px solid #fff;
+}
+
+[data-theme='high-contrast'] .impact-card {
+  background: #000 !important;
+  border: 2px solid #fff !important;
+}
+
+[data-theme='high-contrast'] .impact-card:hover {
+  border-color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .impact-number,
+[data-theme='high-contrast'] .story-title .highlight,
+[data-theme='high-contrast'] .story-desc strong {
+  color: #ffff00 !important;
+}
+
+/* --- 추가된 스토리텔링 롱스크롤 섹션 (Differences & Voices) --- */
+.home-diff-section {
+  padding: 8rem 1.5rem;
+  background-color: var(--white);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.home-voice-section {
+  padding: 8rem 1.5rem;
+  background-color: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-voice-section > div {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.sec-kicker {
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 36px;
+  font-weight: 500;
+}
+
+.story-heading {
+  font-family: var(--font), sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  color: var(--gray-900);
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.diff-card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  padding: 40px;
+  border-radius: 24px;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.diff-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(82, 165, 255, 0.1);
+  border-color: var(--blue);
+}
+
+.voice-card {
+  background: white;
+  border-radius: 18px;
+  border: 1px solid var(--gray-200);
+  padding: 32px 36px;
+  display: grid;
+  grid-template-columns: 4px 1fr;
+  gap: 0 22px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.voice-bar {
+  background: var(--blue);
+  border-radius: 4px;
+}
+
+.voice-q {
+  font-family: var(--font), sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--gray-900);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .home-diff-section, .home-voice-section {
+    padding: 5rem 1.5rem;
+  }
+  .diff-grid {
+    grid-template-columns: 1fr;
+  }
+  .voice-card {
+    padding: 24px;
+  }
+}

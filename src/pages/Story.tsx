@@ -104,19 +104,19 @@ export default function Story() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  root: { fontFamily: "'Noto Sans KR', sans-serif", background: C.bg, color: C.navy, maxWidth: 900, margin: "0 auto", paddingBottom: 80 },
+  root: { fontFamily: "var(--font), sans-serif", background: C.bg, color: C.navy, maxWidth: 900, margin: "0 auto", paddingBottom: 80 },
   header: { padding: "100px 36px 60px", background: C.white, textAlign: "center" as const },
   tagRow: { display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 },
   tag: { fontSize: 13, color: C.blue, background: "#e8f2ff", padding: "4px 12px", borderRadius: 999, fontWeight: 500 },
-  title: { fontFamily: "'Noto Serif KR', serif", fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 700, lineHeight: 1.3, color: C.navy, letterSpacing: -1 },
+  title: { fontFamily: "var(--font), sans-serif", fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 700, lineHeight: 1.3, color: C.navy, letterSpacing: -1 },
   date: { fontSize: 14, color: C.muted, marginTop: 20 },
   
   content: { padding: "60px 36px", background: C.bg },
   voiceBar: { width: 40, height: 4, background: C.blue, marginBottom: 30, borderRadius: 2 },
   paragraph: { fontSize: 16, lineHeight: 1.9, color: C.navy, marginBottom: 24, fontWeight: 300, wordBreak: "keep-all" as const },
-  subHeading: { fontFamily: "'Noto Serif KR', serif", fontSize: 24, fontWeight: 700, marginBottom: 20, color: C.navy },
+  subHeading: { fontFamily: "var(--font), sans-serif", fontSize: 24, fontWeight: 700, marginBottom: 20, color: C.navy },
 
   cta: { background: C.blue, padding: "80px 36px", textAlign: "center" as const, borderRadius: 24, margin: "0 24px" },
-  ctaText: { fontFamily: "'Noto Serif KR', serif", fontSize: 28, fontWeight: 700, color: C.white, marginBottom: 32, lineHeight: 1.4 },
+  ctaText: { fontFamily: "var(--font), sans-serif", fontSize: 28, fontWeight: 700, color: C.white, marginBottom: 32, lineHeight: 1.4 },
   btnMain: { background: C.white, color: C.blue, padding: "14px 32px", borderRadius: 12, fontWeight: 700, textDecoration: "none", display: "inline-block" },
 };
