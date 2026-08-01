@@ -430,29 +430,38 @@
 .diff-card {
   background: white;
   border: 1px solid var(--gray-200);
-  padding: 40px;
-  border-radius: 24px;
-  transition: all 0.4s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  padding: 2.5rem 2rem;
+  border-radius: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
 }
 
 .diff-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(82, 165, 255, 0.1);
-  border-color: var(--blue);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--blue-light);
 }
 
 .voice-card {
   background: white;
-  border-radius: 18px;
+  border-radius: 1.5rem;
   border: 1px solid var(--gray-200);
-  padding: 32px 36px;
+  padding: 2.5rem 2rem;
   display: grid;
   grid-template-columns: 4px 1fr;
   gap: 0 22px;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.voice-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--blue-light);
 }
 
 .voice-bar {

@@ -5,36 +5,45 @@ import './About.css';
 
 "use client";
 
-// 내일 · 무장애 축제 지도 — About 페이지
+// 내일 · 무장애 데이터 — About 페이지 리뉴얼 (축제 + 데이터 종합)
 
 const STATS = [
   {
-    num: "3.6%",
-    label: ["장애인의 문화예술", "직접 참여율"],
+    num: "524",
+    unit: "개+",
+    label: ["직접 실측한", "접근성 데이터"],
     blue: true,
-    isSmall: false,
   },
   {
-    num: "당사자\n동행",
-    label: ["휠체어 이용자와 함께", "현장에서 직접 조사"],
+    num: "100",
+    unit: "명+",
+    label: ["현장 조사에 동행한", "시민과 당사자"],
     blue: false,
-    isSmall: true,
   },
   {
-    num: "실측\n기록",
-    label: ["경사도·단차·폭을", "수치로 검증"],
+    num: "17",
+    unit: "곳+",
+    label: ["함께 데이터를 구축하는", "파트너 기관"],
     blue: false,
-    isSmall: true,
   },
 ];
 
-
+const DIFFERENCES = [
+  {
+    label: "DIFFERENCE 01",
+    title: "당사자 중심 검증",
+    desc: "\"있다/없다\"가 아닌 \"실제 휠체어로 이동 가능한지\"를 휠체어 이용자와 함께 현장에서 직접 확인합니다."
+  },
+  {
+    label: "DIFFERENCE 02",
+    title: "수치화된 데이터",
+    desc: "단순한 \"경사로 있음\"이 아닌 경사도, 단차 높이, 통로 폭을 정확한 수치로 기록하여 신뢰할 수 있는 데이터를 만듭니다."
+  }
+];
 
 export default function About() {
 
-
   useEffect(() => {
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -51,26 +60,9 @@ export default function About() {
 
   return (
     <div className="about-page">
-      {/* JSON-LD 구조화 데이터 추가 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "무장애지도 | 모두가 참여할 수 있는 축제, 내일",
-            "description": "무장애지도 전문 플랫폼 '내일' 교통약자도 함께 즐기는 전국 축제 배리어프리 접근성 정보를 제공합니다.",
-            "url": "https://naeilmap.com",
-            "foundingDate": "2024",
-            "areaServed": "KR",
-            "keywords": "무장애지도, 무장애 축제, 무장애축제지도, 배리어프리, 장애인 문화 접근성, 휠체어 축제 지도"
-          })
-        }}
-      />
-      
       <SEO 
-        title="브랜드 스토리 | 내일 - 무장애지도 전문 플랫폼"
-        description="휠체어 사용자도 즐길 수 있는 축제를 꿈꾸는 '내일'의 이야기. 왜 우리가 직접 현장에서 무장애지도를 제작하는지 그 이유를 들려드립니다."
+        title="브랜드 스토리 | 내일 - 무장애 데이터 전문 플랫폼"
+        description="축제에서 시작해 일상의 모든 접근성을 데이터로 만드는 '내일'의 이야기. 휠체어 바퀴가 닿는 곳의 정확한 데이터를 구축합니다."
         url="https://naeilmap.com/about"
       />
 
@@ -86,75 +78,105 @@ export default function About() {
           opacity: 1;
           transform: translateY(0);
         }
-
-        .stat-num.blue { color: var(--blue); }
-        .stat-num.small { font-size: 22px; line-height: 1.3; }
       `}</style>
 
-      {/* HERO */}
+      {/* 1. HERO */}
       <section className="about-hero" aria-label="프로젝트 소개">
-        <div className="hero-ghost" aria-hidden="true">Naeil</div>
-        <div className="about-pill reveal">문화 접근권 프로젝트</div>
+        <div className="about-pill reveal">접근성 데이터 파트너</div>
         <h1 className="hero-headline reveal">
-          모두의 <span style={{ color: "inherit" }}>내일</span>은,<br />
-          모두가 함께하는<br />축제입니다
+          모두의 내일을 위해,<br />
+          접근성을 <span style={{ color: "var(--blue)" }}>데이터</span>로 증명합니다
         </h1>
         <p className="reveal hero-sub" style={{ transitionDelay: '0.1s' }}>
-          장애인의 문화예술 직접 참여율은 단 3.6%.<br />
-          당연한 축제가 누군가에겐 큰 용기가 필요한 일이라면<br />
-          <span style={{ fontWeight: 700 }}>내일</span>은 장애인·휠체어 사용자·노인 모두가 축제를 즐길 수 있도록 배리어프리 접근성 정보를 제공합니다.
+          가장 불확실한 현장인 '야외 축제'에서 시작된 내일의 무장애지도는,<br />
+          이제 휠체어 바퀴가 닿는 모든 일상의 접근성을 정확한 수치로 기록하는 데이터 기준이 되고 있습니다.
         </p>
-        <div className="reveal hero-cta" style={{ transitionDelay: '0.2s' }}>
-          <Link to="/maps" className="btn-main">지도 보러 가기</Link>
-          <a href="#diff" className="btn-ghost">차별점 확인하기 ➔</a>
+        <div className="reveal hero-cta" style={{ transitionDelay: '0.2s', display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/maps" className="btn-main">무장애지도 보기</Link>
+          <Link to="/partnership" className="btn-ghost" style={{ background: 'white', border: '1px solid var(--gray-200)', color: 'var(--gray-900)' }}>데이터 제휴 알아보기 ➔</Link>
         </div>
       </section>
 
-      {/* STAT BAR */}
-      <div className="stat-bar">
-        {STATS.map((st, i) => (
-          <div key={i} className="reveal stat-pill" style={{ transitionDelay: `${i * 0.1}s` }}>
-            <div className={`stat-num ${st.blue ? 'blue' : ''} ${st.isSmall ? 'small' : ''}`}>
-              {st.num.split("\n").map((line, j) => (
-                <span key={j} style={{ display: "block" }}>{line}</span>
-              ))}
-            </div>
-            <div className="stat-label">
-              {st.label[0]}<br />{st.label[1]}
-            </div>
+      {/* 2. ORIGIN & 3. IMPACT DASHBOARD */}
+      <section className="about-story" style={{ backgroundColor: 'white' }}>
+        <div className="story-container">
+          <div className="story-content reveal" style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+            <div className="sec-kicker">WHY WE STARTED</div>
+            <h2 className="story-heading">
+              정보가 없는 것이 아닙니다.<br />
+              그 정보가 <span style={{ color: "var(--blue)" }}>'진짜'</span>인지 믿기 어려웠을 뿐입니다.
+            </h2>
+            <p className="story-body" style={{ marginTop: '1.5rem', marginBottom: '3rem' }}>
+              검색하면 나오는 '휠체어 이용 가능'이라는 한 줄 뒤에 숨겨진 계단과 턱.<br />
+              '내일'은 당사자와 함께 가장 변수가 많은 야외 축제 현장을 직접 누비며,<br />
+              종이 위 행정 데이터가 아닌 '살아있는 현장 데이터'를 수집하기 시작했습니다.
+            </p>
           </div>
-        ))}
-      </div>
 
-
-
-      {/* STORY */}
-      <section id="story" className="about-story" aria-label="우리가 시작한 이유">
-        <div className="reveal sec-kicker">우리가 시작한 이유</div>
-        <div className="two-col">
-          <div className="reveal story-heading">
-            정보가 없는 게<br />아니었습니다.<br />
-            그 정보가<br /><span>'진짜'인지</span><br />몰랐던 겁니다.
-          </div>
-          <div className="reveal story-body" style={{ transitionDelay: '0.1s' }}>
-            <p>검색하면 나옵니다. '휠체어 이용 가능.' 하지만 그 한 줄이 얼마나 많은 실망을 담고 있는지, 내일은 직접 들었습니다.</p>
-            <p style={{ marginTop: 16 }}>정보를 믿고 찾아간 축제 입구에는 경사로 대신 계단이, 화장실 표시 옆에는 잠긴 자물쇠가 있었습니다.</p>
-            <p style={{ marginTop: 16 }}>그래서 <span style={{ fontWeight: 700 }}>'내일'</span>은 당사자와 함께, 휠체어 바퀴가 닿는 모든 곳의 배리어프리 접근성을 직접 확인하며 책상이 아닌 현장에서 시작했습니다.</p>
+          <div className="stat-bar" style={{ marginTop: '2rem' }}>
+            {STATS.map((st, i) => (
+              <div key={i} className="reveal stat-pill" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <div className={`stat-num ${st.blue ? 'blue' : ''}`} style={{ fontSize: '3.5rem', color: st.blue ? 'var(--blue)' : 'inherit', whiteSpace: 'nowrap' }}>
+                  {st.num}<span style={{ fontSize: '1.5rem', fontWeight: 700, marginLeft: 4 }}>{st.unit}</span>
+                </div>
+                <div className="stat-label" style={{ marginTop: '1rem', color: 'var(--gray-600)' }}>
+                  {st.label[0]}<br /><strong>{st.label[1]}</strong>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* 4. DIFFERENCE */}
+      <section className="about-story" style={{ backgroundColor: 'var(--gray-50)' }}>
+        <div className="story-container">
+          <div className="story-content reveal" style={{ textAlign: 'center' }}>
+            <div className="sec-kicker">OUR DIFFERENCE</div>
+            <h2 className="story-heading">
+              내일의 지도는 기술이 아닌<br />여러분들의 <span style={{ color: "var(--blue)" }}>땀방울</span>로 그려집니다.
+            </h2>
+          </div>
+          
+          <div style={{ display: "flex", gap: "2rem", justifyContent: "center", flexWrap: "wrap", marginTop: "3rem" }}>
+             {DIFFERENCES.map((diff, i) => (
+               <div key={i} className="reveal stat-pill" style={{ transitionDelay: `${i * 0.1}s`, textAlign: "left", flex: "1 1 300px", maxWidth: "480px" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "var(--blue)", marginBottom: 16 }}>{diff.label}</div>
+                  <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: 16, color: "var(--gray-900)" }}>{diff.title}</h3>
+                  <p style={{ fontSize: "1rem", color: "var(--gray-600)", lineHeight: 1.8 }}>
+                    {diff.desc}
+                  </p>
+               </div>
+             ))}
+          </div>
+        </div>
+      </section>
 
+      {/* 5. EXPANSION */}
+      <section className="about-story" style={{ backgroundColor: 'white' }}>
+        <div className="story-container">
+          <div className="story-content reveal" style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+            <div className="sec-kicker">BEYOND FESTIVALS</div>
+            <h2 className="story-heading">
+              축제 지도에서 시작된 내일,<br />
+              이제 모든 공간의 <span style={{ color: "var(--blue)" }}>표준</span>이 됩니다.
+            </h2>
+            <p className="story-body" style={{ marginTop: '1.5rem' }}>
+              축제와 행사를 넘어 실생활권 상권과 복잡한 실내 시설까지.<br />
+              내일이 만든 접근성 데이터는 공공기관과 기업의 ESG 지표가 되고,<br />
+              교통약자의 완벽한 이동권 보장을 위한 인프라로 진화하고 있습니다.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {/* CTA */}
+      {/* 6. CTA */}
       <section className="about-cta" aria-label="함께하기">
-        <p className="reveal cta-big">모두에게 즐거운 축제의 <span>내일</span></p>
-        <p className="reveal cta-sub" style={{ transitionDelay: '0.1s' }}>
-          내일의 지도는 기술이 아닌 따뜻한 관심으로 채워집니다.<br />
-          더 많은 이들이 문밖으로 나설 수 있도록,<br />
-          지금 <span>'내일'</span>과 함께해주세요.
-        </p>
-        <a href="https://www.instagram.com/naeil__official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="reveal btn-white" style={{ transitionDelay: '0.2s' }}>지금 함께하기</a>
+        <p className="reveal cta-big">내일과 함께 장벽 없는 세상을 만들어가세요.</p>
+        <div className="reveal hero-cta" style={{ transitionDelay: '0.1s', display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2.5rem' }}>
+          <Link to="/maps" className="btn-main">지도에서 내일 경험하기</Link>
+          <Link to="/partnership" className="btn-main" style={{ background: 'var(--gray-800)' }}>우리 기관 접근성 진단하기</Link>
+        </div>
       </section>
 
       {/* FOOTER */}
@@ -169,4 +191,3 @@ export default function About() {
     </div>
   );
 }
-

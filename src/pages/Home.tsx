@@ -153,64 +153,75 @@ export default function Home() {
 
           <div className="impact-dashboard">
             <div className="impact-card">
-              <div className="impact-number">70<span className="impact-unit">명</span></div>
-              <div className="impact-label">함께 동행 시민</div>
+              <div className="impact-number">524<span className="impact-unit">개+</span></div>
+              <div className="impact-label">직접 실측한<br/><strong>접근성 데이터</strong></div>
             </div>
             <div className="impact-card">
-              <div className="impact-number">8<span className="impact-unit">건</span></div>
-              <div className="impact-label">무장애지도 제작</div>
+              <div className="impact-number">100<span className="impact-unit">명+</span></div>
+              <div className="impact-label">현장 조사에 동행한<br/><strong>시민과 당사자</strong></div>
             </div>
             <div className="impact-card">
-              <div className="impact-number">524<span className="impact-unit">개</span></div>
-              <div className="impact-label">접근성 실측 정보</div>
+              <div className="impact-number">17<span className="impact-unit">곳+</span></div>
+              <div className="impact-label">함께 데이터를 구축하는<br/><strong>파트너 기관</strong></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* DIFFERENCES SECTION (Moved from About) */}
-      <section id="diff" className="home-diff-section">
-        <div className="reveal sec-kicker">THE DIFFERENCE</div>
-        <h2 className="reveal story-heading" style={{ marginBottom: 50 }}>'내일'은 무엇이 다른가요?</h2>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }} className="diff-grid">
-           <div className="reveal diff-card">
-              <div className="mv-label" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--blue)", marginBottom: 14, textTransform: "uppercase" }}>Difference 01</div>
-              <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>더 직관적인 무장애지도</h3>
-              <p className="story-body" style={{ fontSize: 15, color: '#64748b', lineHeight: 1.8 }}>
-                무장애지도 위 픽토그램을 클릭하면 현장 사진은 물론 실제 휠체어 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
-                <strong style={{ color: '#1e293b' }}>"가보기 전에도 현장의 모습을 생생하게"</strong>
-              </p>
-           </div>
-           <div className="reveal diff-card" style={{ transitionDelay: '0.1s' }}>
-              <div className="mv-label" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--blue)", marginBottom: 14, textTransform: "uppercase" }}>Difference 02</div>
-              <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 16 }}>함께 만들어가는 정보</h3>
-              <p className="story-body" style={{ fontSize: 15, color: '#64748b', lineHeight: 1.8 }}>
-                사용자가 직접 경험하고 제보한 현장의 디테일이 실시간으로 지도에 더해집니다.<br/><br/>
-                <strong style={{ color: '#1e293b' }}>"당신의 발걸음이 누군가에게는 새로운 길이 됩니다"</strong>
-              </p>
-           </div>
+      {/* DIFFERENCES SECTION */}
+      <section id="diff" className="home-story-section" style={{ backgroundColor: 'var(--white)' }}>
+        <div className="story-container">
+          <div className="story-content reveal">
+            <h2 className="story-title">
+              '내일'은 <span className="highlight">무엇이 다른가요?</span>
+            </h2>
+          </div>
+          
+          <div style={{ display: "flex", gap: "2rem", justifyContent: "center", flexWrap: "wrap", marginTop: "1rem" }}>
+             <div className="reveal diff-card" style={{ flex: "1 1 300px", maxWidth: "480px", textAlign: "left" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "var(--blue)", marginBottom: 16 }}>DIFFERENCE 01</div>
+                <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: 16, color: "var(--gray-900)" }}>더 직관적인 무장애지도</h3>
+                <p style={{ fontSize: "1rem", color: "var(--gray-600)", lineHeight: 1.8 }}>
+                  무장애지도 위 픽토그램을 클릭하면 현장 사진은 물론 실제 휠체어 접근 가능 여부를 바로 확인할 수 있어요.<br/><br/>
+                  <strong style={{ color: 'var(--gray-800)' }}>"가보기 전에도 현장의 모습을 생생하게"</strong>
+                </p>
+             </div>
+             <div className="reveal diff-card" style={{ transitionDelay: '0.1s', flex: "1 1 300px", maxWidth: "480px", textAlign: "left" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1, color: "var(--blue)", marginBottom: 16 }}>DIFFERENCE 02</div>
+                <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: 16, color: "var(--gray-900)" }}>함께 만들어가는 정보</h3>
+                <p style={{ fontSize: "1rem", color: "var(--gray-600)", lineHeight: 1.8 }}>
+                  사용자가 직접 경험하고 제보한 현장의 디테일이 실시간으로 지도에 더해집니다.<br/><br/>
+                  <strong style={{ color: 'var(--gray-800)' }}>"당신의 발걸음이 누군가에게는 새로운 길이 됩니다"</strong>
+                </p>
+             </div>
+          </div>
         </div>
       </section>
 
-      {/* VOICE SECTION (Moved from About) */}
-      <section className="home-voice-section" aria-label="당사자의 목소리">
-        <div style={{ maxWidth: 560, marginBottom: 48 }}>
-          <div className="about-pill reveal" style={{ display: 'inline-block', background: 'rgba(82,165,255,0.1)', color: 'var(--blue)', fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 999, marginBottom: 20 }}>당사자의 목소리</div>
-          <div className="reveal story-heading" style={{ fontSize: 28, fontWeight: 800, marginBottom: 14, transitionDelay: '0.1s' }}>
-            내일이 현장으로 나간<br />진짜 이유
+      {/* VOICE SECTION */}
+      <section className="home-story-section" aria-label="당사자의 목소리">
+        <div className="story-container">
+          <div className="story-content reveal">
+            <h2 className="story-title">
+              내일이 현장으로 나간 <span className="highlight">진짜 이유</span>
+            </h2>
           </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          {VOICES.map((v, i) => (
-            <div key={i} className="reveal voice-card" style={{ transitionDelay: `${i * 0.1 + 0.1}s` }}>
-              <div className="voice-bar" />
-              <div>
-                <div className="voice-q">&ldquo;{v.quote}&rdquo;</div>
-                <div className="voice-who" style={{ fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600, color: 'var(--blue)' }}>{v.who}</div>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center", marginTop: "1rem" }}>
+            {VOICES.map((v, i) => (
+              <div key={i} className="reveal voice-card" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <div className="voice-bar" />
+                <div style={{ textAlign: "left" }}>
+                  <div className="voice-q" style={{ fontSize: "1.25rem", fontWeight: 700, lineHeight: 1.6, color: "var(--gray-900)", marginBottom: "1rem" }}>
+                    &ldquo;{v.quote}&rdquo;
+                  </div>
+                  <div className="voice-who" style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--blue)" }}>
+                    {v.who}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
