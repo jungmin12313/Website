@@ -210,7 +210,7 @@ export default function Partnership() {
       <section className="partnership-section">
         <div className="reveal logo-wall">
           <div className="sec-kicker">PARTNERS</div>
-          <h2 className="sec-heading" style={{ marginBottom: 0 }}>전남 광주 지역의 17개 기관이 현재 '내일'과 함께 하고 있습니다</h2>
+          <h2 className="sec-heading" style={{ marginBottom: 0 }}>광주·전남 17개 파트너가 '내일'과 함께 접근성을 데이터로 만들고 있습니다</h2>
           
           <div className="logo-grid">
             <div className="logo-item"><img src="/images/partners/partner1.png" alt="파트너 기관" /></div>
@@ -218,7 +218,6 @@ export default function Partnership() {
             <div className="logo-item"><img src="/images/partners/partner3.png" alt="파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner4.png" alt="파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner5.png" alt="파트너 기관" /></div>
-            <div className="logo-item"><img src="/images/partners/광주광역시_지체장애인협회.png" alt="광주광역시 지체장애인협회" /></div>
             <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-01 031416.png" alt="추가 파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-01 031645.png" alt="추가 파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/인액터스_전남.png" alt="인액터스 전남" /></div>
