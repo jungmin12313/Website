@@ -255,13 +255,26 @@
   .stat-pill { max-width: 100%; }
 }
 
-[data-theme='high-contrast'] .about-page { background: #000; color: #fff; }
+[data-theme='high-contrast'] .about-page { background: #000 !important; color: #fff !important; }
 [data-theme='high-contrast'] .stat-pill,
+[data-theme='high-contrast'] .about-cta { background: #000 !important; border: 2px solid #fff !important; }
 [data-theme='high-contrast'] .about-story,
-[data-theme='high-contrast'] .about-cta,
-[data-theme='high-contrast'] .about-footer { background: #000 !important; border: 2px solid #fff !important; }
+[data-theme='high-contrast'] .about-hero,
+[data-theme='high-contrast'] .about-footer { background: #000 !important; border-top: 2px solid #fff !important; }
+
 [data-theme='high-contrast'] .stat-num,
+[data-theme='high-contrast'] .stat-unit,
+[data-theme='high-contrast'] .stat-pill h3,
+[data-theme='high-contrast'] .stat-pill div,
 [data-theme='high-contrast'] .hero-headline span,
 [data-theme='high-contrast'] .story-heading span,
 [data-theme='high-contrast'] .cta-big span { color: #ffff00 !important; }
+
+[data-theme='high-contrast'] .stat-pill p,
+[data-theme='high-contrast'] .stat-label,
+[data-theme='high-contrast'] .hero-headline,
+[data-theme='high-contrast'] .hero-sub,
+[data-theme='high-contrast'] .story-heading,
+[data-theme='high-contrast'] .story-body { color: #fff !important; }
+
 [data-theme='high-contrast'] .btn-main, [data-theme='high-contrast'] .btn-white { background: #ffff00 !important; color: #000 !important; font-weight: 900; }

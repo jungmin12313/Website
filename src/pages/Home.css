@@ -368,24 +368,42 @@
   }
 }
 
-[data-theme='high-contrast'] .home-story-section {
-  background-color: #000;
+[data-theme='high-contrast'] .home-story-section,
+[data-theme='high-contrast'] .home-diff-section,
+[data-theme='high-contrast'] .home-voice-section {
+  background-color: #000 !important;
   border-top: 2px solid #fff;
 }
 
-[data-theme='high-contrast'] .impact-card {
+[data-theme='high-contrast'] .impact-card,
+[data-theme='high-contrast'] .diff-card,
+[data-theme='high-contrast'] .voice-card {
   background: #000 !important;
   border: 2px solid #fff !important;
 }
 
-[data-theme='high-contrast'] .impact-card:hover {
+[data-theme='high-contrast'] .impact-card:hover,
+[data-theme='high-contrast'] .diff-card:hover,
+[data-theme='high-contrast'] .voice-card:hover {
   border-color: #ffff00 !important;
 }
 
 [data-theme='high-contrast'] .impact-number,
+[data-theme='high-contrast'] .impact-unit,
 [data-theme='high-contrast'] .story-title .highlight,
-[data-theme='high-contrast'] .story-desc strong {
+[data-theme='high-contrast'] .story-desc strong,
+[data-theme='high-contrast'] .diff-card h3,
+[data-theme='high-contrast'] .diff-card div,
+[data-theme='high-contrast'] .voice-q {
   color: #ffff00 !important;
+}
+
+[data-theme='high-contrast'] .impact-label,
+[data-theme='high-contrast'] .story-title,
+[data-theme='high-contrast'] .story-desc,
+[data-theme='high-contrast'] .diff-card p,
+[data-theme='high-contrast'] .voice-who {
+  color: #fff !important;
 }
 
 /* --- 추가된 스토리텔링 롱스크롤 섹션 (Differences & Voices) --- */
