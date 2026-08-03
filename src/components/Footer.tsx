@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Instagram, Mail, X, Shield, FileText, Lock } from 'lucide-react'
+import { Instagram, Mail, X } from 'lucide-react'
 import './Footer.css'
 
 export default function Footer() {
