@@ -355,7 +355,13 @@
     font-size: 1.75rem;
   }
   .impact-number {
-    font-size: 2.75rem;
+    font-size: 2.5rem;
+  }
+  .impact-unit {
+    font-size: 1.25rem;
+  }
+  .impact-card {
+    max-width: 100%;
   }
   .home-story-section {
     padding: 4rem 1.5rem;
@@ -485,7 +491,11 @@
   .diff-grid {
     grid-template-columns: 1fr;
   }
+  .diff-card {
+    max-width: 100% !important;
+  }
   .voice-card {
     padding: 24px;
+    max-width: 100%;
   }
 }

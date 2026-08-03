@@ -116,8 +116,8 @@ export default function About() {
           <div className="stat-bar" style={{ marginTop: '2rem' }}>
             {STATS.map((st, i) => (
               <div key={i} className="reveal stat-pill" style={{ transitionDelay: `${i * 0.1}s` }}>
-                <div className={`stat-num ${st.blue ? 'blue' : ''}`} style={{ fontSize: '3.5rem', color: st.blue ? 'var(--blue)' : 'inherit', whiteSpace: 'nowrap' }}>
-                  {st.num}<span style={{ fontSize: '1.5rem', fontWeight: 700, marginLeft: 4 }}>{st.unit}</span>
+                <div className={`stat-num ${st.blue ? 'blue' : ''}`} style={{ color: st.blue ? 'var(--blue)' : 'inherit', whiteSpace: 'nowrap' }}>
+                  {st.num}<span className="stat-unit">{st.unit}</span>
                 </div>
                 <div className="stat-label" style={{ marginTop: '1rem', color: 'var(--gray-600)' }}>
                   {st.label[0]}<br /><strong>{st.label[1]}</strong>
