@@ -15,3 +15,5 @@ User-agent: PerplexityBot
 Allow: /
 
 Sitemap: https://naeilmap.com/sitemap.xml
+# AI Agents Context File
+Allow: /llms.txt
