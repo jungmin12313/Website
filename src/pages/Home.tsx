@@ -245,6 +245,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 인기 탐색어 (SEO & Internal Linking) */}
+      <section className="home-story-section" style={{ backgroundColor: 'var(--gray-50)', padding: '40px 24px', borderTop: '1px solid var(--gray-200)' }}>
+        <div className="story-container" style={{ textAlign: 'left' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--gray-800)' }}>테마별 무장애 축제 탐색</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <a href="/explore/seoul/wheelchair" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>서울 휠체어 축제</a>
+            <a href="/explore/gyeonggi/wheelchair" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>경기 휠체어 축제</a>
+            <a href="/explore/jeju/wheelchair" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>제주 휠체어 축제</a>
+            <a href="/explore/busan/wheelchair" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>부산 휠체어 축제</a>
+            <a href="/explore/all/stroller" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>전국 유아차 동반 축제</a>
+            <a href="/explore/all/blind" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>시각장애인 편의 축제</a>
+            <a href="/explore/all/deaf" style={{ padding: '8px 16px', background: '#fff', borderRadius: '100px', fontSize: '0.9rem', color: 'var(--gray-700)', textDecoration: 'none', border: '1px solid var(--gray-200)' }}>수어 안내 축제</a>
+          </div>
+        </div>
+      </section>
+
     </div>
   )
 }

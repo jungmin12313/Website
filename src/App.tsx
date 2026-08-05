@@ -19,6 +19,7 @@ const Gallery = lazy(() => import('./pages/Gallery'))
 const Press = lazy(() => import('./pages/Press'))
 const Newsletter = lazy(() => import('./pages/Newsletter'))
 const Partnership = lazy(() => import('./pages/Partnership'))
+const Explore = lazy(() => import('./pages/Explore'))
 
 export default function App() {
   return (
@@ -40,6 +41,8 @@ export default function App() {
             <Route path="/press" element={<Press />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/partnership" element={<Partnership />} />
+            <Route path="/explore/:region" element={<Explore />} />
+            <Route path="/explore/:region/:theme" element={<Explore />} />
           </Routes>
         </Suspense>
       </main>

@@ -35,9 +35,19 @@ const getFestivalIds = async () => {
 
 async function generate() {
   const festivalIds = await getFestivalIds();
+  const REGIONS = ['seoul', 'gyeonggi', 'incheon', 'gangwon', 'chungcheong', 'jeolla', 'gyeongsang', 'jeju', 'all'];
+  const THEMES = ['wheelchair', 'stroller', 'blind', 'deaf'];
+  const explorePages = [];
+  REGIONS.forEach(region => {
+    THEMES.forEach(theme => {
+      explorePages.push(`/explore/${region}/${theme}`);
+    });
+  });
+
   const allPages = [
     ...STATIC_PAGES.map(p => ({ url: p, priority: p === '' ? '1.0' : '0.8', changefreq: 'daily' })),
-    ...festivalIds.map(id => ({ url: `/maps/${id}`, priority: '0.9', changefreq: 'weekly' }))
+    ...festivalIds.map(id => ({ url: `/maps/${id}`, priority: '0.9', changefreq: 'weekly' })),
+    ...explorePages.map(p => ({ url: p, priority: '0.7', changefreq: 'weekly' }))
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
