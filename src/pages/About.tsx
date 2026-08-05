@@ -63,14 +63,38 @@ export default function About() {
       <SEO 
         title="브랜드 스토리 | 대한민국 접근성 데이터 플랫폼, 내일"
         description="축제에서 시작해 일상의 모든 접근성을 데이터로 만드는 '내일'의 이야기. 휠체어 바퀴가 닿는 곳의 정확한 데이터를 구축합니다."
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
-            { "@type": "ListItem", "position": 2, "name": "브랜드 스토리", "item": "https://naeilmap.com/about" }
-          ]
-        }}
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+              { "@type": "ListItem", "position": 2, "name": "브랜드 스토리", "item": "https://naeilmap.com/about" }
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "내일 (NAEILMAP)",
+            "url": "https://naeilmap.com/",
+            "logo": "https://naeilmap.com/og-image.png",
+            "description": "대한민국 접근성 데이터 플랫폼 및 무장애 지도 서비스",
+            "knowsAbout": [
+              "Barrier-free (무장애)",
+              "Wheelchair Accessibility (휠체어 접근성)",
+              "Universal Design (유니버설 디자인)"
+            ],
+            "sameAs": [
+              "https://www.instagram.com/naeilmap"
+            ],
+            "memberOf": [
+              {
+                "@type": "Organization",
+                "name": "함께하는 17곳 이상의 파트너 기관"
+              }
+            ]
+          }
+        ]}
       />
 
       <style>{`

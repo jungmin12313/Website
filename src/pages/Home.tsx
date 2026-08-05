@@ -80,10 +80,24 @@ export default function Home() {
           {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "내일 (NAEIL)",
+            "name": "내일 (NAEILMAP)",
             "url": "https://naeilmap.com/",
             "logo": "https://naeilmap.com/og-image.png",
-            "description": "대한민국 접근성 데이터 플랫폼"
+            "description": "대한민국 접근성 데이터 플랫폼 및 무장애 지도 서비스",
+            "knowsAbout": [
+              "Barrier-free (무장애)",
+              "Wheelchair Accessibility (휠체어 접근성)",
+              "Universal Design (유니버설 디자인)"
+            ],
+            "sameAs": [
+              "https://www.instagram.com/naeilmap"
+            ],
+            "memberOf": [
+              {
+                "@type": "Organization",
+                "name": "함께하는 17곳 이상의 파트너 기관"
+              }
+            ]
           }
         ]}
       />
