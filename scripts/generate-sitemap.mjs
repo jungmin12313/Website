@@ -12,8 +12,10 @@ const STATIC_PAGES = [
   '/about',
   '/maps',
   '/calendar',
-  '/story',
-  '/report'
+  '/report',
+  '/partnership',
+  '/newsletter',
+  '/press'
 ];
 
 // Firestore REST API를 통해 동적으로 축제 ID를 불러옵니다.

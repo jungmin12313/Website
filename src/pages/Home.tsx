@@ -63,9 +63,29 @@ export default function Home() {
   return (
     <div className="home">
       <SEO 
-        title="내일 - 무장애 축제 지도 | 우리 모두를 위한 배리어프리 축제 여행"
-        description="무장애 축제 지도 플랫폼 '내일'은 휠체어 사용자, 고령자 등 교통약자를 위한 전국 축제장 무장애 접근성 정보를 제공합니다. 직접 조사한 무장애 축제 지로 평등하고 즐거운 문화를 누려보세요."
-        url="https://naeilmap.com/"
+        title="내일 - 무장애 축제 지도 | 대한민국 접근성 데이터 플랫폼"
+        description="무장애지도 전문 플랫폼 '내일'은 휠체어 사용자, 고령자 등 교통약자를 위한 전국 축제와 일상의 접근성 정보를 제공합니다."
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "내일 - 무장애 축제 지도",
+            "url": "https://naeilmap.com/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://naeilmap.com/maps?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "내일 (NAEIL)",
+            "url": "https://naeilmap.com/",
+            "logo": "https://naeilmap.com/og-image.png",
+            "description": "대한민국 접근성 데이터 플랫폼"
+          }
+        ]}
       />
       {/* 히어로 섹션 */}
       <section className="hero">

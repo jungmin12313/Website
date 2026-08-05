@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getFestivals } from '../firebaseUtils'
 import type { Festival } from '../types'
+import SEO from '../components/SEO'
 import './Calendar.css'
 
 export default function Calendar() {
+// ... existing states ... (will handle carefully)
   const [festivals, setFestivals] = useState<Festival[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const navigate = useNavigate()
@@ -120,8 +122,21 @@ export default function Calendar() {
 
   return (
     <div className="calendar-page">
+      <SEO 
+        title="무장애 축제 캘린더 | 내일"
+        description="전국의 무장애 축제 일정을 캘린더에서 한눈에 확인하세요. 배리어프리 축제를 미리 계획하고 방문할 수 있습니다."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "캘린더", "item": "https://naeilmap.com/calendar" }
+          ]
+        }}
+      />
       <div className="calendar-container">
         <div className="calendar-header">
+          <h1 style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>전국 무장애 축제 일정 캘린더</h1>
           <button className="nav-btn" onClick={prevMonth}><ChevronLeft size={24} /></button>
           <h2>{year}년 {month + 1}월</h2>
           <button className="nav-btn" onClick={nextMonth}><ChevronRight size={24} /></button>

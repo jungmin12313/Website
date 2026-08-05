@@ -168,7 +168,6 @@ export default function FestivalDetail() {
       <SEO 
         title="무장애 축제 정보 불러오는 중 | 내일맵" 
         description="데이터를 불러오고 있습니다." 
-        url="https://naeilmap.com/maps" 
       />
       불러오는 중...
     </div>
@@ -177,27 +176,51 @@ export default function FestivalDetail() {
   return (
     <div className="detail-page">
       <SEO 
-        title={`${festival.name} 무장애 축제 지도 | 내일맵`}
-        description={`${festival.name}의 휠체어 접근성, 장애인 화장실 정보를 무장애지도로 확인하세요. 내일(NAEIL)이 직접 조사한 배리어프리 데이터입니다.`}
-        url={`https://naeilmap.com/maps/${festival.id}`}
+        title={`${festival.name} | 무장애축제지도 내일`}
+        description={festival.description || `${festival.name}의 휠체어, 유아차 접근성 정보를 내일맵에서 확인하세요.`}
         image={festival.thumbnail || festival.mapImage}
+        type="event"
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": festival.name,
+            "description": festival.description || `${festival.name} 무장애 접근성 정보`,
+            "image": festival.thumbnail || festival.mapImage,
+            "startDate": festival.startDate ? new Date(festival.startDate).toISOString() : undefined,
+            "endDate": festival.endDate ? new Date(festival.endDate).toISOString() : undefined,
+            "location": {
+              "@type": "Place",
+              "name": festival.address || festival.name,
+              "address": festival.address
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "홈",
+                "item": "https://naeilmap.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "무장애지도",
+                "item": "https://naeilmap.com/maps"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": festival.name
+              }
+            ]
+          }
+        ]}
       />
-      {festival && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
-                { "@type": "ListItem", "position": 2, "name": "무장애 축제 검색", "item": "https://naeilmap.com/maps" },
-                { "@type": "ListItem", "position": 3, "name": festival.name, "item": `https://naeilmap.com/maps/${festival.id}` }
-              ]
-            })
-          }}
-        />
-      )}
+
 
       {/* 탭 */}
       <div className="tab-bar">

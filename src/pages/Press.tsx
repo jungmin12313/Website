@@ -1,18 +1,12 @@
 import { useState, useEffect } from 'react'
 import { getPress } from '../firebaseUtils'
 import type { PressArticle } from '../types'
-import { useSEO } from '../hooks/useSEO'
+import SEO from '../components/SEO'
 import './About.css' // Using About.css for common styling
 import './Press.css' // Using Press.css for component styling
 
 export default function Press() {
   const [pressList, setPressList] = useState<PressArticle[]>([])
-  
-  useSEO({
-    title: "보도자료 | 내일",
-    description: "내일 무장애지도의 관련 보도자료를 확인하세요.",
-    url: 'https://naeilmap.com/press'
-  });
 
   useEffect(() => {
     getPress().then(data => {
@@ -24,6 +18,18 @@ export default function Press() {
 
   return (
     <div className="about-page press-page">
+      <SEO 
+        title="보도자료 | 내일"
+        description="내일 무장애지도의 관련 보도자료를 확인하세요."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "보도자료", "item": "https://naeilmap.com/press" }
+          ]
+        }}
+      />
       <div className="press-container">
         <h1 className="press-title">보도자료</h1>
         <p className="press-desc">'내일'과 관련된 최신 소식과 보도자료입니다.</p>

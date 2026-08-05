@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Mail, Check, AlertCircle, ArrowRight, Sparkles, Calendar, Heart, Shield } from 'lucide-react'
-import { useSEO } from '../hooks/useSEO'
 import './Newsletter.css'
+
+import SEO from '../components/SEO'
 
 export default function Newsletter() {
   const [email, setEmail] = useState('')
@@ -9,12 +10,6 @@ export default function Newsletter() {
   const [agreed, setAgreed] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [error, setError] = useState('')
-
-  useSEO({
-    title: "뉴스레터 구독 | 내일",
-    description: "내일이 전하는 생생한 무장애 축제 소식과 배리어프리 편의시설 정보를 메일로 정기 수신하세요.",
-    url: 'https://naeilmap.com/newsletter'
-  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,6 +34,18 @@ export default function Newsletter() {
 
   return (
     <div className="newsletter-page">
+      <SEO 
+        title="뉴스레터 구독 | 내일"
+        description="내일이 전하는 생생한 무장애 축제 소식과 배리어프리 편의시설 정보를 메일로 정기 수신하세요."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "뉴스레터", "item": "https://naeilmap.com/newsletter" }
+          ]
+        }}
+      />
       <div className="newsletter-container">
         {subscribed ? (
           <div className="newsletter-success-card fade-in">

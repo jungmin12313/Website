@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Calendar, User, Phone, FileText, Camera, Send, MapPin, X, AlertTriangle } from 'lucide-react'
 import { getFestivals, saveReport, uploadToStorage } from '../firebaseUtils'
 import type { Festival, Report } from '../types'
+import SEO from '../components/SEO'
 import './Report.css'
 
 export default function ReportPage() {
@@ -165,6 +166,18 @@ export default function ReportPage() {
 
   return (
     <div className="report-page">
+      <SEO 
+        title="접근성 정보 제보 | 내일"
+        description="휠체어 이용자를 위한 무장애 축제 및 장소의 접근성 정보를 직접 제보해주세요. 여러분의 제보가 대한민국 배리어프리 데이터를 만듭니다."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "접근성 제보", "item": "https://naeilmap.com/report" }
+          ]
+        }}
+      />
       <div className="report-header">
         <h1 className="report-title">신고센터</h1>
         <p className="report-subtitle">축제 현장에서의 불편함을 알려주세요. 배리어프리 축제를 위해 최선을 다하겠습니다.</p>

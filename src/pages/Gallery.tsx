@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react'
 import { getGallery } from '../firebaseUtils'
 import type { GalleryImage } from '../types'
-import { useSEO } from '../hooks/useSEO'
+import SEO from '../components/SEO'
 import './FestivalList.css'
 
 export default function Gallery() {
   const [galleryList, setGalleryList] = useState<GalleryImage[]>([])
-  
-  useSEO({
-    title: "갤러리 | 내일",
-    description: "무장애지도에 등록된 다양한 현장 갤러리를 확인해보세요.",
-    url: 'https://naeilmap.com/gallery'
-  });
 
   useEffect(() => {
     getGallery().then(setGalleryList).catch(console.error)
@@ -19,6 +13,10 @@ export default function Gallery() {
 
   return (
     <div className="festival-list-page" style={{ padding: '40px 24px', minHeight: 'calc(100vh - var(--nav-height))' }}>
+      <SEO 
+        title="갤러리 | 내일"
+        description="무장애지도에 등록된 다양한 현장 갤러리를 확인해보세요."
+      />
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>갤러리</h1>
         <p style={{ color: 'var(--gray-600)', marginBottom: '2.5rem' }}>생생한 현장 모습을 사진으로 만나보세요.</p>

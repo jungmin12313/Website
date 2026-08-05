@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Upload, MapPin, Home, Calendar, ShieldAlert, Loader2, LogOut, X, Search } from 'lucide-react'
+import SEO from '../components/SEO'
 import { auth } from '../firebase'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Hotspot, Festival, Report, PressArticle, GalleryImage } from '../types'
@@ -591,11 +592,12 @@ export default function Admin() {
     try { await signOut(auth); } catch (err) { console.error('Logout error:', err); }
   }
 
-  if (authLoading) return <div className="admin-login-page"><Loader2 className="animate-spin" /></div>
+  if (authLoading) return <div className="admin-login-page"><SEO noindex={true} /><Loader2 className="animate-spin" /></div>
 
   if (!isAuthorized) {
     return (
       <div className="admin-login-page">
+        <SEO noindex={true} />
         <div className="login-card">
           <div className="login-icon"><Calendar size={32} /></div>
           <h2>관리자 시스템</h2>
@@ -611,6 +613,7 @@ export default function Admin() {
 
   return (
     <div className="admin-page">
+      <SEO noindex={true} />
       <div className="admin-header">
         <div className="admin-title-row">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 // 내일 · 인터뷰 아티클 페이지
 
@@ -37,6 +38,10 @@ export default function Story() {
 
   return (
     <>
+      <SEO 
+        title="정보가 있어도 믿기 힘들다 — 휠체어 이용자 인터뷰 · 내일"
+        description="97.4%가 TV 앞에 머무는 이유. 휠체어 이용자와 장애인 이동권 활동가를 직접 만나 들은 이야기입니다."
+      />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
         

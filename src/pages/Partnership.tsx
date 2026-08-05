@@ -64,9 +64,16 @@ export default function Partnership() {
   return (
     <div className="partnership-page">
       <SEO 
-        title="기관·기업 제휴 | 내일 - 무장애 축제 지도"
-        description="우리 기관의 접근성을 데이터로 증명하세요. '내일'은 휠체어가 실제로 닿을 수 있는지를 현장에서 직접 확인하고, 데이터로 만듭니다."
-        url="https://naeilmap.com/partnership"
+        title="기관·기업 제휴 | 무장애 접근성 진단 및 데이터 제휴 - 내일"
+        description="우리 기관의 접근성을 진단하고 ESG 지표를 높이세요. '내일'과 함께 신뢰할 수 있는 무장애 접근성 데이터를 구축하고 장벽 없는 환경을 조성할 수 있습니다."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "기관·기업 제휴", "item": "https://naeilmap.com/partnership" }
+          ]
+        }}
       />
       
       <style>{`

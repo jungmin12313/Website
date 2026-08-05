@@ -61,9 +61,16 @@ export default function About() {
   return (
     <div className="about-page">
       <SEO 
-        title="브랜드 스토리 | 내일 - 무장애 데이터 전문 플랫폼"
+        title="브랜드 스토리 | 대한민국 접근성 데이터 플랫폼, 내일"
         description="축제에서 시작해 일상의 모든 접근성을 데이터로 만드는 '내일'의 이야기. 휠체어 바퀴가 닿는 곳의 정확한 데이터를 구축합니다."
-        url="https://naeilmap.com/about"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "브랜드 스토리", "item": "https://naeilmap.com/about" }
+          ]
+        }}
       />
 
       <style>{`

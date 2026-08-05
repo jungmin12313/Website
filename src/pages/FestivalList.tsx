@@ -66,11 +66,19 @@ export default function FestivalList() {
   return (
     <div className="festival-list-page">
       <SEO 
-        title="전국 무장애지도 전체 보기 | 내일"
-        description="전국 각지의 축제 현장을 직접 조사하여 제작한 무장애지도를 만나보세요. 휠체어 접근 시설과 편의 정보를 한눈에 제공합니다."
-        url="https://naeilmap.com/maps"
+        title="무장애지도 | 전국 무장애 축제 검색 - 내일맵"
+        description="전국 배리어프리 축제 지도를 한눈에 검색하세요. 지역별, 접근성 시설별 필터링 기능으로 내게 딱 맞는 휠체어 접근 가능 축제를 찾을 수 있습니다."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://naeilmap.com/" },
+            { "@type": "ListItem", "position": 2, "name": "무장애지도", "item": "https://naeilmap.com/maps" }
+          ]
+        }}
       />
       <div className="list-container">
+        <h1 style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>전국 무장애 축제 검색 및 지도</h1>
         {/* 필터 */}
         <div className="filters">
           <div className="filter-select half-width">
