@@ -63,13 +63,13 @@ export default function Home() {
   return (
     <div className="home">
       <SEO 
-        title="내일 - 무장애 축제 지도 | 대한민국 접근성 데이터 플랫폼"
-        description="무장애지도 전문 플랫폼 '내일'은 휠체어 사용자, 고령자 등 교통약자를 위한 전국 축제와 일상의 접근성 정보를 제공합니다."
+        title="대한민국 무장애 지도 | 휠체어·유아차·접근성 정보 | NAEILMAP"
+        description="대한민국 무장애 지도 플랫폼 NAEILMAP. 휠체어 사용자, 유아차 이용자, 고령자를 위한 접근성 정보를 제공합니다. 축제, 관광지, 카페, 음식점, 숙소, 공공시설의 접근성과 편의시설 정보를 쉽고 빠르게 확인하세요"
         schema={[
           {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "내일 - 무장애 축제 지도",
+            "name": "NAEILMAP",
             "url": "https://naeilmap.com/",
             "potentialAction": {
               "@type": "SearchAction",
