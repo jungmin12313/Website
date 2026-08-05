@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { MapPin, Calendar, Users, ChevronRight } from 'lucide-react'
+import { MapPin, Calendar } from 'lucide-react'
 import { getFestivals } from '../firebaseUtils'
 import type { Festival } from '../types'
 import SEO from '../components/SEO'
