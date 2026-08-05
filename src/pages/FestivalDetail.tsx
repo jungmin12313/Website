@@ -10,6 +10,7 @@ import type { Festival, Hotspot, Report } from '../types'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import HotspotModal from '../components/HotspotModal'
 import SEO from '../components/SEO'
+import { generateAccessibilitySchema } from '../utils/schemaGenerator'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -181,20 +182,7 @@ export default function FestivalDetail() {
         image={festival.thumbnail || festival.mapImage}
         type="event"
         schema={[
-          {
-            "@context": "https://schema.org",
-            "@type": "Event",
-            "name": festival.name,
-            "description": festival.description || `${festival.name} 무장애 접근성 정보`,
-            "image": festival.thumbnail || festival.mapImage,
-            "startDate": festival.startDate ? new Date(festival.startDate).toISOString() : undefined,
-            "endDate": festival.endDate ? new Date(festival.endDate).toISOString() : undefined,
-            "location": {
-              "@type": "Place",
-              "name": festival.address || festival.name,
-              "address": festival.address
-            }
-          },
+          generateAccessibilitySchema(festival),
           {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
