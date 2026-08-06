@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight } from 'lucide-react'
-import type { Festival } from '../types'
+import { ChevronRight } from 'lucide-react'
+import type { Festival, GalleryImage } from '../types'
 import defaultHero from '../assets/hero.png'
 import SEO from '../components/SEO'
 import './Home.css'
@@ -24,9 +24,10 @@ const VOICES = [
   },
 ];
 export default function Home() {
-  const [query, setQuery] = useState('')
   const [heroBg, setHeroBg] = useState(() => localStorage.getItem('naeil_hero_bg_cache') || '')
   const [mainFestivals, setMainFestivals] = useState<Festival[]>([])
+  const [galleryList, setGalleryList] = useState<GalleryImage[]>([])
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
   const navigate = useNavigate()
 
 
@@ -35,7 +36,7 @@ export default function Home() {
     // Firebase 함수들을 동적 임포트하여 초기 번들 크기 감소 및 실행 지연 방지
     const loadData = async () => {
       try {
-        const { getSetting, getFestivals } = await import('../firebaseUtils');
+        const { getSetting, getFestivals, getGallery } = await import('../firebaseUtils');
         
         getSetting('naeil_hero_bg').then(savedHero => {
           if (savedHero) {
@@ -48,6 +49,13 @@ export default function Home() {
           const onMain = fests.filter(f => f.showOnMain === true && (f.thumbnail || f.mapImage));
           setMainFestivals(onMain.slice(0, 3));
         });
+
+        getGallery().then(gallery => {
+          if (gallery && gallery.length > 0) {
+            // 최대 5장만 배경으로 사용 (너무 많으면 메모리 이슈 가능성)
+            setGalleryList(gallery.slice(0, 5));
+          }
+        });
       } catch (err) {
         console.error('Failed to load data:', err);
       }
@@ -56,9 +64,13 @@ export default function Home() {
     loadData();
   }, [])
 
-  const handleSearch = () => {
-    if (query.trim()) navigate(`/maps?q=${encodeURIComponent(query)}`)
-  }
+  useEffect(() => {
+    if (galleryList.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentHeroIndex(prev => (prev + 1) % galleryList.length);
+    }, 4500); // 4.5초마다 롤링
+    return () => clearInterval(interval);
+  }, [galleryList.length]);
 
   return (
     <div className="home">
@@ -90,7 +102,7 @@ export default function Home() {
               "Universal Design (유니버설 디자인)"
             ],
             "sameAs": [
-              "https://www.instagram.com/naeilmap"
+              "https://www.instagram.com/naeil__official"
             ],
             "memberOf": [
               {
@@ -103,31 +115,39 @@ export default function Home() {
       />
       {/* 히어로 섹션 */}
       <section className="hero">
-        <img 
-          src={heroBg || defaultHero} 
-          alt="무장애 축제 지도 내일 배경" 
-          fetchPriority="high" 
-          decoding="async"
-          width="1920" 
-          height="1080" 
-          className={`hero-img ${heroBg ? 'loaded' : ''}`}
-        />
+        <div className="hero-carousel-container">
+          <div 
+            className="hero-carousel-track"
+            style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
+          >
+            {galleryList.length > 0 ? (
+              galleryList.map((img, idx) => (
+                <img 
+                  key={img.id || idx}
+                  src={img.url} 
+                  alt="무장애 축제 지도 갤러리 배경" 
+                  fetchPriority={idx === 0 ? "high" : "auto"}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  className="hero-carousel-img"
+                />
+              ))
+            ) : (
+              <img 
+                src={heroBg || defaultHero} 
+                alt="무장애 축제 지도 내일 배경" 
+                fetchPriority="high" 
+                decoding="async"
+                className="hero-carousel-img"
+              />
+            )}
+          </div>
+        </div>
         <div className="hero-overlay" style={{ zIndex: 1 }} />
         <div className="hero-content">
           <h1 className="hero-title" style={{ fontFamily: 'var(--font)', fontWeight: 800 }}>
             모두를 위한 무장애지도
           </h1>
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="관심있는 장소나 축제를 검색해보세요!"
-              aria-label="축제 검색"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
-            <button onClick={handleSearch} aria-label="검색"><Search size={20} /></button>
-          </div>
 
           {mainFestivals.length > 0 && (
             <div className="latest-maps-container">
@@ -153,7 +173,7 @@ export default function Home() {
                   <div className="widget-content">
                     <div className="widget-header">
                       <span className="pulse-dot"></span>
-                      <span className="widget-badge-text">방금 전 업데이트 됨</span>
+                      <span className="widget-badge-text">방금 전 업데이트 됨 ✨</span>
                     </div>
                     <div className="widget-info">
                       <strong>{fest.name}</strong>
