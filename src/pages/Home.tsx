@@ -146,7 +146,7 @@ export default function Home() {
         <div className="hero-overlay" style={{ zIndex: 1 }} />
         <div className="hero-content">
           <h1 className="hero-title" style={{ fontFamily: 'var(--font)', fontWeight: 800 }}>
-            모두를 위한 무장애지도
+            대한민국 무장애 지도
           </h1>
 
           {mainFestivals.length > 0 && (
