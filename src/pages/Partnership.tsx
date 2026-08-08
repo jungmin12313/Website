@@ -233,9 +233,7 @@ export default function Partnership() {
             <div className="logo-item"><img src="/images/partners/partner_rise.png" alt="조선이공대 RISE사업단" /></div>
             <div className="logo-item"><img src="/images/partners/head-logo.svg" alt="파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner_logo_210321.png" alt="파트너 기관" /></div>
-            <div className="logo-item"><img src="/images/partners/partner_kappd.png" alt="광주광역시 지체장애인협회" /></div>
             <div className="logo-item"><img src="/images/partners/partner_new1.png" alt="추가 파트너 기관" /></div>
-            <div className="logo-item"><img src="/images/partners/partner_new2.png" alt="추가 파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/partner_new3.png" alt="추가 파트너 기관" /></div>
           </div>
         </div>
