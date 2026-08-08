@@ -10,6 +10,7 @@ export default function Partnership() {
     contact: '',
     email: '',
     service: '',
+    scale: '',
     content: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,7 @@ export default function Partnership() {
     setIsSubmitting(true);
     try {
       await savePartnershipInquiry(formData);
-      setFormData({ name: '', organization: '', contact: '', email: '', service: '', content: '' });
+      setFormData({ name: '', organization: '', contact: '', email: '', service: '', scale: '', content: '' });
       alert('문의가 성공적으로 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.');
     } catch (error) {
       console.error('Failed to submit inquiry:', error);
@@ -155,26 +156,31 @@ export default function Partnership() {
 
         <div className="service-list">
           <div className="reveal service-item">
-            <h4>미니 진단</h4>
-            <p>우리 시설 하나, 핵심 문제부터 가볍게 확인하고 싶다면</p>
+            <h4>미니 진단 <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>소규모 시설 맞춤형</span></h4>
+            <p style={{ marginBottom: 4 }}>- 우리 시설 하나, 핵심 문제부터 가볍게 확인</p>
+            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (법적 편의시설 기준 + NAEIL 실질 점수 진단 리포트)</p>
           </div>
           <div className="reveal service-item">
-            <h4>표준 패키지 <span className="service-badge">추천</span></h4>
-            <p>무장애지도 제작부터 현장 진단, 개선 방향 제안까지 (무장애지도 제작이 포함된 기본 단위)</p>
+            <h4>표준 패키지 <span className="service-badge">추천</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>지자체/기관 수의계약 표준</span></h4>
+            <p style={{ marginBottom: 4 }}>- 무장애지도 제작부터 현장 진단, 개선 방향 제안까지</p>
+            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (축제장/1개 골목 상권 대상, 무장애지도 제작 포함)</p>
           </div>
           <div className="reveal service-item">
-            <h4>교육 포함 패키지</h4>
-            <p>현장 개선과 함께, 구성원 인식 개선 워크숍까지</p>
+            <h4>교육 포함 패키지 <span className="service-badge" style={{ background: '#f59e0b', color: '#fff' }}>BEST SELLER</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>사업비/인식개선 통합 성과형</span></h4>
+            <p style={{ marginBottom: 4 }}>- 현장 개선과 함께, 구성원 인식 개선 워크숍까지</p>
+            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (표준 패키지 전체 + 데이터 기반 맞춤형 강연 포함)</p>
           </div>
           <div className="reveal service-item">
-            <h4>통합 리포트</h4>
-            <p>여러 시설, 여러 지역을 한 번에 관리하고 싶다면</p>
+            <h4>통합 리포트 <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>대형 프로젝트 / 컨설팅 용역형</span></h4>
+            <p style={{ marginBottom: 4 }}>- 여러 시설, 여러 지역을 한 번에 관리하고 싶다면</p>
+            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (관내 전수조사 + NAEIL OS 자원배분 컨설팅)</p>
           </div>
           
           <div className="reveal service-item service-sub-item">
-            <h4>정기 구독형 관리 <span className="service-badge" style={{ background: 'var(--gray-600)', color: 'var(--white)' }}>준비중</span></h4>
-            <p style={{ textAlign: 'center' }}>한 번의 진단으로 끝내지 않고, 매달 최신 상태로 유지하는 구독 서비스를 준비하고 있습니다.</p>
-            <button className="btn-pill-blue" style={{ background: 'var(--gray-700)', padding: '12px 24px' }} onClick={() => scrollToForm('정기구독(준비중)')}>
+            <h4>정기 구독형 관리 <span className="service-badge" style={{ background: 'var(--gray-600)', color: 'var(--white)' }}>준비중</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>연간 데이터 최신화 & 지속 유지관리</span></h4>
+            <p style={{ textAlign: 'center', marginBottom: 4 }}>- 한 번의 진단으로 끝나지 않고, 지속 유지하는 서비스</p>
+            <p style={{ textAlign: 'center', color: 'var(--gray-600)', fontSize: '14px' }}>- (DB 실시간 업데이트, 웹 지도 유지보수, 성과 측정)</p>
+            <button className="btn-pill-blue" style={{ background: 'var(--gray-700)', padding: '12px 24px', marginTop: 12 }} onClick={() => scrollToForm('정기구독(준비중)')}>
               오픈 소식 먼저 받아보기
             </button>
           </div>
@@ -247,40 +253,53 @@ export default function Partnership() {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">담당자 성함 *</label>
-              <input type="text" name="name" className="form-input" required value={formData.name} onChange={handleChange} placeholder="홍길동" />
+              <input type="text" name="name" className="form-input" required value={formData.name} onChange={handleChange} placeholder="[ 홍길동 ]" />
             </div>
             
             <div className="form-group">
               <label className="form-label">기관/기업명 *</label>
-              <input type="text" name="organization" className="form-input" required value={formData.organization} onChange={handleChange} placeholder="○○기관" />
+              <input type="text" name="organization" className="form-input" required value={formData.organization} onChange={handleChange} placeholder="[ OO구청 / OO재단 ]" />
             </div>
 
             <div className="form-group">
               <label className="form-label">연락처 *</label>
-              <input type="text" name="contact" className="form-input" required value={formData.contact} onChange={handleChange} placeholder="010-0000-0000" />
+              <input type="text" name="contact" className="form-input" required value={formData.contact} onChange={handleChange} placeholder="[ 010-0000-0000 ]" />
             </div>
 
             <div className="form-group">
               <label className="form-label">이메일 *</label>
-              <input type="email" name="email" className="form-input" required value={formData.email} onChange={handleChange} placeholder="email@example.com" />
+              <input type="email" name="email" className="form-input" required value={formData.email} onChange={handleChange} placeholder="[ email@example.com ]" />
             </div>
 
             <div className="form-group">
               <label className="form-label">관심 있는 서비스</label>
               <select name="service" className="form-select" value={formData.service} onChange={handleChange}>
                 <option value="">선택해주세요</option>
-                <option value="미니진단">미니 진단</option>
-                <option value="표준패키지">표준 패키지</option>
-                <option value="교육포함패키지">교육 포함 패키지</option>
-                <option value="통합리포트">통합 리포트</option>
-                <option value="정기구독(준비중)">정기구독 (준비중)</option>
-                <option value="모름">아직 잘 모르겠어요</option>
+                <option value="미니진단">1. 미니 진단 (단일 건물/시설 접근성 진단 리포트)</option>
+                <option value="표준패키지">2. 표준 패키지 (축제/상권 무장애지도 제작 + 현장 개별 개선안) [추천]</option>
+                <option value="교육포함패키지">3. 교육 포함 패키지 (지도 + 현장 개선안 + 임직원/주민 강연)</option>
+                <option value="통합리포트">4. 통합 리포트 (동/구청 전역 전수조사 + 예산 우선순위 컨설팅)</option>
+                <option value="단독강연">5. 단독 강연/워크숍 (데이터 기반 이동권 실태 강연)</option>
+                <option value="정기구독">6. 정기구독 관리 (데이터 최신화 및 연간 유지보수)</option>
+                <option value="모름">7. 아직 잘 모르겠어요 (맞춤 상담 희망)</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">조사 희망 규모 (선택)</label>
+              <select name="scale" className="form-select" value={formData.scale} onChange={handleChange}>
+                <option value="">선택해주세요</option>
+                <option value="단일시설">1. 단일 시설 / 1개 건물</option>
+                <option value="축제행사장">2. 축제/행사장 (시설 30개 내외)</option>
+                <option value="상권거리">3. 1개 골목 상권 / 거리 (시설 50개 내외)</option>
+                <option value="동구청전역">4. 1개 동 / 구청 관내 전역 (시설 100개 이상)</option>
+                <option value="모름">5. 잘 모르겠음 (상담 후 결정)</option>
               </select>
             </div>
 
             <div className="form-group">
               <label className="form-label">문의 내용</label>
-              <textarea name="content" className="form-textarea" value={formData.content} onChange={handleChange} placeholder="자유롭게 작성해주세요"></textarea>
+              <textarea name="content" className="form-textarea" value={formData.content} onChange={handleChange} placeholder="사업 목적, 희망 일정, 예산 범위 등을 자유롭게 작성해주시면&#10;더욱 정확한 맞춤 제안서와 견적을 안내해드립니다."></textarea>
             </div>
 
             <div style={{ textAlign: 'center', marginTop: 40 }}>
