@@ -229,6 +229,14 @@ export default function Partnership() {
             <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-01 031645.png" alt="추가 파트너 기관" /></div>
             <div className="logo-item"><img src="/images/partners/인액터스_전남.png" alt="인액터스 전남" /></div>
             <div className="logo-item"><img src="/images/partners/지속가능발전.png" alt="지속가능발전협의회" /></div>
+            {/* 새로 추가된 로고들 */}
+            <div className="logo-item"><img src="/images/partners/250912_조선이공대-광주LOCALL-RISE사업단_logo_확정B.png" alt="조선이공대 RISE사업단" /></div>
+            <div className="logo-item"><img src="/images/partners/head-logo.svg" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/logo-210321.png" alt="파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/광주광역시_지체장애인협회.png" alt="광주광역시 지체장애인협회" /></div>
+            <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-09 005209.png" alt="추가 파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-09 005512.png" alt="추가 파트너 기관" /></div>
+            <div className="logo-item"><img src="/images/partners/스크린샷 2026-08-09 005626.png" alt="추가 파트너 기관" /></div>
           </div>
         </div>
       </section>
