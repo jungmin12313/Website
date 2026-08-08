@@ -203,6 +203,7 @@ export interface PartnershipInquiry {
   contact: string;
   email: string;
   service: string;
+  scale?: string;
   content: string;
   createdAt: number;
 }

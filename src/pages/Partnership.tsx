@@ -148,10 +148,10 @@ export default function Partnership() {
       <section id="service-lineup" className="partnership-section">
         <div className="reveal sec-kicker">THE SERVICE</div>
         <h2 className="reveal sec-heading" style={{ transitionDelay: '0.1s' }}>
-          모든 서비스는<br/>'무장애지도'에서 시작합니다
+          모든 변화는<br/>현장의 '정확한 데이터'에서 시작합니다
         </h2>
         <p className="reveal sec-desc" style={{ transitionDelay: '0.2s' }}>
-          지금 여러분이 보고 계신 무장애지도는, 단순한 콘텐츠가 아니라 저희가 현장에서 직접 만든 데이터입니다. 이 데이터를 어디까지 활용하시느냐에 따라, 필요한 만큼 단계적으로 선택하실 수 있습니다.
+          지금 여러분이 보고 계신 무장애지도 역시 단순한 콘텐츠가 아니라, 저희가 직접 발로 뛰어 만든 실측 데이터의 결과물입니다. 단일 시설의 가벼운 진단부터 무장애지도 제작, 지역구 단위의 전수조사까지 필요한 만큼 단계적으로 선택하실 수 있습니다.
         </p>
 
         <div className="service-list">
