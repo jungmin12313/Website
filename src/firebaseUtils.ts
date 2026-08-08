@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, orderBy, onSnapshot, runTransaction } from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, setDoc, addDoc, deleteDoc, query, orderBy, onSnapshot, runTransaction } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from './firebase'
 import type { Festival, Report, PressArticle, GalleryImage, Hotspot } from './types'
@@ -210,11 +210,34 @@ export interface PartnershipInquiry {
 
 export async function savePartnershipInquiry(inquiry: Omit<PartnershipInquiry, 'id' | 'createdAt'>): Promise<void> {
   const inquiryId = `inq-${Date.now()}`;
+  const timestamp = Date.now();
+  
   await setDoc(doc(db, 'partnership_inquiries', inquiryId), {
     ...inquiry,
     id: inquiryId,
-    createdAt: Date.now()
+    createdAt: timestamp
   });
+
+  try {
+    await addDoc(collection(db, 'mail'), {
+      to: ['contact@naeilmap.com'], // 수신받을 이메일 주소
+      message: {
+        subject: `[신규 제휴문의] ${inquiry.organization} - ${inquiry.name}님`,
+        html: `
+          <h2>신규 제휴/협업 문의가 도착했습니다.</h2>
+          <p><strong>담당자:</strong> ${inquiry.name}</p>
+          <p><strong>기관/기업명:</strong> ${inquiry.organization}</p>
+          <p><strong>연락처:</strong> ${inquiry.contact}</p>
+          <p><strong>이메일:</strong> ${inquiry.email}</p>
+          <p><strong>관심 서비스:</strong> ${inquiry.service}</p>
+          <p><strong>조사 희망 규모:</strong> ${inquiry.scale || '미선택'}</p>
+          <p><strong>문의 내용:</strong><br/>${inquiry.content.replace(/\n/g, '<br/>')}</p>
+        `
+      }
+    });
+  } catch (err) {
+    console.error("이메일 발송 큐 추가 실패:", err);
+  }
 }
 
 // 초기 데이터 세팅용 (만약 서버가 비어있다면)
