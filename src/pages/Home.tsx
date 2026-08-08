@@ -26,7 +26,17 @@ const VOICES = [
 export default function Home() {
   const [heroBg, setHeroBg] = useState(() => localStorage.getItem('naeil_hero_bg_cache') || '')
   const [mainFestivals, setMainFestivals] = useState<Festival[]>([])
-  const [galleryList, setGalleryList] = useState<GalleryImage[]>([])
+  const [galleryList, setGalleryList] = useState<GalleryImage[]>(() => {
+    const cached = localStorage.getItem('naeil_gallery_cache');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  })
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
   const navigate = useNavigate()
 
@@ -53,7 +63,9 @@ export default function Home() {
         getGallery().then(gallery => {
           if (gallery && gallery.length > 0) {
             // 최대 5장만 배경으로 사용 (너무 많으면 메모리 이슈 가능성)
-            setGalleryList(gallery.slice(0, 5));
+            const top5 = gallery.slice(0, 5);
+            setGalleryList(top5);
+            localStorage.setItem('naeil_gallery_cache', JSON.stringify(top5));
           }
         });
       } catch (err) {
