@@ -10,8 +10,18 @@ export default function Press() {
 
   useEffect(() => {
     getPress().then(data => {
-      // 옛날 기사부터 최상단에 오도록 날짜 기준 오름차순 정렬
-      const sorted = data.sort((a, b) => a.date.localeCompare(b.date));
+      // 최신 기사가 최상단에 오도록 날짜 기준 내림차순 정렬
+      const sorted = data.sort((a, b) => {
+        const parseDate = (d: string) => {
+          const match = d.match(/\d+/g);
+          if (!match || match.length < 2) return new Date(d).getTime() || 0;
+          let [y, m, day] = match;
+          if (y.length === 2) y = '20' + y;
+          const pad = (n: string) => (n && n.length === 1 ? '0' + n : n || '00');
+          return parseInt(`${y}${pad(m)}${pad(day)}`, 10);
+        };
+        return parseDate(b.date) - parseDate(a.date);
+      });
       setPressList(sorted);
     }).catch(console.error)
   }, [])
