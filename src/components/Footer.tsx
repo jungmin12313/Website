@@ -13,7 +13,7 @@ export default function Footer() {
           <p className="footer-slogan">모두의 더 나은 내일을 위해</p>
           <Link to="/" className="f-logo-link">
             <img 
-              src="/logo_transparent.png" 
+              src="/logo_transparent.webp" 
               alt="내일 - 무장애지도" 
               className="footer-logo" 
               loading="lazy" 

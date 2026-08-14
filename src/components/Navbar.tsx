@@ -28,7 +28,7 @@ export default function Navbar() {
               <Menu size={26} />
             </button>
             <Link to="/" className="logo-link">
-              <img src="/logo_new.png" alt="내일 - 무장애지도" className="logo-img" width="100" height="30" loading="lazy" />
+              <img src="/logo_new.webp" alt="내일 - 무장애지도" className="logo-img" width="100" height="30" loading="lazy" />
             </Link>
           </div>
 
@@ -69,7 +69,7 @@ export default function Navbar() {
       <div className={`sidebar-overlay ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
         <div className={`sidebar ${menuOpen ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="sidebar-header">
-            <img src="/logo_new.png" alt="내일 - 무장애지도" className="sidebar-logo" width="100" height="30" loading="lazy" />
+            <img src="/logo_new.webp" alt="내일 - 무장애지도" className="sidebar-logo" width="100" height="30" loading="lazy" />
             <button className="sidebar-close" aria-label="메뉴 닫기" onClick={() => setMenuOpen(false)}>
               <X size={28} />
             </button>

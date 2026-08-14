@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import type { Festival, GalleryImage } from '../types'
-import defaultHero from '../assets/hero.png'
+import defaultHero from '../assets/hero.webp'
 import SEO from '../components/SEO'
 import './Home.css'
 
