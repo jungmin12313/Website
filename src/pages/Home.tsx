@@ -38,9 +38,19 @@ export default function Home() {
     return [];
   })
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
+  const [isImagesLoaded, setIsImagesLoaded] = useState(false)
   const navigate = useNavigate()
 
-
+  useEffect(() => {
+    if (galleryList.length > 0) {
+      const img = new Image();
+      img.src = galleryList.length > 0 ? galleryList[0].url : (heroBg || defaultHero);
+      img.onload = () => setIsImagesLoaded(true);
+      img.onerror = () => setIsImagesLoaded(true);
+    } else {
+      setIsImagesLoaded(true);
+    }
+  }, [galleryList, heroBg]);
 
   useEffect(() => {
     // Firebase 함수들을 동적 임포트하여 초기 번들 크기 감소 및 실행 지연 방지
@@ -127,7 +137,25 @@ export default function Home() {
       />
       {/* 히어로 섹션 */}
       <section className="hero">
-        <div className="hero-carousel-container">
+        <div 
+          className="hero-default-bg" 
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${heroBg || defaultHero})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0
+          }}
+        />
+        <div 
+          className="hero-carousel-container"
+          style={{ 
+            opacity: isImagesLoaded ? 1 : 0,
+            transition: 'opacity 0.8s ease-in-out',
+            zIndex: 1
+          }}
+        >
           <div 
             className="hero-carousel-track"
             style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
@@ -140,7 +168,7 @@ export default function Home() {
                   alt="무장애 축제 지도 갤러리 배경" 
                   fetchPriority={idx === 0 ? "high" : "auto"}
                   loading={idx === 0 ? "eager" : "lazy"}
-                  decoding="async"
+                  decoding={idx === 0 ? "sync" : "async"}
                   className="hero-carousel-img"
                 />
               ))
@@ -155,8 +183,8 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className="hero-overlay" style={{ zIndex: 1 }} />
-        <div className="hero-content">
+        <div className="hero-overlay" style={{ zIndex: 2 }} />
+        <div className="hero-content" style={{ zIndex: 3, position: 'relative' }}>
           <h1 className="hero-title" style={{ fontFamily: 'var(--font)', fontWeight: 800 }}>
             대한민국 무장애 지도
           </h1>
