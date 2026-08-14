@@ -20,6 +20,10 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/maps/:id.md",
+      "destination": "/api/llm-festival?id=:id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
