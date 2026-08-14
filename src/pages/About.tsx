@@ -240,15 +240,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="about-footer">
-        <div style={{ fontFamily: "var(--font), sans-serif", fontSize: 17, fontWeight: 700 }}>
-          내일 · 무장애 데이터
-        </div>
-        <div style={{ fontSize: 11, lineHeight: 1.75, textAlign: "right", opacity: 0.7 }}>
-          장애인 이동권 개선 프로젝트
-        </div>
-      </footer>
     </div>
   );
 }
