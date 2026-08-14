@@ -85,7 +85,7 @@ export default function About() {
               "Universal Design (유니버설 디자인)"
             ],
             "sameAs": [
-              "https://www.instagram.com/naeilmap"
+              "https://www.instagram.com/naeil__official"
             ],
             "memberOf": [
               {
