@@ -13,7 +13,7 @@ const packagesData = [
     subhead: '단일 시설·상권의 핵심 보행장벽을 정밀 실측하여 즉각적인 개선 도면을 도출하는 긴급 진단 솔루션',
     description: '* 복지관, 행사장 진입로, 골목 상권 등 특정 단일 구역의 단차·경사도를 디지털 계측기로 mm 단위 정밀 실측합니다.\n* 법령 적합성을 즉시 검토하여 3일 만에 시공용 약식도면과 예산 산출 근거 시트를 납품합니다. (실측 오차율 0%, 핵심 결함 100% 도출)',
     fileUrl: '/packages/TIER1.png',
-    fileName: '[내일]_솔루션소개서_Tier1.png',
+    fileName: '[모두의내일]_솔루션소개서_Tier1.png',
     format: 'PNG'
   },
   {
@@ -24,7 +24,7 @@ const packagesData = [
     subhead: '데이터 기반 이동권 강연과 현장 매핑 실습을 결합한 참여형 배리어프리 임팩트 워크숍',
     description: '* 수동적 주입식 교육을 넘어 초·중·고·대학생, 기업 ESG 실천단, 지자체 임직원이 직접 앱과 도구로 보행 장애물을 기록하는 데이터 플로깅 모델입니다.\n* 비전문가도 10분 만에 숙달 가능한 툴킷을 제공하며, 수집된 원천 데이터와 ESG 성과 결과 보고서(교육 만족도 98%, 인식 개선율 95%↑)를 함께 발간합니다.',
     fileUrl: '/packages/TIER2.png',
-    fileName: '[내일]_솔루션소개서_Tier2.png',
+    fileName: '[모두의내일]_솔루션소개서_Tier2.png',
     format: 'PNG'
   },
   {
@@ -35,7 +35,7 @@ const packagesData = [
     subhead: '실측 데이터를 기반으로 보행 단절을 해소하는 온·오프라인 무장애지도 및 개선 리포트',
     description: '* 지자체 문화관광과, 축제 조직위, 복지관을 대상으로 권역 내 보행로와 편의시설을 전수 실측하여 휠체어·유아차가 이동 가능한 최적 우회 경로를 도출합니다.\n* 시각적 식별성을 극대화한 고대비 현장 배포용 리플릿과 스마트폰 모바일 UI 웹 지도를 동시에 공급합니다. (보행 단절 0건, 안전 우회 경로 100% 제공)',
     fileUrl: '/packages/TIER3.png',
-    fileName: '[내일]_솔루션소개서_Tier3.png',
+    fileName: '[모두의내일]_솔루션소개서_Tier3.png',
     format: 'PNG',
     highlight: '추천'
   },
@@ -47,7 +47,7 @@ const packagesData = [
     subhead: '지자체(동·구청)를 대상으로 [전수조사 DB 구축] 및 효율적인 도로 정비 예산 집행을 위한 [우선순위 컨설팅] 솔루션 제안',
     description: '* 민원 사후 대응의 한계를 극복하기 위해 GIS 기반으로 관할 구역 가로망을 전수 실측(전수율 100%)하고 독자적 Scoring 알고리즘으로 위험도를 지수화합니다.\n* 감사와 의회 설득이 가능한 법령 기준 정량 DB와 도로 보수 공사비 산출 근거를 담은 최우선 정비 순위 컨설팅 리포트를 납품합니다.',
     fileUrl: '/packages/TIER4.png',
-    fileName: '[내일]_솔루션소개서_Tier4.png',
+    fileName: '[모두의내일]_솔루션소개서_Tier4.png',
     format: 'PNG'
   },
   {
@@ -58,7 +58,7 @@ const packagesData = [
     subhead: '보행환경 데이터의 연간 갱신과 모니터링 대시보드를 통한 지속 가능한 데이터 자산화',
     description: '* 1회성 인쇄물 제작에 그치지 않고, 공사 및 상권 변화로 바뀌는 도시 보행 데이터를 연 1회 이상 정기 재실측하여 상시 신뢰성을 보장합니다.\n* 관리자 전용 모니터링 웹 대시보드를 제공하여 보행환경 개선 전·후 성과를 수치화하고 정책 핵심 자산으로 영구 운용할 수 있도록 지원합니다.',
     fileUrl: '/packages/TIER5.png',
-    fileName: '[내일]_솔루션소개서_Tier5.png',
+    fileName: '[모두의내일]_솔루션소개서_Tier5.png',
     format: 'PNG',
     hasInquiryBtn: true
   }
