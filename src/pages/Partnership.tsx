@@ -9,8 +9,9 @@ const packagesData = [
     id: 1,
     tier: 'Tier 1',
     title: '[Tier 1] 미니 진단 패키지',
-    tags: ['소규모 상권·단일 시설', '신속 진단', '가성비'],
-    description: '단일 복지관, 소규모 문화시설, 골목 상권의 주출입구 단차·유효폭·경사로를 정밀 실측하여 즉각적인 개선 포인트를 도출하는 경량형 솔루션입니다.\n종합 컨설팅 대비 1/5 수준의 빠른 납기와 합리적 비용으로 법령 기준 적합성 대조표 및 약식 개선 도면을 제공합니다.',
+    tags: ['단일 시설·상권', '긴급 진단', '3일 납기'],
+    subhead: '단일 시설·상권의 핵심 보행장벽을 정밀 실측하여 즉각적인 개선 도면을 도출하는 긴급 진단 솔루션',
+    description: '* 복지관, 행사장 진입로, 골목 상권 등 특정 단일 구역의 단차·경사도를 디지털 계측기로 mm 단위 정밀 실측합니다.\n* 법령 적합성을 즉시 검토하여 3일 만에 시공용 약식도면과 예산 산출 근거 시트를 납품합니다. (실측 오차율 0%, 핵심 결함 100% 도출)',
     fileUrl: '/assets/packages/TIER1.png',
     fileName: '[내일]_솔루션소개서_Tier1.png',
     format: 'PNG'
@@ -18,31 +19,33 @@ const packagesData = [
   {
     id: 2,
     tier: 'Tier 2',
-    title: '[Tier 2] 표준 지도 패키지',
-    tags: ['추천', '축제·관광지', '온·오프라인 무장애지도'],
-    description: '지역 축제, 관광지, 역세권 등 권역 내 보행로 전수 실측 데이터를 기반으로 구축하는 맞춤형 무장애 내비게이션 지도입니다.\n저시력자·휠체어 이용자를 고려한 고대비 그래픽 리플릿(인쇄용)과 모바일 QR 반응형 웹 지도를 듀얼 패키지로 제공합니다.',
+    title: '[Tier 2] 패키지 + 강연',
+    tags: ['참여형 워크숍', 'ESG 실천단', '데이터 플로깅'],
+    subhead: '데이터 기반 이동권 강연과 현장 매핑 실습을 결합한 참여형 배리어프리 임팩트 워크숍',
+    description: '* 수동적 주입식 교육을 넘어 초·중·고·대학생, 기업 ESG 실천단, 지자체 임직원이 직접 앱과 도구로 보행 장애물을 기록하는 데이터 플로깅 모델입니다.\n* 비전문가도 10분 만에 숙달 가능한 툴킷을 제공하며, 수집된 원천 데이터와 ESG 성과 결과 보고서(교육 만족도 98%, 인식 개선율 95%↑)를 함께 발간합니다.',
     fileUrl: '/assets/packages/TIER2.png',
     fileName: '[내일]_솔루션소개서_Tier2.png',
-    format: 'PNG',
-    highlight: '추천'
+    format: 'PNG'
   },
   {
     id: 3,
     tier: 'Tier 3',
-    title: '[Tier 3] 교육 포함 패키지 (패키지 + 강연)',
-    tags: ['BEST SELLER', '기업 ESG', '인식개선 교육', '데이터 플로깅'],
-    description: '단순 이론 중심 의무 교육을 넘어, 참여자가 스마트폰과 계측 도구를 들고 현장 보행 장애물을 직접 측정·수집하는 참여형 임팩트 워크숍입니다.\n장애 당사자 이동권 현실 강연과 매핑 실습을 결합하여 ESG 성과 지표(시간, 인원)를 완벽히 충족하는 결과 리포트를 납품합니다.',
+    title: '[Tier 3] 표준 지도 패키지',
+    tags: ['추천', '축제·관광지', '온·오프라인 듀얼 배포'],
+    subhead: '실측 데이터를 기반으로 보행 단절을 해소하는 온·오프라인 무장애지도 및 개선 리포트',
+    description: '* 지자체 문화관광과, 축제 조직위, 복지관을 대상으로 권역 내 보행로와 편의시설을 전수 실측하여 휠체어·유아차가 이동 가능한 최적 우회 경로를 도출합니다.\n* 시각적 식별성을 극대화한 고대비 현장 배포용 리플릿과 스마트폰 모바일 UI 웹 지도를 동시에 공급합니다. (보행 단절 0건, 안전 우회 경로 100% 제공)',
     fileUrl: '/assets/packages/TIER3.png',
     fileName: '[내일]_솔루션소개서_Tier3.png',
     format: 'PNG',
-    highlight: 'BEST SELLER'
+    highlight: '추천'
   },
   {
     id: 4,
     tier: 'Tier 4',
-    title: '[Tier 4] 통합 리포트 구축',
-    tags: ['대형 프로젝트', '지자체·공공기관', 'GIS 전수조사', '예산 우선순위'],
-    description: '동·구 단위 생활권 도로망의 미세 단차·파손·경사를 전수조사하고, 위험도를 1~5등급으로 지수화(Scoring)하는 행정 맞춤형 데이터 솔루션입니다.\n민원 발생 전 선제적 도로 정비가 가능하도록 GIS 히트맵 공간정보 DB 및 예산 투입 우선순위 시뮬레이션 보고서를 납품합니다.',
+    title: '[Tier 4] 통합 패키지: 보행환경 전수조사 및 예산 투입 컨설팅',
+    tags: ['지자체 동·구청 전역', '전수조사 DB', '예산 우선순위'],
+    subhead: '지자체(동·구청)를 대상으로 [전수조사 DB 구축] 및 효율적인 도로 정비 예산 집행을 위한 [우선순위 컨설팅] 솔루션 제안',
+    description: '* 민원 사후 대응의 한계를 극복하기 위해 GIS 기반으로 관할 구역 가로망을 전수 실측(전수율 100%)하고 독자적 Scoring 알고리즘으로 위험도를 지수화합니다.\n* 감사와 의회 설득이 가능한 법령 기준 정량 DB와 도로 보수 공사비 산출 근거를 담은 최우선 정비 순위 컨설팅 리포트를 납품합니다.',
     fileUrl: '/assets/packages/TIER4.png',
     fileName: '[내일]_솔루션소개서_Tier4.png',
     format: 'PNG'
@@ -51,8 +54,9 @@ const packagesData = [
     id: 5,
     tier: 'Tier 5',
     title: '[Tier 5] 운영 구독 패키지',
-    tags: ['스마트시티', '연간 정기구독', '실시간 모니터링 DB'],
-    description: '도로 공사, 상권 변화 등으로 변동하는 도시 보행 인프라를 분기별로 재실측하여 상시 최신성을 유지하는 클라우드 유지관리 서비스입니다.\n관리자 전용 웹 대시보드와 최신 갱신 API를 제공하여 1회성 재구축 대비 50% 이상의 관리 비용을 절감합니다.',
+    tags: ['상시 모니터링', '연간 최신화', '관리자 대시보드'],
+    subhead: '보행환경 데이터의 연간 갱신과 모니터링 대시보드를 통한 지속 가능한 데이터 자산화',
+    description: '* 1회성 인쇄물 제작에 그치지 않고, 공사 및 상권 변화로 바뀌는 도시 보행 데이터를 연 1회 이상 정기 재실측하여 상시 신뢰성을 보장합니다.\n* 관리자 전용 모니터링 웹 대시보드를 제공하여 보행환경 개선 전·후 성과를 수치화하고 정책 핵심 자산으로 영구 운용할 수 있도록 지원합니다.',
     fileUrl: '/assets/packages/TIER5.png',
     fileName: '[내일]_솔루션소개서_Tier5.png',
     format: 'PNG',
@@ -227,6 +231,9 @@ export default function Partnership() {
                     ))}
                   </div>
                   <h3 className="download-card-title">{pkg.title}</h3>
+                  {pkg.subhead && (
+                    <h4 className="download-card-subhead">{pkg.subhead}</h4>
+                  )}
                   <div className="download-card-desc">
                     {pkg.description.split('\n').map((line, i) => (
                       <p key={i}>{line}</p>
@@ -343,9 +350,9 @@ export default function Partnership() {
               <select name="service" className="form-select" value={formData.service} onChange={handleChange}>
                 <option value="">선택해주세요</option>
                 <option value="Tier 1">1. [Tier 1] 미니 진단 패키지</option>
-                <option value="Tier 2">2. [Tier 2] 표준 지도 패키지</option>
-                <option value="Tier 3">3. [Tier 3] 교육 포함 패키지 (패키지 + 강연)</option>
-                <option value="Tier 4">4. [Tier 4] 통합 리포트 구축</option>
+                <option value="Tier 2">2. [Tier 2] 패키지 + 강연</option>
+                <option value="Tier 3">3. [Tier 3] 표준 지도 패키지</option>
+                <option value="Tier 4">4. [Tier 4] 통합 패키지: 보행환경 전수조사 및 예산 투입 컨설팅</option>
                 <option value="Tier 5">5. [Tier 5] 운영 구독 패키지</option>
                 <option value="모름">6. 아직 잘 모르겠어요 (맞춤 상담 희망)</option>
               </select>
