@@ -11,7 +11,7 @@ const packagesData = [
     title: '[Tier 1] 미니 진단 패키지',
     tags: ['소규모 상권·단일 시설', '신속 진단', '가성비'],
     description: '단일 복지관, 소규모 문화시설, 골목 상권의 주출입구 단차·유효폭·경사로를 정밀 실측하여 즉각적인 개선 포인트를 도출하는 경량형 솔루션입니다.\n종합 컨설팅 대비 1/5 수준의 빠른 납기와 합리적 비용으로 법령 기준 적합성 대조표 및 약식 개선 도면을 제공합니다.',
-    fileUrl: '/assets/packages/tier1.png',
+    fileUrl: '/assets/packages/TIER1.png',
     fileName: '[내일]_솔루션소개서_Tier1.png',
     format: 'PNG'
   },
@@ -21,7 +21,7 @@ const packagesData = [
     title: '[Tier 2] 표준 지도 패키지',
     tags: ['추천', '축제·관광지', '온·오프라인 무장애지도'],
     description: '지역 축제, 관광지, 역세권 등 권역 내 보행로 전수 실측 데이터를 기반으로 구축하는 맞춤형 무장애 내비게이션 지도입니다.\n저시력자·휠체어 이용자를 고려한 고대비 그래픽 리플릿(인쇄용)과 모바일 QR 반응형 웹 지도를 듀얼 패키지로 제공합니다.',
-    fileUrl: '/assets/packages/tier2.png',
+    fileUrl: '/assets/packages/TIER2.png',
     fileName: '[내일]_솔루션소개서_Tier2.png',
     format: 'PNG',
     highlight: '추천'
@@ -32,7 +32,7 @@ const packagesData = [
     title: '[Tier 3] 교육 포함 패키지 (패키지 + 강연)',
     tags: ['BEST SELLER', '기업 ESG', '인식개선 교육', '데이터 플로깅'],
     description: '단순 이론 중심 의무 교육을 넘어, 참여자가 스마트폰과 계측 도구를 들고 현장 보행 장애물을 직접 측정·수집하는 참여형 임팩트 워크숍입니다.\n장애 당사자 이동권 현실 강연과 매핑 실습을 결합하여 ESG 성과 지표(시간, 인원)를 완벽히 충족하는 결과 리포트를 납품합니다.',
-    fileUrl: '/assets/packages/tier3.png',
+    fileUrl: '/assets/packages/TIER3.png',
     fileName: '[내일]_솔루션소개서_Tier3.png',
     format: 'PNG',
     highlight: 'BEST SELLER'
@@ -43,7 +43,7 @@ const packagesData = [
     title: '[Tier 4] 통합 리포트 구축',
     tags: ['대형 프로젝트', '지자체·공공기관', 'GIS 전수조사', '예산 우선순위'],
     description: '동·구 단위 생활권 도로망의 미세 단차·파손·경사를 전수조사하고, 위험도를 1~5등급으로 지수화(Scoring)하는 행정 맞춤형 데이터 솔루션입니다.\n민원 발생 전 선제적 도로 정비가 가능하도록 GIS 히트맵 공간정보 DB 및 예산 투입 우선순위 시뮬레이션 보고서를 납품합니다.',
-    fileUrl: '/assets/packages/tier4.png',
+    fileUrl: '/assets/packages/TIER4.png',
     fileName: '[내일]_솔루션소개서_Tier4.png',
     format: 'PNG'
   },
@@ -53,7 +53,7 @@ const packagesData = [
     title: '[Tier 5] 운영 구독 패키지',
     tags: ['스마트시티', '연간 정기구독', '실시간 모니터링 DB'],
     description: '도로 공사, 상권 변화 등으로 변동하는 도시 보행 인프라를 분기별로 재실측하여 상시 최신성을 유지하는 클라우드 유지관리 서비스입니다.\n관리자 전용 웹 대시보드와 최신 갱신 API를 제공하여 1회성 재구축 대비 50% 이상의 관리 비용을 절감합니다.',
-    fileUrl: '/assets/packages/tier5.png',
+    fileUrl: '/assets/packages/TIER5.png',
     fileName: '[내일]_솔루션소개서_Tier5.png',
     format: 'PNG',
     hasInquiryBtn: true
