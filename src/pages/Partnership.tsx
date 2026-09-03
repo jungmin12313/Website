@@ -1,7 +1,64 @@
 import { useState, useEffect, useRef } from 'react';
+import { FileText, Download } from 'lucide-react';
 import SEO from '../components/SEO';
 import { savePartnershipInquiry } from '../firebaseUtils';
 import './Partnership.css';
+
+const packagesData = [
+  {
+    id: 1,
+    tier: 'Tier 1',
+    title: '[Tier 1] 미니 진단 패키지',
+    tags: ['소규모 상권·단일 시설', '신속 진단', '가성비'],
+    description: '단일 복지관, 소규모 문화시설, 골목 상권의 주출입구 단차·유효폭·경사로를 정밀 실측하여 즉각적인 개선 포인트를 도출하는 경량형 솔루션입니다.\n종합 컨설팅 대비 1/5 수준의 빠른 납기와 합리적 비용으로 법령 기준 적합성 대조표 및 약식 개선 도면을 제공합니다.',
+    fileUrl: '/assets/packages/tier1.png',
+    fileName: '[내일]_솔루션소개서_Tier1.png',
+    format: 'PNG'
+  },
+  {
+    id: 2,
+    tier: 'Tier 2',
+    title: '[Tier 2] 표준 지도 패키지',
+    tags: ['추천', '축제·관광지', '온·오프라인 무장애지도'],
+    description: '지역 축제, 관광지, 역세권 등 권역 내 보행로 전수 실측 데이터를 기반으로 구축하는 맞춤형 무장애 내비게이션 지도입니다.\n저시력자·휠체어 이용자를 고려한 고대비 그래픽 리플릿(인쇄용)과 모바일 QR 반응형 웹 지도를 듀얼 패키지로 제공합니다.',
+    fileUrl: '/assets/packages/tier2.png',
+    fileName: '[내일]_솔루션소개서_Tier2.png',
+    format: 'PNG',
+    highlight: '추천'
+  },
+  {
+    id: 3,
+    tier: 'Tier 3',
+    title: '[Tier 3] 교육 포함 패키지 (패키지 + 강연)',
+    tags: ['BEST SELLER', '기업 ESG', '인식개선 교육', '데이터 플로깅'],
+    description: '단순 이론 중심 의무 교육을 넘어, 참여자가 스마트폰과 계측 도구를 들고 현장 보행 장애물을 직접 측정·수집하는 참여형 임팩트 워크숍입니다.\n장애 당사자 이동권 현실 강연과 매핑 실습을 결합하여 ESG 성과 지표(시간, 인원)를 완벽히 충족하는 결과 리포트를 납품합니다.',
+    fileUrl: '/assets/packages/tier3.png',
+    fileName: '[내일]_솔루션소개서_Tier3.png',
+    format: 'PNG',
+    highlight: 'BEST SELLER'
+  },
+  {
+    id: 4,
+    tier: 'Tier 4',
+    title: '[Tier 4] 통합 리포트 구축',
+    tags: ['대형 프로젝트', '지자체·공공기관', 'GIS 전수조사', '예산 우선순위'],
+    description: '동·구 단위 생활권 도로망의 미세 단차·파손·경사를 전수조사하고, 위험도를 1~5등급으로 지수화(Scoring)하는 행정 맞춤형 데이터 솔루션입니다.\n민원 발생 전 선제적 도로 정비가 가능하도록 GIS 히트맵 공간정보 DB 및 예산 투입 우선순위 시뮬레이션 보고서를 납품합니다.',
+    fileUrl: '/assets/packages/tier4.png',
+    fileName: '[내일]_솔루션소개서_Tier4.png',
+    format: 'PNG'
+  },
+  {
+    id: 5,
+    tier: 'Tier 5',
+    title: '[Tier 5] 운영 구독 패키지',
+    tags: ['스마트시티', '연간 정기구독', '실시간 모니터링 DB'],
+    description: '도로 공사, 상권 변화 등으로 변동하는 도시 보행 인프라를 분기별로 재실측하여 상시 최신성을 유지하는 클라우드 유지관리 서비스입니다.\n관리자 전용 웹 대시보드와 최신 갱신 API를 제공하여 1회성 재구축 대비 50% 이상의 관리 비용을 절감합니다.',
+    fileUrl: '/assets/packages/tier5.png',
+    fileName: '[내일]_솔루션소개서_Tier5.png',
+    format: 'PNG',
+    hasInquiryBtn: true
+  }
+];
 
 export default function Partnership() {
   const [formData, setFormData] = useState({
@@ -102,7 +159,7 @@ export default function Partnership() {
         </p>
         <div className="partnership-cta reveal" style={{ transitionDelay: '0.3s' }}>
           <button className="btn-pill-blue" onClick={() => scrollToForm()}>협업 문의하기</button>
-          <a href="#service-lineup" className="text-link-arrow">서비스 살펴보기 ➔</a>
+          <a href="#the-service" className="text-link-arrow">서비스 살펴보기 ➔</a>
         </div>
       </section>
 
@@ -145,51 +202,61 @@ export default function Partnership() {
       </section>
 
       {/* 4. 서비스 라인업 */}
-      <section id="service-lineup" className="partnership-section">
-        <div className="reveal sec-kicker">THE SERVICE</div>
-        <h2 className="reveal sec-heading" style={{ transitionDelay: '0.1s' }}>
-          모든 변화는<br/>현장의 '정확한 데이터'에서 시작합니다
-        </h2>
-        <p className="reveal sec-desc" style={{ transitionDelay: '0.2s' }}>
-          지금 여러분이 보고 계신 무장애지도 역시 단순한 콘텐츠가 아니라, 저희가 직접 발로 뛰어 만든 실측 데이터의 결과물입니다. 단일 시설의 가벼운 진단부터 무장애지도 제작, 지역구 단위의 전수조사까지 필요한 만큼 단계적으로 선택하실 수 있습니다.
-        </p>
+      <section id="the-service" className="partnership-section" style={{ maxWidth: '100%', padding: '120px 24px', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div className="reveal sec-kicker">THE SERVICE</div>
+          <h2 className="reveal sec-heading" style={{ transitionDelay: '0.1s' }}>
+            모든 변화는 현장의 '정확한 데이터'에서 시작합니다
+          </h2>
+          <p className="reveal sec-desc" style={{ transitionDelay: '0.2s', maxWidth: '800px' }}>
+            지금 여러분이 보고 계신 무장애지도 역시 단순한 콘텐츠가 아니라, 직접 발로 뛰어 만든 실측 데이터의 결과물입니다. 
+            단일 시설의 정밀 진단부터 무장애지도 제작, 전수조사 및 지속 구독 관리까지 맞춤형 솔루션 소개서를 다운로드하여 검토하세요.
+          </p>
 
-        <div className="service-list">
-          <div className="reveal service-item">
-            <h4>미니 진단 <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>소규모 시설 맞춤형</span></h4>
-            <p style={{ marginBottom: 4 }}>- 우리 시설 하나, 핵심 문제부터 가볍게 확인</p>
-            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (법적 편의시설 기준 + NAEIL 실질 점수 진단 리포트)</p>
-          </div>
-          <div className="reveal service-item">
-            <h4>표준 패키지 <span className="service-badge">추천</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>지자체/기관 수의계약 표준</span></h4>
-            <p style={{ marginBottom: 4 }}>- 무장애지도 제작부터 현장 진단, 개선 방향 제안까지</p>
-            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (축제장/1개 골목 상권 대상, 무장애지도 제작 포함)</p>
-          </div>
-          <div className="reveal service-item">
-            <h4>교육 포함 패키지 <span className="service-badge" style={{ background: '#f59e0b', color: '#fff' }}>BEST SELLER</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>사업비/인식개선 통합 성과형</span></h4>
-            <p style={{ marginBottom: 4 }}>- 현장 개선과 함께, 구성원 인식 개선 워크숍까지</p>
-            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (표준 패키지 전체 + 데이터 기반 맞춤형 강연 포함)</p>
-          </div>
-          <div className="reveal service-item">
-            <h4>통합 리포트 <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>대형 프로젝트 / 컨설팅 용역형</span></h4>
-            <p style={{ marginBottom: 4 }}>- 여러 시설, 여러 지역을 한 번에 관리하고 싶다면</p>
-            <p style={{ color: 'var(--gray-600)', fontSize: '14px' }}>- (관내 전수조사 + NAEIL OS 자원배분 컨설팅)</p>
+          <div className="service-download-list">
+            {packagesData.map((pkg, idx) => (
+              <div key={pkg.id} className="reveal download-card" style={{ transitionDelay: `${0.1 + idx * 0.1}s` }}>
+                <div className="download-card-icon">
+                  <FileText size={28} color="#2563eb" />
+                </div>
+                
+                <div className="download-card-content">
+                  <div className="download-card-tags">
+                    {pkg.tags.map(tag => (
+                      <span key={tag} className={`download-tag ${tag === pkg.highlight ? 'highlight' : ''}`}>{tag}</span>
+                    ))}
+                  </div>
+                  <h3 className="download-card-title">{pkg.title}</h3>
+                  <div className="download-card-desc">
+                    {pkg.description.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="download-card-actions">
+                  <div className="download-format">{pkg.format}</div>
+                  <div className="download-buttons">
+                    <a href={pkg.fileUrl} download={pkg.fileName} className="btn-download">
+                      <Download size={18} /> 소개서 다운로드
+                    </a>
+                    {pkg.hasInquiryBtn && (
+                      <button className="btn-outline" onClick={() => scrollToForm(pkg.tier)}>
+                        도입 문의하기
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           
-          <div className="reveal service-item service-sub-item">
-            <h4>정기 구독형 관리 <span className="service-badge" style={{ background: 'var(--gray-600)', color: 'var(--white)' }}>준비중</span> <span style={{ fontSize: '14px', color: 'var(--blue-600)', fontWeight: 600, marginLeft: '8px' }}>연간 데이터 최신화 & 지속 유지관리</span></h4>
-            <p style={{ textAlign: 'center', marginBottom: 4 }}>- 한 번의 진단으로 끝나지 않고, 지속 유지하는 서비스</p>
-            <p style={{ textAlign: 'center', color: 'var(--gray-600)', fontSize: '14px' }}>- (DB 실시간 업데이트, 웹 지도 유지보수, 성과 측정)</p>
-            <button className="btn-pill-blue" style={{ background: 'var(--gray-700)', padding: '12px 24px', marginTop: 12 }} onClick={() => scrollToForm('정기구독(준비중)')}>
-              오픈 소식 먼저 받아보기
+          <div className="reveal service-footer-note">
+            <p>※ 각 패키지의 세부 과업 범위 및 견적은 대상 구역 규모에 따라 맞춤 조정되며, 상세 제안서 및 공문 발송은 하단 문의를 통해 신청 가능합니다.</p>
+            <button className="text-link-arrow" onClick={() => scrollToForm()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}>
+              우리 기관에 맞는 맞춤형 견적이 궁금하다면? ➔ <span style={{ fontWeight: 700, color: 'var(--blue)' }}>협업 제안하러 가기</span>
             </button>
           </div>
-        </div>
-        
-        <div className="reveal" style={{ marginTop: 24 }}>
-          <button className="text-link-arrow" onClick={() => scrollToForm()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}>
-            우리 기관에 맞는 방식이 궁금하다면 ➔ 문의하기
-          </button>
         </div>
       </section>
 
@@ -275,13 +342,12 @@ export default function Partnership() {
               <label className="form-label">관심 있는 서비스</label>
               <select name="service" className="form-select" value={formData.service} onChange={handleChange}>
                 <option value="">선택해주세요</option>
-                <option value="미니진단">1. 미니 진단 (단일 건물/시설 접근성 진단 리포트)</option>
-                <option value="표준패키지">2. 표준 패키지 (축제/상권 무장애지도 제작 + 현장 개별 개선안) [추천]</option>
-                <option value="교육포함패키지">3. 교육 포함 패키지 (지도 + 현장 개선안 + 임직원/주민 강연)</option>
-                <option value="통합리포트">4. 통합 리포트 (동/구청 전역 전수조사 + 예산 우선순위 컨설팅)</option>
-                <option value="단독강연">5. 단독 강연/워크숍 (데이터 기반 이동권 실태 강연)</option>
-                <option value="정기구독">6. 정기구독 관리 (데이터 최신화 및 연간 유지보수)</option>
-                <option value="모름">7. 아직 잘 모르겠어요 (맞춤 상담 희망)</option>
+                <option value="Tier 1">1. [Tier 1] 미니 진단 패키지</option>
+                <option value="Tier 2">2. [Tier 2] 표준 지도 패키지</option>
+                <option value="Tier 3">3. [Tier 3] 교육 포함 패키지 (패키지 + 강연)</option>
+                <option value="Tier 4">4. [Tier 4] 통합 리포트 구축</option>
+                <option value="Tier 5">5. [Tier 5] 운영 구독 패키지</option>
+                <option value="모름">6. 아직 잘 모르겠어요 (맞춤 상담 희망)</option>
               </select>
             </div>
 
