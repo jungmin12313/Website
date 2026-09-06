@@ -10,10 +10,10 @@ const packagesData = [
     tier: 'Tier 1',
     title: '[Tier 1] 미니 진단 패키지',
     tags: ['단일 시설·상권', '긴급 진단', '3일 납기'],
-    subhead: '단일 시설·상권의 핵심 보행장벽을 정밀 실측하여 즉각적인 개선 도면을 도출하는 긴급 진단 솔루션',
-    description: '* 복지관, 행사장 진입로, 골목 상권 등 특정 단일 구역의 단차·경사도를 디지털 계측기로 mm 단위 정밀 실측합니다.\n* 법령 적합성을 즉시 검토하여 3일 만에 시공용 약식도면과 예산 산출 근거 시트를 납품합니다. (실측 오차율 0%, 핵심 결함 100% 도출)',
-    fileUrl: '/packages/[모두의내일]_솔루션소개서_Tier1.png',
-    fileName: '[모두의내일]_솔루션소개서_Tier1.png',
+    subhead: '단일 시설·상권의 핵심 보행장벽을 정밀 실측하여 즉각적인 개선 근거를 담은 진단보고서를 도출하는 긴급 진단 솔루션',
+    description: '* 복지관, 행사장 진입로, 골목 상권 등 특정 단일 구역의 단차·경사도를 디지털 계측기로 mm 단위 정밀 실측합니다.\n* 법령 적합성을 즉시 검토하여 3일 만에 정밀 진단보고서(실측 데이터+항목별 개선가이드+현장사진)와 예산 산출 근거 시트를 납품합니다.',
+    fileUrl: '/assets/packages/tier1.png',
+    fileName: '[내일]_솔루션소개서_Tier1.png',
     format: 'PNG'
   },
   {
@@ -22,9 +22,9 @@ const packagesData = [
     title: '[Tier 2] 패키지 + 강연',
     tags: ['참여형 워크숍', 'ESG 실천단', '데이터 플로깅'],
     subhead: '데이터 기반 이동권 강연과 현장 매핑 실습을 결합한 참여형 배리어프리 임팩트 워크숍',
-    description: '* 수동적 주입식 교육을 넘어 초·중·고·대학생, 기업 ESG 실천단, 지자체 임직원이 직접 앱과 도구로 보행 장애물을 기록하는 데이터 플로깅 모델입니다.\n* 비전문가도 10분 만에 숙달 가능한 툴킷을 제공하며, 수집된 원천 데이터와 ESG 성과 결과 보고서(교육 만족도 98%, 인식 개선율 95%↑)를 함께 발간합니다.',
-    fileUrl: '/packages/[모두의내일]_솔루션소개서_Tier2.png',
-    fileName: '[모두의내일]_솔루션소개서_Tier2.png',
+    description: '* 수동적 주입식 교육을 넘어 학생, 기업 ESG 실천단, 지자체 임직원이 지정된 현장조사 툴과 측정도구로 보행 장애물을 기록하는 데이터 플로깅 모델입니다.\n* 누구나 10분 만에 숙달 가능한 조사 가이드를 제공하며, 수집된 원천 데이터와 ESG/교육 성과 결과 보고서를 함께 발간합니다.',
+    fileUrl: '/assets/packages/tier2.png',
+    fileName: '[내일]_솔루션소개서_Tier2.png',
     format: 'PNG'
   },
   {
@@ -33,9 +33,9 @@ const packagesData = [
     title: '[Tier 3] 표준 지도 패키지',
     tags: ['추천', '축제·관광지', '온·오프라인 듀얼 배포'],
     subhead: '실측 데이터를 기반으로 보행 단절을 해소하는 온·오프라인 무장애지도 및 개선 리포트',
-    description: '* 지자체 문화관광과, 축제 조직위, 복지관을 대상으로 권역 내 보행로와 편의시설을 전수 실측하여 휠체어·유아차가 이동 가능한 최적 우회 경로를 도출합니다.\n* 시각적 식별성을 극대화한 고대비 현장 배포용 리플릿과 스마트폰 모바일 UI 웹 지도를 동시에 공급합니다. (보행 단절 0건, 안전 우회 경로 100% 제공)',
-    fileUrl: '/packages/[모두의내일]_솔루션소개서_Tier3.png',
-    fileName: '[모두의내일]_솔루션소개서_Tier3.png',
+    description: '* 지자체 문화관광과, 축제 조직위, 복지관을 대상으로 권역 내 보행로와 편의시설을 실측하여 휠체어·유아차 이동 가능 여부와 우회 구간을 표기합니다.\n* 시각적 식별성을 극대화한 고대비 현장 배포용 리플릿과 스마트폰 모바일 UI 웹 지도를 듀얼 패키지로 공급합니다. (현장 우회 가능 구간 100% 파악)',
+    fileUrl: '/assets/packages/tier3.png',
+    fileName: '[내일]_솔루션소개서_Tier3.png',
     format: 'PNG',
     highlight: '추천'
   },
@@ -46,19 +46,19 @@ const packagesData = [
     tags: ['지자체 동·구청 전역', '전수조사 DB', '예산 우선순위'],
     subhead: '지자체(동·구청)를 대상으로 [전수조사 DB 구축] 및 효율적인 도로 정비 예산 집행을 위한 [우선순위 컨설팅] 솔루션 제안',
     description: '* 민원 사후 대응의 한계를 극복하기 위해 GIS 기반으로 관할 구역 가로망을 전수 실측(전수율 100%)하고 독자적 Scoring 알고리즘으로 위험도를 지수화합니다.\n* 감사와 의회 설득이 가능한 법령 기준 정량 DB와 도로 보수 공사비 산출 근거를 담은 최우선 정비 순위 컨설팅 리포트를 납품합니다.',
-    fileUrl: '/packages/[모두의내일]_솔루션소개서_Tier4.png',
-    fileName: '[모두의내일]_솔루션소개서_Tier4.png',
+    fileUrl: '/assets/packages/tier4.png',
+    fileName: '[내일]_솔루션소개서_Tier4.png',
     format: 'PNG'
   },
   {
     id: 5,
     tier: 'Tier 5',
     title: '[Tier 5] 운영 구독 패키지',
-    tags: ['상시 모니터링', '연간 최신화', '관리자 대시보드'],
+    tags: ['스마트시티', '연간 정기구독', '관리자 대시보드'],
     subhead: '보행환경 데이터의 연간 갱신과 모니터링 대시보드를 통한 지속 가능한 데이터 자산화',
-    description: '* 1회성 인쇄물 제작에 그치지 않고, 공사 및 상권 변화로 바뀌는 도시 보행 데이터를 연 1회 이상 정기 재실측하여 상시 신뢰성을 보장합니다.\n* 관리자 전용 모니터링 웹 대시보드를 제공하여 보행환경 개선 전·후 성과를 수치화하고 정책 핵심 자산으로 영구 운용할 수 있도록 지원합니다.',
-    fileUrl: '/packages/[모두의내일]_솔루션소개서_Tier5.png',
-    fileName: '[모두의내일]_솔루션소개서_Tier5.png',
+    description: '* 1회성 인쇄물 제작에 그치지 않고, 공사 및 상권 변화로 바뀌는 도시 보행 데이터를 정기 재실측하여 상시 신뢰성을 보장합니다.\n* 관리자 전용 웹 대시보드를 제공하여 연도별 데이터 누적을 통해 향후 보행환경 개선 전·후 비교 기반을 안정적으로 마련합니다.',
+    fileUrl: '/assets/packages/tier5.png',
+    fileName: '[내일]_솔루션소개서_Tier5.png',
     format: 'PNG',
     hasInquiryBtn: true
   }
@@ -163,7 +163,7 @@ export default function Partnership() {
         </p>
         <div className="partnership-cta reveal" style={{ transitionDelay: '0.3s' }}>
           <button className="btn-pill-blue" onClick={() => scrollToForm()}>협업 문의하기</button>
-          <a href="#the-service" className="text-link-arrow">서비스 살펴보기 ➔</a>
+          <a href="#the-service" className="text-link-arrow" onClick={(e) => { e.preventDefault(); document.getElementById('the-service')?.scrollIntoView({ behavior: 'smooth' }); }}>서비스 살펴보기 ➔</a>
         </div>
       </section>
 
@@ -213,8 +213,8 @@ export default function Partnership() {
             모든 변화는 현장의 '정확한 데이터'에서 시작합니다
           </h2>
           <p className="reveal sec-desc" style={{ transitionDelay: '0.2s', maxWidth: '800px' }}>
-            지금 여러분이 보고 계신 무장애지도 역시 단순한 콘텐츠가 아니라, 직접 발로 뛰어 만든 실측 데이터의 결과물입니다. 
-            단일 시설의 정밀 진단부터 무장애지도 제작, 전수조사 및 지속 구독 관리까지 맞춤형 솔루션 소개서를 다운로드하여 검토하세요.
+            단일 시설의 정밀 실측 진단부터 참여형 매핑 워크숍, 보행환경 전수조사 및 지속 가능한 연간 클라우드 관리까지.<br />
+            '내일'이 현장에서 직접 구축한 맞춤형 솔루션 포트폴리오를 다운로드하여 검토해보세요.
           </p>
 
           <div className="service-download-list">
@@ -259,9 +259,9 @@ export default function Partnership() {
           </div>
           
           <div className="reveal service-footer-note">
-            <p>※ 각 패키지의 세부 과업 범위 및 견적은 대상 구역 규모에 따라 맞춤 조정되며, 상세 제안서 및 공문 발송은 하단 문의를 통해 신청 가능합니다.</p>
+            <p>※ 각 패키지의 세부 과업 범위와 견적은 대상 구역 규모에 따라 맞춤 조정되며, 상세 제안서 및 공문 발송은 하단 협업 제안 폼을 통해 요청하실 수 있습니다.</p>
             <button className="text-link-arrow" onClick={() => scrollToForm()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}>
-              우리 기관에 맞는 맞춤형 견적이 궁금하다면? ➔ <span style={{ fontWeight: 700, color: 'var(--blue)' }}>협업 제안하러 가기</span>
+              <span style={{ fontWeight: 700, color: 'var(--blue)' }}>우리 기관 맞춤형 패키지 상담받기 ➔</span>
             </button>
           </div>
         </div>
