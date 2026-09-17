@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
-  AlertCircle, X, RefreshCcw, Smartphone, Map, Layers
+  AlertCircle, X, RefreshCcw, Smartphone, Map, Layers, Share2, Printer, Target, Download, ExternalLink, Navigation
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
@@ -11,6 +11,7 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import HotspotModal from '../components/HotspotModal'
 import SEO from '../components/SEO'
 import { generateAccessibilitySchema } from '../utils/schemaGenerator'
+import { trackEvent } from '../utils/analytics'
 import './FestivalDetail.css'
 
 type Tab = 'info' | 'map' | 'access'
@@ -424,7 +425,14 @@ export default function FestivalDetail() {
                               top: `${hs.y}%`,
                               zIndex: hs.isReportBased ? 12 : 10
                             }}
-                            onClick={() => setSelectedHotspot(hs)}
+                            onClick={() => {
+                              setSelectedHotspot(hs);
+                              trackEvent('pin_click', {
+                                place_name: hs.label || '알 수 없는 핫스팟',
+                                category: hs.isReportBased ? 'report_hotspot' : 'info_hotspot',
+                                festival_name: festival.name
+                              });
+                            }}
                             title={hs.label}
                           />
                         ))}
@@ -445,7 +453,14 @@ export default function FestivalDetail() {
                               cursor: 'pointer',
                               zIndex: 10
                             }}
-                            onClick={() => setSelectedReport(r)}
+                            onClick={() => {
+                              setSelectedReport(r);
+                              trackEvent('pin_click', {
+                                place_name: r.title || '현장 제보',
+                                category: 'user_report',
+                                festival_name: festival.name
+                              });
+                            }}
                             title="현장 변동사항 제보"
                           >
                             <AlertCircle size={24} color="#E53E3E" fill="white" />
