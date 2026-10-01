@@ -3,7 +3,7 @@ import { FileText, Download } from 'lucide-react';
 import SEO from '../components/SEO';
 import { savePartnershipInquiry } from '../firebaseUtils';
 import './Partnership.css';
-
+import { GLOBAL_STATS } from '../data/constants';
 const packagesData = [
   {
     id: 1,
@@ -169,18 +169,12 @@ export default function Partnership() {
 
       {/* 2. 신뢰 스탯 바 */}
       <div className="stat-bar-partnership">
-        <div className="reveal stat-pill" style={{ transitionDelay: '0.1s' }}>
-          <div className="stat-num">17곳</div>
-          <div className="stat-label">협력 기관 네트워크</div>
-        </div>
-        <div className="reveal stat-pill" style={{ transitionDelay: '0.2s' }}>
-          <div className="stat-num blue">100명+</div>
-          <div className="stat-label">현장 조사 참여 인원</div>
-        </div>
-        <div className="reveal stat-pill" style={{ transitionDelay: '0.3s' }}>
-          <div className="stat-num">5관왕</div>
-          <div className="stat-label">공인된 성과</div>
-        </div>
+        {GLOBAL_STATS.map((stat, idx) => (
+          <div key={stat.id} className="reveal stat-pill" style={{ transitionDelay: `${0.1 * (idx + 1)}s` }}>
+            <div className={`stat-num ${stat.blue ? 'blue' : ''}`}>{stat.num}{stat.unit}</div>
+            <div className="stat-label">{stat.singleLineLabel}</div>
+          </div>
+        ))}
       </div>
 
       {/* 3. 포트폴리오 */}
@@ -297,7 +291,7 @@ export default function Partnership() {
       <section className="partnership-section">
         <div className="reveal logo-wall">
           <div className="sec-kicker">PARTNERS</div>
-          <h2 className="sec-heading" style={{ marginBottom: 0 }}>광주·전남 17개 파트너가 '내일'과 함께 접근성을 데이터로 만들고 있습니다</h2>
+          <h2 className="sec-heading" style={{ marginBottom: 0 }}>광주 전남의 파트너들이 '내일'과 함께 접근성을 데이터로 만들고 있습니다.</h2>
           
           <div className="logo-grid">
             <div className="logo-item"><img src="/images/partners/partner1.png" alt="파트너 기관" /></div>

@@ -7,26 +7,9 @@ import './About.css';
 
 // 내일 · 무장애 데이터 — About 페이지 리뉴얼 (축제 + 데이터 종합)
 
-const STATS = [
-  {
-    num: "524",
-    unit: "개+",
-    label: ["직접 실측한", "접근성 데이터"],
-    blue: true,
-  },
-  {
-    num: "100",
-    unit: "명+",
-    label: ["현장 조사에 동행한", "시민과 당사자"],
-    blue: false,
-  },
-  {
-    num: "17",
-    unit: "곳+",
-    label: ["함께 데이터를 구축하는", "파트너 기관"],
-    blue: false,
-  },
-];
+import { GLOBAL_STATS } from '../data/constants';
+
+const STATS = GLOBAL_STATS;
 
 const DIFFERENCES = [
   {

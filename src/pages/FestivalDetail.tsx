@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
   Calendar, MapPin, Phone, Instagram, Globe, DollarSign, 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize, Minimize2,
-  AlertCircle, X, RefreshCcw, Smartphone, Map, Layers, Share2, Printer, Target, Download, ExternalLink, Navigation
+  AlertCircle, X, RefreshCcw, Smartphone, Map, Layers
 } from 'lucide-react'
 import { getFestivals, getReports } from '../firebaseUtils'
 import type { Festival, Hotspot, Report } from '../types'
@@ -456,7 +456,7 @@ export default function FestivalDetail() {
                             onClick={() => {
                               setSelectedReport(r);
                               trackEvent('pin_click', {
-                                place_name: r.title || '현장 제보',
+                                place_name: '현장 제보',
                                 category: 'user_report',
                                 festival_name: festival.name
                               });

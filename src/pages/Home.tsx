@@ -5,7 +5,7 @@ import type { Festival, GalleryImage } from '../types'
 import defaultHero from '../assets/hero.webp'
 import SEO from '../components/SEO'
 import './Home.css'
-
+import { GLOBAL_STATS } from '../data/constants'
 const VOICES = [
   {
     quote: "정보가 없는 건 아니에요. 근데 그 정보가 진짜인지 믿기가 힘들죠. 가보기 전까지는 늘 불안함이 앞서요.",
@@ -246,18 +246,12 @@ export default function Home() {
           </div>
 
           <div className="impact-dashboard">
-            <div className="impact-card">
-              <div className="impact-number">524<span className="impact-unit">개+</span></div>
-              <div className="impact-label">직접 실측한<br/><strong>접근성 데이터</strong></div>
-            </div>
-            <div className="impact-card">
-              <div className="impact-number">100<span className="impact-unit">명+</span></div>
-              <div className="impact-label">현장 조사에 동행한<br/><strong>시민과 당사자</strong></div>
-            </div>
-            <div className="impact-card">
-              <div className="impact-number">17<span className="impact-unit">곳+</span></div>
-              <div className="impact-label">함께 데이터를 구축하는<br/><strong>파트너 기관</strong></div>
-            </div>
+            {GLOBAL_STATS.map((stat, idx) => (
+              <div key={stat.id} className="impact-card">
+                <div className="impact-number">{stat.num}<span className="impact-unit">{stat.unit}</span></div>
+                <div className="impact-label">{stat.label[0]}<br/><strong>{stat.label[1]}</strong></div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

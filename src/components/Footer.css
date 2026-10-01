@@ -3,7 +3,6 @@
 .footer.dark-footer {
   background: #111111; /* Deep dark background */
   color: #ffffff;
-  font-family: var(--font), sans-serif;
   padding: 4rem 1.5rem 3rem;
   margin-top: auto;
   position: relative;
@@ -118,7 +117,6 @@
   cursor: pointer;
   padding: 0;
   text-decoration: none;
-  font-family: inherit;
   transition: color 0.2s;
 }
 
