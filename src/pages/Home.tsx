@@ -246,7 +246,7 @@ export default function Home() {
           </div>
 
           <div className="impact-dashboard">
-            {GLOBAL_STATS.map((stat, idx) => (
+            {GLOBAL_STATS.map((stat) => (
               <div key={stat.id} className="impact-card">
                 <div className="impact-number">{stat.num}<span className="impact-unit">{stat.unit}</span></div>
                 <div className="impact-label">{stat.label[0]}<br/><strong>{stat.label[1]}</strong></div>
